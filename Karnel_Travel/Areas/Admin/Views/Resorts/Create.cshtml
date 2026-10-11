@@ -1,0 +1,121 @@
+@model Karnel_Travel.Models.Resort
+
+@{
+    ViewData["Title"] = "Add Resort";
+    var m = Model ?? new Karnel_Travel.Models.Resort();
+}
+
+<!-- Page heading -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Add Resort</h1>
+        <p class="page-subtitle">Fill in the details below. This will appear on the website.</p>
+    </div>
+    <a asp-action="Index" class="btn-crud btn-crud-light"><i class="bi bi-arrow-left"></i> Back to List</a>
+</div>
+
+<form asp-action="Create" enctype="multipart/form-data" novalidate>
+    <div class="row g-4">
+
+        <!-- Left: details -->
+        <div class="col-lg-8">
+            <div class="crud-card">
+                <div class="crud-card-title"><i class="bi bi-house-door"></i> Resort Details</div>
+
+                <div asp-validation-summary="ModelOnly" class="crud-summary"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label asp-for="Name" class="crud-label">Resort Name <span class="req">*</span></label>
+                        <input asp-for="Name" class="crud-input" placeholder="e.g. Sea View Resort" maxlength="100" />
+                        <span asp-validation-for="Name" class="crud-error"></span>
+                    </div>
+                    <div class="col-md-12">
+                        <label asp-for="Location" class="crud-label">Location <span class="req">*</span></label>
+                        <input asp-for="Location" class="crud-input" placeholder="e.g. Hawke's Bay" maxlength="100" />
+                        <span asp-validation-for="Location" class="crud-error"></span>
+                    </div>
+                    <div class="col-md-12">
+                        <label asp-for="Description" class="crud-label">Description</label>
+                        <textarea asp-for="Description" class="crud-textarea" rows="5" maxlength="1000" placeholder="Activities, rooms, pool, packages..." data-counter="DescriptionCount"></textarea>
+                        <div class="crud-counter" id="DescriptionCount">0 / 1000</div>
+                        <span asp-validation-for="Description" class="crud-error"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="crud-card">
+                <div class="crud-card-title"><i class="bi bi-cash-coin"></i> Pricing & Availability</div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Price" class="crud-label">Price <span class="req">*</span></label>
+                        <div class="input-affix"><span class="affix">Rs</span><input asp-for="Price" type="number" step="0.01" min="0" class="crud-input" placeholder="0.00" /></div>
+                        <span asp-validation-for="Price" class="crud-error"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Quantity" class="crud-label">Available rooms / units <span class="req">*</span></label>
+                        <div class="input-affix"><input asp-for="Quantity" type="number" step="1" min="0" class="crud-input has-right" placeholder="0" /><span class="affix affix-right">units</span></div>
+                        <span asp-validation-for="Quantity" class="crud-error"></span>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="crud-label">Rating (quality)</label>
+                        <div class="star-rating">
+                            @for (var i = 5; i >= 1; i--)
+                            {
+                                <input type="radio" id="rate@(i)" name="Rating" value="@i" @(m.Rating == i ? "checked" : "") />
+                                <label for="rate@(i)" title="@i star"><i class="bi bi-star-fill"></i></label>
+                            }
+                        </div>
+                        <span asp-validation-for="Rating" class="crud-error"></span>
+                    </div>
+                    <div class="col-md-12">
+                        @{ var isIsAvailable = Model == null ? true : Model.IsAvailable; }
+                        <label class="switch-row">
+                            <span class="switch"><input type="checkbox" name="IsAvailable" value="true" @(isIsAvailable ? "checked" : "") /><span class="slider"></span></span>
+                            <span><strong>Available for booking</strong><small>Turn off to hide it from available-only searches.</small></span>
+                        </label>
+                        <input type="hidden" name="IsAvailable" value="false" />
+    
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right: image + buttons -->
+        <div class="col-lg-4">
+
+            <div class="crud-card">
+                <div class="crud-card-title"><i class="bi bi-image"></i> Resort Image</div>
+
+                <div class="upload-box">
+                    <img id="imgPreview" class="upload-preview" alt="Preview" />
+                    <div id="imgPlaceholder" class="upload-placeholder">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        <strong>Click or drag an image here</strong>
+                    </div>
+                    <div id="imgName" class="upload-name"></div>
+                    <input type="file" name="imageFile" accept=".jpg,.jpeg,.png,.webp"
+                           data-preview="imgPreview" data-name="imgName"
+                           data-placeholder="imgPlaceholder" data-error="imgError" />
+                </div>
+                <div class="upload-hint mt-2">JPG, PNG or WEBP. Maximum 2 MB.</div>
+                <span id="imgError" class="crud-error"></span>
+                @Html.ValidationMessage("imageFile", new { @class = "crud-error" })
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn-crud btn-crud-primary justify-content-center">
+                    <i class="bi bi-check-lg"></i> Create Resort
+                </button>
+                <a asp-action="Index" class="btn-crud btn-crud-light justify-content-center">Cancel</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/admin/js/crud-form.js"></script>
+}

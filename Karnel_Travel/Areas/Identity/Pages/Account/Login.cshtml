@@ -1,0 +1,128 @@
+@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+    ViewData["HideNavbar"] = true;
+    ViewData["HideFooter"] = true;
+}
+
+<link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+
+<div class="auth-card">
+    <div class="row g-0">
+
+        <!-- Left: image panel -->
+        <div class="col-lg-5 auth-side d-none d-lg-flex">
+            <div class="auth-side-inner">
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="auth-brand">
+                    <i class="fa fa-map-marker-alt"></i>Karnel Travel
+                </a>
+                <div>
+                    <h2>Welcome back, traveller!</h2>
+                    <p>Log in to your account and continue exploring amazing destinations.</p>
+                    <ul class="auth-points">
+                        <li><i class="fa fa-check"></i> Handpicked destinations</li>
+                        <li><i class="fa fa-check"></i> Best price deals</li>
+                        <li><i class="fa fa-check"></i> 24/7 support</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: form -->
+        <div class="col-lg-7">
+            <div class="auth-form-wrap">
+                <div class="auth-head">
+                    <span class="auth-icon"><i class="fa fa-lock"></i></span>
+                    <h2>Log in</h2>
+                    <p>Enter your email and password to continue</p>
+                </div>
+
+                <form id="account" method="post" autocomplete="off">
+                    <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+
+                    <div class="auth-field">
+                        <label asp-for="Input.Email" class="auth-label">Email address</label>
+                        <div class="auth-input-wrap">
+                            <i class="fa fa-envelope auth-input-icon"></i>
+                            <input asp-for="Input.Email" class="auth-input" autocomplete="off" aria-required="true" placeholder="name@example.com" />
+                        </div>
+                        <span asp-validation-for="Input.Email" class="auth-error"></span>
+                    </div>
+
+                    <div class="auth-field">
+                        <label asp-for="Input.Password" class="auth-label">Password</label>
+                        <div class="auth-input-wrap has-toggle">
+                            <i class="fa fa-lock auth-input-icon"></i>
+                            <input asp-for="Input.Password" class="auth-input" autocomplete="new-password" aria-required="true" placeholder="Enter your password" />
+                            <button type="button" class="auth-toggle" data-toggle-password="#Input_Password" aria-label="Show or hide password">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Input.Password" class="auth-error"></span>
+                    </div>
+
+                    <div class="auth-row">
+                        <div class="form-check">
+                            <input class="form-check-input" asp-for="Input.RememberMe" />
+                            <label asp-for="Input.RememberMe" class="form-check-label">@Html.DisplayNameFor(m => m.Input.RememberMe)</label>
+                        </div>
+                        <a id="forgot-password" asp-page="./ForgotPassword">Forgot password?</a>
+                    </div>
+
+                    <button id="login-submit" type="submit" class="btn btn-primary auth-btn w-100">
+                        Log in <i class="fa fa-arrow-right ms-2"></i>
+                    </button>
+                </form>
+
+                @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+                {
+                    <div class="auth-divider"><span>or continue with</span></div>
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        <div class="auth-social">
+                            @foreach (var provider in Model.ExternalLogins!)
+                            {
+                                <button type="submit" class="btn auth-social-btn" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                            }
+                        </div>
+                    </form>
+                }
+
+                <p class="auth-switch">
+                    Don't have an account?
+                    <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register now</a>
+                </p>
+                @* <p class="auth-small">
+                    <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a>
+                </p> *@
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Back/Forward se page wapas aaye to purana bhara hua data clear kar do
+        window.addEventListener('pageshow', function (e) {
+            if (e.persisted) {
+                var form = document.getElementById('account');
+                if (!form) return;
+                form.reset();
+                form.querySelectorAll('input:not([type=checkbox]):not([type=hidden])').forEach(function (i) { i.value = ''; });
+            }
+        });
+
+        document.querySelectorAll('[data-toggle-password]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var input = document.querySelector(btn.getAttribute('data-toggle-password'));
+                if (!input) return;
+                var show = input.type === 'password';
+                input.type = show ? 'text' : 'password';
+                btn.querySelector('i').className = show ? 'fa fa-eye-slash' : 'fa fa-eye';
+            });
+        });
+    </script>
+}

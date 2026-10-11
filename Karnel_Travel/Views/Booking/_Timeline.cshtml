@@ -1,0 +1,32 @@
+@model Karnel_Travel.Models.Booking
+@{
+    var s = Model.Status;
+    var closed = s == BookingStatus.Cancelled || s == BookingStatus.Rejected;
+    var confirmed = s == BookingStatus.Confirmed || s == BookingStatus.Completed;
+    var completed = s == BookingStatus.Completed;
+}
+
+<ol class="vip-steps">
+    <li class="done">
+        <div class="dot"><i class="fa fa-paper-plane"></i></div>
+        Request sent
+    </li>
+    @if (closed)
+    {
+        <li class="bad">
+            <div class="dot"><i class="fa fa-times"></i></div>
+            @BookingUi.StatusLabel(s)
+        </li>
+    }
+    else
+    {
+        <li class="@(confirmed ? "done" : "")">
+            <div class="dot"><i class="fa fa-check"></i></div>
+            Confirmed
+        </li>
+        <li class="@(completed ? "done" : "")">
+            <div class="dot"><i class="fa fa-star"></i></div>
+            Completed
+        </li>
+    }
+</ol>

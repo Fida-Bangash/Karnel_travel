@@ -1,0 +1,135 @@
+@model IEnumerable<Karnel_Travel.Models.TouristSpot>
+
+@{
+    ViewData["Title"] = "Tourist Spots";
+
+    // Unique categories (used for the filter chips)
+    var categories = Model.Select(s => s.Category).Where(c => !string.IsNullOrWhiteSpace(c))
+                          .Distinct().OrderBy(c => c).ToList();
+}
+
+<!-- Page heading + Add button -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Tourist Spots</h1>
+        <p class="page-subtitle">@Model.Count() destinations shown on the website.</p>
+    </div>
+    <a asp-action="Create" class="btn-crud btn-crud-primary">
+        <i class="bi bi-plus-lg"></i> Add Tourist Spot
+    </a>
+</div>
+
+<div class="table-card-custom">
+
+    <!-- Search box + category filter chips -->
+    <div class="crud-toolbar">
+        <div class="crud-search">
+            <i class="bi bi-search"></i>
+            <input type="text" id="spotSearch" placeholder="Search by name, location or category..." autocomplete="off" />
+        </div>
+        <div class="crud-chips" id="spotChips">
+            <button type="button" class="crud-chip active" data-cat="">All</button>
+            @foreach (var c in categories)
+            {
+                <button type="button" class="crud-chip" data-cat="@c.ToLower()">@c</button>
+            }
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="crud-empty">
+            <i class="bi bi-geo-alt"></i>
+            <strong>No tourist spots yet</strong>
+            <p class="mb-3">Add your first destination to show it on the website.</p>
+            <a asp-action="Create" class="btn-crud btn-crud-primary"><i class="bi bi-plus-lg"></i> Add Tourist Spot</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-custom" id="spotTable">
+                <thead>
+                    <tr>
+                        <th>Spot</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr data-search="@((item.Name + " " + item.Location + " " + item.Category).ToLower())"
+                            data-cat="@item.Category.ToLower()">
+                            <td>
+                                <div class="table-user-cell">
+                                    @if (!string.IsNullOrEmpty(item.ImagePath))
+                                    {
+                                        <img src="@item.ImagePath" class="crud-thumb" alt="@item.Name" />
+                                    }
+                                    else
+                                    {
+                                        <span class="crud-thumb-empty"><i class="bi bi-image"></i></span>
+                                    }
+                                    <div>
+                                        <div class="table-user-name">@item.Name</div>
+                                        <div class="table-user-sub"><i class="bi bi-geo-alt-fill"></i> @item.Location</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="tag-pill">@item.Category</span></td>
+                            <td><div class="cell-truncate" title="@item.Description">@(string.IsNullOrWhiteSpace(item.Description) ? "—" : item.Description)</div></td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="icon-btn" title="View"><i class="bi bi-eye"></i></a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="icon-btn" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="icon-btn danger" title="Delete"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Shown when search/filter matches nothing -->
+        <div class="crud-empty" id="noMatch" style="display:none">
+            <i class="bi bi-search"></i>
+            <strong>No matching spots</strong>
+            <p class="mb-0">Try a different word or choose "All".</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Live filter: text search + category chips (runs in the browser, no reload)
+        (function () {
+            var rows = document.querySelectorAll('#spotTable tbody tr');
+            var search = document.getElementById('spotSearch');
+            var chips = document.querySelectorAll('#spotChips .crud-chip');
+            var noMatch = document.getElementById('noMatch');
+            var activeCat = '';
+
+            function apply() {
+                var q = (search.value || '').trim().toLowerCase();
+                var shown = 0;
+                rows.forEach(function (r) {
+                    var ok = r.dataset.search.indexOf(q) !== -1 && (activeCat === '' || r.dataset.cat === activeCat);
+                    r.style.display = ok ? '' : 'none';
+                    if (ok) shown++;
+                });
+                if (noMatch) noMatch.style.display = shown === 0 ? '' : 'none';
+            }
+
+            if (search) search.addEventListener('input', apply);
+            chips.forEach(function (c) {
+                c.addEventListener('click', function () {
+                    chips.forEach(function (x) { x.classList.remove('active'); });
+                    c.classList.add('active');
+                    activeCat = c.dataset.cat;
+                    apply();
+                });
+            });
+        })();
+    </script>
+}

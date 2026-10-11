@@ -1,0 +1,193 @@
+@{
+    ViewData["Title"] = "Home";
+}
+
+@section Hero {
+<div class="container-fluid bg-primary py-5 mb-5 hero-header">
+            <div class="container py-5">
+                <div class="row justify-content-center py-5">
+                    <div class="col-lg-10 pt-lg-5 mt-lg-5 text-center">
+                        <h1 class="display-3 text-white mb-3 animated slideInDown">Enjoy Your Vacation With Us</h1>
+                        <p class="fs-4 text-white mb-4 animated slideInDown">Explore tourist spots, hotels, resorts and restaurants across the country.</p>
+<div class="position-relative w-75 mx-auto animated slideInDown">
+    <form asp-controller="Search" asp-action="Index" method="get">
+        <input name="keyword"
+               class="form-control border-0 rounded-pill w-100 py-3 ps-4 pe-5"
+               type="text"
+               placeholder="Eg: Beach, Murree, Hotel" />
+
+        <button type="submit"
+                class="btn btn-primary rounded-pill py-2 px-4 position-absolute top-0 end-0 me-2"
+                style="margin-top: 7px;">
+            Search
+        </button>
+    </form>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+}
+
+       <!-- About Start -->
+    <div class="container-fluid py-5">
+        <div class="container">
+            <div class="row g-5">
+                <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s" style="min-height: 400px;">
+                    <div class="position-relative h-100">
+                        <img class="img-fluid position-absolute w-100 h-100" src="~/img/about.jpg" alt="" style="object-fit: cover;">
+                    </div>
+                </div>
+                <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.3s">
+                    <h6 class="section-title bg-white text-start text-primary pe-3">About Us</h6>
+                    <h1 class="mb-4">Welcome to <span class="text-primary">Karnel Travel Guide</span></h1>
+                    <p class="mb-4">Karnel Travels is a tours and travel company that provides transportation between tourist spots and cities across the country, along with complete information about hotels, resorts and restaurants.</p>
+                    <p class="mb-4">Through this website you can explore tourist spots, compare hotels and resorts by price and quality, check travel options, and contact us to place your tour or transport order.</p>
+                    <div class="row gy-2 gx-4 mb-4">
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Transport to Tourist Spots</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Handpicked Hotels</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Comfortable Resorts</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Good Restaurants</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Tour Packages &amp; Discounts</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Customer Support</p>
+                        </div>
+                    </div>
+                    <a class="btn btn-primary py-3 px-5 mt-2" asp-controller="Information" asp-action="Index">Explore Information</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- About End -->   
+
+
+      <!-- Service Start -->
+    <div class="container-fluid py-5">
+        <div class="container">
+            <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                <h6 class="section-title bg-white text-center text-primary px-3">Services</h6>
+                <h1 class="mb-5">Our Services</h1>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="service-item rounded pt-3">
+                        <div class="p-4">
+                            <i class="fa fa-3x fa-map-marked-alt text-primary mb-4"></i>
+                            <h5>Tourist Spots</h5>
+                            <p>Beaches, monuments and attractions across the country.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.3s">
+                    <div class="service-item rounded pt-3">
+                        <div class="p-4">
+                            <i class="fa fa-3x fa-bus text-primary mb-4"></i>
+                            <h5>Travel Information</h5>
+                            <p>Transport options, routes and fares between cities.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.5s">
+                    <div class="service-item rounded pt-3">
+                        <div class="p-4">
+                            <i class="fa fa-3x fa-hotel text-primary mb-4"></i>
+                            <h5>Hotel Information</h5>
+                            <p>Hotels with price, rating and room availability.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.7s">
+                    <div class="service-item rounded pt-3">
+                        <div class="p-4">
+                            <i class="fa fa-3x fa-utensils text-primary mb-4"></i>
+                            <h5>Restaurant Information</h5>
+                            <p>Find good places to eat in every city.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="service-item rounded pt-3">
+                        <div class="p-4">
+                            <i class="fa fa-3x fa-umbrella-beach text-primary mb-4"></i>
+                            <h5>Resort Information</h5>
+                            <p>Holiday resorts for families and groups.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.3s">
+                    <div class="service-item rounded pt-3">
+                        <div class="p-4">
+                            <i class="fa fa-3x fa-tags text-primary mb-4"></i>
+                            <h5>Tour Packages</h5>
+                            <p>Special packages and discounts for travellers.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.5s">
+                    <div class="service-item rounded pt-3">
+                        <div class="p-4">
+                            <i class="fa fa-3x fa-search text-primary mb-4"></i>
+                            <h5>Easy Search</h5>
+                            <p>Search by location, price, quality and availability.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.7s">
+                    <div class="service-item rounded pt-3">
+                        <div class="p-4">
+                            <i class="fa fa-3x fa-headset text-primary mb-4"></i>
+                            <h5>Customer Support</h5>
+                            <p>Contact us any time to place an order or share feedback.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Service End -->
+
+
+        @{
+        
+        var popularSpots = ViewBag.PopularSpots as List<TouristSpot> ?? new List<TouristSpot>();
+    }
+
+    <!-- Destination Start -->
+    <div class="container-fluid py-5 destination">
+        <div class="container">
+            <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                <h6 class="section-title bg-white text-center text-primary px-3">Destination</h6>
+                <h1 class="mb-5">Popular Destination</h1>
+            </div>
+
+            <div class="row g-4">
+                @foreach (var s in popularSpots)
+                {
+                    <div class="col-lg-3 col-md-6 wow zoomIn" data-wow-delay="0.1s">
+                        <partial name="_SpotCard" model="s" />
+                    </div>
+                }
+            </div>
+
+            @if (!popularSpots.Any())
+            {
+                <p class="text-center text-muted">No destinations added yet.</p>
+            }
+
+            <div class="text-center mt-5">
+                <a class="btn btn-primary py-3 px-5" asp-controller="Home" asp-action="Destination">View All Destinations</a>
+            </div>
+        </div>
+    </div>
+    <!-- Destination End -->

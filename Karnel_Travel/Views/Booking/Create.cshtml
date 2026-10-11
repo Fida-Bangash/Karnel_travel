@@ -1,0 +1,375 @@
+@model Karnel_Travel.Models.BookingFormViewModel
+@using Karnel_Travel.Data
+@{
+    var item = Model.Item;
+    var inp = Model.Input;
+    ViewData["Title"] = "Reserve " + item.Name;
+
+    var isStay = item.Type is BookingType.Hotel or BookingType.Resort;
+    var isRestaurant = item.Type == BookingType.Restaurant;
+    var today = DateTime.Today.ToString("yyyy-MM-dd");
+
+    var dateLabel = item.Type switch
+    {
+        BookingType.Hotel or BookingType.Resort => "Check-in date",
+        BookingType.Restaurant => "Reservation date",
+        BookingType.Transport => "Travel date",
+        BookingType.Package => "Tour start date",
+        _ => "Visit date"
+    };
+    var guestLabel = item.Type switch
+    {
+        BookingType.Transport => "Passengers",
+        BookingType.Package or BookingType.Spot => "Persons",
+        _ => "Guests"
+    };
+    var unitLabel = item.Type == BookingType.Resort ? "Units" : "Rooms";
+    var priceUnit = item.Type switch
+    {
+        BookingType.Hotel or BookingType.Resort => "/ night",
+        BookingType.Restaurant => "/ avg. meal per guest",
+        BookingType.Transport => "/ passenger",
+        BookingType.Package => "/ person",
+        _ => ""
+    };
+}
+
+@section Styles { <partial name="_Styles" /> }
+
+<div class="vip-page py-4">
+    <div class="vip-head">
+        <span class="vip-eyebrow">@(isRestaurant ? "Table reservation" : "Reserve your experience")</span>
+        <h1 class="vip-title">Book <span>@BookingUi.TypeLabel(item.Type)</span></h1>
+        <p class="vip-sub">Choose your dates, see the price instantly and send your request. No advance payment needed.</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+
+        <!-- ================= Left: item showcase ================= -->
+        <div class="col-lg-5">
+            <div class="vip-card position-sticky" style="top: 100px">
+                <div class="vip-item-img">
+                    <img src="@Url.Content(item.ImageUrl)" alt="@item.Name" />
+                    <span class="vip-item-badge"><i class="fa @BookingUi.TypeIcon(item.Type) me-1"></i> @BookingUi.TypeLabel(item.Type)</span>
+                    <div class="vip-item-over">
+                        <h3>@item.Name</h3>
+                        <div class="vip-muted"><i class="fa fa-map-marker-alt vip-gold me-2"></i>@item.Location</div>
+                        @if (item.Rating > 0)
+                        {
+                            <div class="vip-stars mt-1">@(new string('★', item.Rating))<span class="vip-muted">@(new string('★', 5 - item.Rating))</span></div>
+                        }
+                    </div>
+                </div>
+
+                <div class="vip-price-tag">
+                    @if (item.UnitPrice > 0)
+                    {
+                        <strong>@BookingUi.Money(item.UnitPrice)</strong>
+                        <span class="vip-muted">@priceUnit</span>
+                        @if (item.DiscountPercent > 0)
+                        {
+                            <span class="ms-auto vip-item-badge" style="position:static">-@item.DiscountPercent% OFF</span>
+                        }
+                    }
+                    else
+                    {
+                        <strong style="font-size:1.2rem">Price on confirmation</strong>
+                    }
+                </div>
+
+                <ul class="vip-perks">
+                    @if (!string.IsNullOrWhiteSpace(item.Description))
+                    {
+                        <li style="display:block; color: var(--vip-text)">@item.Description</li>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(item.Extra))
+                    {
+                        <li><i class="fa fa-tag"></i> @item.Extra</li>
+                    }
+                    @if (item.ValidTill != null)
+                    {
+                        <li><i class="fa fa-hourglass-half"></i> Offer valid till @item.ValidTill.Value.ToString("dd MMM yyyy")</li>
+                    }
+                    <li><i class="fa fa-shield-alt"></i> Free cancellation before the start date</li>
+                    <li><i class="fa fa-hand-holding-usd"></i> Pay on arrival, no advance payment</li>
+                    <li><i class="fa fa-headset"></i> Confirmation by our team</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ================= Right: booking form ================= -->
+        <div class="col-lg-7">
+            <div class="vip-card">
+                <div class="vip-card-body">
+
+                    @if (!item.IsAvailable)
+                    {
+                        <div class="vip-alert error">
+                            <i class="fa fa-exclamation-circle mt-1"></i>
+                            <div>@(item.Type == BookingType.Package ? "This package has expired." : "This item is not available for booking right now.") Please explore other options.</div>
+                        </div>
+                    }
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="vip-alert error">
+                            <i class="fa fa-exclamation-circle mt-1"></i>
+                            <div asp-validation-summary="ModelOnly" class="m-0 p-0"></div>
+                        </div>
+                    }
+
+                    <form asp-action="Create" method="post" id="bookingForm"
+                          data-quote-url="@Url.Action("Quote", "Booking")"
+                          data-type="@item.Type" data-id="@item.Id"
+                          data-stay="@(isStay ? "1" : "0")" data-restaurant="@(isRestaurant ? "1" : "0")">
+
+                        <input type="hidden" asp-for="Input.Type" />
+                        <input type="hidden" asp-for="Input.ItemId" />
+
+                        <h4 class="vip-card-title"><i class="fa fa-calendar-check"></i> Your reservation</h4>
+
+                        <div class="row g-3 mb-4">
+                            <div class="@(isStay ? "col-md-6" : "col-12")">
+                                <label class="vip-label" for="Input_StartDate">@dateLabel</label>
+                                <input asp-for="Input.StartDate" type="date" min="@today" class="vip-input" required />
+                                <span asp-validation-for="Input.StartDate" class="vip-field-error"></span>
+                            </div>
+
+                            @if (isStay)
+                            {
+                                <div class="col-md-6">
+                                    <label class="vip-label" for="Input_EndDate">Check-out date</label>
+                                    <input asp-for="Input.EndDate" type="date" min="@today" class="vip-input" required />
+                                    <span asp-validation-for="Input.EndDate" class="vip-field-error"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="vip-label">@unitLabel</label>
+                                    <div class="vip-stepper" data-target="Input_Units" data-min="1" data-max="10">
+                                        <button type="button" data-step="-1" aria-label="Fewer">&minus;</button>
+                                        <input asp-for="Input.Units" type="number" min="1" max="10" />
+                                        <button type="button" data-step="1" aria-label="More">+</button>
+                                    </div>
+                                    <span asp-validation-for="Input.Units" class="vip-field-error"></span>
+                                </div>
+                            }
+                            else
+                            {
+                                <input type="hidden" asp-for="Input.Units" />
+                            }
+
+                            <div class="@(isStay ? "col-md-6" : "col-12")">
+                                <label class="vip-label">@guestLabel</label>
+                                <div class="vip-stepper" data-target="Input_Guests" data-min="1" data-max="@(isRestaurant ? 40 : item.Type == BookingType.Transport ? 20 : 50)">
+                                    <button type="button" data-step="-1" aria-label="Fewer">&minus;</button>
+                                    <input asp-for="Input.Guests" type="number" min="1" />
+                                    <button type="button" data-step="1" aria-label="More">+</button>
+                                </div>
+                                <span asp-validation-for="Input.Guests" class="vip-field-error"></span>
+                            </div>
+
+                            @if (isRestaurant)
+                            {
+                                <div class="col-12">
+                                    <label class="vip-label">Time slot</label>
+                                    <div class="vip-slots">
+                                        <span class="vip-slot-group">Lunch</span>
+                                        @foreach (var slot in BookingService.RestaurantSlots)
+                                        {
+                                            if (slot == "18:00")
+                                            {
+                                                <span class="vip-slot-group">Dinner</span>
+                                            }
+                                            var sid = "slot_" + slot.Replace(":", "");
+                                            <input type="radio" name="Input.TimeSlot" id="@sid" value="@slot" @(inp.TimeSlot == slot ? "checked" : null) />
+                                            <label for="@sid">@BookingUi.Slot(slot)</label>
+                                        }
+                                    </div>
+                                    <span asp-validation-for="Input.TimeSlot" class="vip-field-error"></span>
+                                    <small class="vip-muted d-block mt-2">Every 4 guests need one table. Tables are held for your slot.</small>
+                                </div>
+                            }
+                        </div>
+
+                        <h4 class="vip-card-title"><i class="fa fa-user"></i> Guest details</h4>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label class="vip-label" for="Input_CustomerName">Full name</label>
+                                <input asp-for="Input.CustomerName" class="vip-input" placeholder="As on your ID" required maxlength="100" />
+                                <span asp-validation-for="Input.CustomerName" class="vip-field-error"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="vip-label" for="Input_CustomerEmail">Email</label>
+                                <input asp-for="Input.CustomerEmail" type="email" class="vip-input" placeholder="you@example.com" required maxlength="254" />
+                                <span asp-validation-for="Input.CustomerEmail" class="vip-field-error"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="vip-label" for="Input_CustomerPhone">Phone / WhatsApp</label>
+                                <input asp-for="Input.CustomerPhone" type="tel" class="vip-input" placeholder="+92 300 0000000" required maxlength="20" />
+                                <span asp-validation-for="Input.CustomerPhone" class="vip-field-error"></span>
+                            </div>
+                            <div class="col-12">
+                                <label class="vip-label" for="Input_Notes">Special requests <span style="text-transform:none;letter-spacing:0;font-weight:500">(optional)</span></label>
+                                <textarea asp-for="Input.Notes" class="vip-textarea" maxlength="1000" placeholder="Late arrival, dietary needs, celebration..."></textarea>
+                                <span asp-validation-for="Input.Notes" class="vip-field-error"></span>
+                            </div>
+                        </div>
+
+                        <h4 class="vip-card-title"><i class="fa fa-receipt"></i> Summary</h4>
+
+                        <div class="vip-summary mb-3" id="summaryBox">
+                            <div id="summaryRows"><div class="vip-sum-row"><span>Choose your date to see the price.</span></div></div>
+                            <div class="vip-sum-total"><span>Total</span><strong id="sumTotal">&mdash;</strong></div>
+                            <div class="vip-sum-msg" id="sumMsg"></div>
+                        </div>
+
+                        <button type="submit" class="vip-btn vip-btn-gold vip-btn-block" id="submitBtn" @(item.IsAvailable ? null : "disabled")>
+                             Request booking
+                        </button>
+                        <p class="vip-muted small text-center mt-3 mb-0">
+                            <i class="fa fa-lock me-1"></i> Your request is reviewed by our team. You pay on arrival.
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var form = document.getElementById('bookingForm');
+            if (!form) return;
+
+            var isStay = form.dataset.stay === '1';
+            var isRestaurant = form.dataset.restaurant === '1';
+            var quoteUrl = form.dataset.quoteUrl;
+            var box = document.getElementById('summaryBox');
+            var rows = document.getElementById('summaryRows');
+            var totalEl = document.getElementById('sumTotal');
+            var msg = document.getElementById('sumMsg');
+            var submitBtn = document.getElementById('submitBtn');
+            var startEl = document.getElementById('Input_StartDate');
+            var endEl = document.getElementById('Input_EndDate');
+            var guestsEl = document.getElementById('Input_Guests');
+            var unitsEl = document.getElementById('Input_Units');
+            var timer = null, seq = 0;
+
+            function addDays(iso, n) {
+                var d = new Date(iso + 'T00:00:00');
+                d.setDate(d.getDate() + n);
+                var m = String(d.getMonth() + 1).padStart(2, '0');
+                var day = String(d.getDate()).padStart(2, '0');
+                return d.getFullYear() + '-' + m + '-' + day;
+            }
+
+            function row(label, value) {
+                var r = document.createElement('div');
+                r.className = 'vip-sum-row';
+                var l = document.createElement('span'); l.textContent = label;
+                var v = document.createElement('b'); v.textContent = value;
+                r.appendChild(l); r.appendChild(v);
+                return r;
+            }
+
+            function slotValue() {
+                var c = form.querySelector('input[name="Input.TimeSlot"]:checked');
+                return c ? c.value : '';
+            }
+
+            function showMessage(kind, text) {
+                msg.className = 'vip-sum-msg' + (kind ? ' ' + kind : '');
+                msg.textContent = text || '';
+            }
+
+            function render(d) {
+                rows.innerHTML = '';
+                if (d.ok) {
+                    if (isStay) rows.appendChild(row('Stay', d.nights + (d.nights === 1 ? ' night' : ' nights')));
+                    if (isStay) rows.appendChild(row('Rooms', d.units));
+                    if (isRestaurant) rows.appendChild(row('Tables', d.units));
+                    rows.appendChild(row(isStay ? 'Guests' : 'People', d.guests));
+                    if (!d.priceOnRequest) {
+                        rows.appendChild(row('Rate', d.unitPrice));
+                        if (d.discount > 0) rows.appendChild(row('Package discount', d.discount + '%'));
+                    }
+                    totalEl.textContent = d.total;
+                    if (d.available !== null && d.available !== undefined) {
+                        var what = isRestaurant ? 'table' : 'room';
+                        showMessage('ok', d.available + ' ' + what + (d.available === 1 ? '' : 's') + ' available for your selection.');
+                    } else {
+                        showMessage('', '');
+                    }
+                    submitBtn.disabled = false;
+                } else {
+                    var r = document.createElement('div');
+                    r.className = 'vip-sum-row';
+                    r.innerHTML = '<span>Fill in the details above to see the price.</span>';
+                    rows.appendChild(r);
+                    totalEl.textContent = '\u2014';
+                    showMessage(d.error ? 'err' : '', d.error || '');
+                    submitBtn.disabled = !!d.error;
+                }
+            }
+
+            function requestQuote() {
+                if (!startEl.value) { render({ ok: false }); return; }
+                var params = new URLSearchParams({
+                    type: form.dataset.type,
+                    id: form.dataset.id,
+                    start: startEl.value,
+                    end: endEl ? endEl.value : '',
+                    slot: isRestaurant ? slotValue() : '',
+                    guests: guestsEl.value || '1',
+                    units: unitsEl ? (unitsEl.value || '1') : '1'
+                });
+                var mine = ++seq;
+                box.classList.add('vip-loading');
+                fetch(quoteUrl + '?' + params.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (d) { if (mine === seq) render(d); })
+                    .catch(function () { if (mine === seq) showMessage('err', 'Could not calculate the price. Please check your connection.'); })
+                    .finally(function () { if (mine === seq) box.classList.remove('vip-loading'); });
+            }
+
+            function schedule() { clearTimeout(timer); timer = setTimeout(requestQuote, 250); }
+
+            // Check-out hamesha check-in ke baad
+            startEl.addEventListener('change', function () {
+                if (endEl && startEl.value) {
+                    endEl.min = addDays(startEl.value, 1);
+                    if (!endEl.value || endEl.value <= startEl.value) endEl.value = addDays(startEl.value, 1);
+                }
+                schedule();
+            });
+            if (endEl) endEl.addEventListener('change', schedule);
+
+            // +/- buttons
+            form.querySelectorAll('.vip-stepper').forEach(function (st) {
+                var input = document.getElementById(st.dataset.target);
+                var min = parseInt(st.dataset.min, 10), max = parseInt(st.dataset.max, 10);
+                st.querySelectorAll('button').forEach(function (b) {
+                    b.addEventListener('click', function () {
+                        var v = (parseInt(input.value, 10) || min) + parseInt(b.dataset.step, 10);
+                        input.value = Math.min(max, Math.max(min, v));
+                        // Rooms badhein to guests kam az kam utne hon
+                        if (isStay && input === unitsEl && parseInt(guestsEl.value, 10) < parseInt(unitsEl.value, 10)) guestsEl.value = unitsEl.value;
+                        schedule();
+                    });
+                });
+                input.addEventListener('input', schedule);
+            });
+
+            form.querySelectorAll('input[name="Input.TimeSlot"]').forEach(function (r) { r.addEventListener('change', schedule); });
+
+            form.addEventListener('submit', function () {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sending request...';
+            });
+
+            if (endEl && startEl.value) endEl.min = addDays(startEl.value, 1);
+            if (startEl.value) requestQuote();
+        })();
+    </script>
+}

@@ -1,0 +1,173 @@
+@{
+    ViewData["Title"] = "Dashboard";
+
+    // Controller se aaya hua data (cast karke safe banaya, null nahi hoga)
+    var messages = ViewBag.RecentMessages as List<Karnel_Travel.Models.ContactMessage>
+                   ?? new List<Karnel_Travel.Models.ContactMessage>();
+    var feedbacks = ViewBag.RecentFeedback as List<Karnel_Travel.Models.Feedback>
+                    ?? new List<Karnel_Travel.Models.Feedback>();
+
+    var recentBookings = ViewBag.RecentBookings as List<Karnel_Travel.Models.Booking>
+                         ?? new List<Karnel_Travel.Models.Booking>();
+    int pendingBookings = (int)ViewBag.PendingBookings;
+
+    // 8 stat cards ki list: naam, count, icon, chhota note, aur admin ka controller
+    var stats = new[]
+    {
+        (Label: "Tourist Spots", Value: (int)ViewBag.Spots,       Icon: "bi-geo-alt",       Note: "Total destinations", Ctrl: "TouristSpots"),
+        (Label: "Travel Info",   Value: (int)ViewBag.TravelInfos, Icon: "bi-truck",         Note: "Routes & fares",     Ctrl: "TravelInfoes"),
+        (Label: "Hotels",        Value: (int)ViewBag.Hotels,      Icon: "bi-building",      Note: "Total hotels",       Ctrl: "Hotels"),
+        (Label: "Restaurants",   Value: (int)ViewBag.Restaurants, Icon: "bi-shop",          Note: "Total restaurants",  Ctrl: "Restaurants"),
+        (Label: "Resorts",       Value: (int)ViewBag.Resorts,     Icon: "bi-house-door",    Note: "Total resorts",      Ctrl: "Resorts"),
+        (Label: "Packages",      Value: (int)ViewBag.Packages,    Icon: "bi-tag",           Note: "Offers & discounts", Ctrl: "TourPackages"),
+        (Label: "Messages",      Value: (int)ViewBag.Messages,    Icon: "bi-envelope",      Note: "Received messages",  Ctrl: "ContactMessages"),
+        (Label: "Feedback",      Value: (int)ViewBag.Feedback,    Icon: "bi-chat-dots",     Note: "Customer feedback",  Ctrl: "Feedbacks")
+    };
+}
+
+<!-- Page heading -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Overview of Karnel Travel Guide data.</p>
+    </div>
+</div>
+
+<!-- Bookings overview -->
+<link rel="stylesheet" href="~/admin/css/admin-bookings.css" asp-append-version="true" />
+<div class="bk-gold">
+    <div class="bk-stats">
+        <a class="bk-stat text-decoration-none" asp-area="Admin" asp-controller="Bookings" asp-action="Index"><i class="bi bi-journal-bookmark"></i><div class="bk-stat-label">Total bookings</div><div class="bk-stat-value">@ViewBag.Bookings</div></a>
+        <a class="bk-stat @(pendingBookings > 0 ? "alert-pending" : "") text-decoration-none" asp-area="Admin" asp-controller="Bookings" asp-action="Index" asp-route-status="Pending"><i class="bi bi-hourglass-split"></i><div class="bk-stat-label">Pending - needs action</div><div class="bk-stat-value">@pendingBookings</div></a>
+        <div class="bk-stat vip"><i class="bi bi-gem"></i><div class="bk-stat-label">Booking revenue</div><div class="bk-stat-value">@Karnel_Travel.Models.BookingUi.Money((decimal)ViewBag.BookingRevenue)</div></div>
+    </div>
+</div>
+
+<!-- 8 stat cards -->
+<div class="row g-4">
+    @foreach (var s in stats)
+    {
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-stat">
+                <div class="card-header">
+                    <span class="stat-label">@s.Label</span>
+                    <i class="bi @s.Icon text-primary fs-4"></i>
+                </div>
+                <div class="stat-value">@s.Value</div>
+                <p class="text-muted mb-1">@s.Note</p>
+                <a asp-area="Admin" asp-controller="@s.Ctrl" asp-action="Index" class="small">Manage &rarr;</a>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Latest bookings -->
+<div class="row g-4 mt-1 bk-gold">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="card-title mb-0">Recent Bookings</h2>
+                <a asp-area="Admin" asp-controller="Bookings" asp-action="Index" class="small">View all</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr><th>Code</th><th>Customer</th><th>Item</th><th>When</th><th>Total</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var rb in recentBookings)
+                        {
+                            <tr>
+                                <td><a asp-area="Admin" asp-controller="Bookings" asp-action="Details" asp-route-id="@rb.Id" class="bk-code">@rb.BookingCode</a></td>
+                                <td>@rb.CustomerName</td>
+                                <td>@Karnel_Travel.Models.BookingUi.TypeLabel(rb.ItemType): @rb.ItemName</td>
+                                <td>@Karnel_Travel.Models.BookingUi.When(rb)</td>
+                                <td>@(rb.TotalPrice > 0 ? Karnel_Travel.Models.BookingUi.Money(rb.TotalPrice) : "On request")</td>
+                                <td><span class="bk-status @Karnel_Travel.Models.BookingUi.StatusClass(rb.Status)">@Karnel_Travel.Models.BookingUi.StatusLabel(rb.Status)</span></td>
+                            </tr>
+                        }
+                        @if (!recentBookings.Any())
+                        {
+                            <tr><td colspan="6" class="text-muted text-center">No bookings yet.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Latest messages and feedback -->
+<div class="row g-4 mt-1">
+
+    <!-- Recent Messages -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="card-title mb-0">Recent Messages</h2>
+                <a asp-area="Admin" asp-controller="ContactMessages" asp-action="Index" class="small">View all</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Subject</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var m in messages)
+                        {
+                            <tr>
+                                <td>@m.Name</td>
+                                <td>@m.Subject</td>
+                                <td>@m.CreatedOn.ToString("dd MMM yyyy")</td>
+                            </tr>
+                        }
+                        @if (!messages.Any())
+                        {
+                            <tr><td colspan="3" class="text-muted text-center">No messages yet.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Feedback -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="card-title mb-0">Recent Feedback</h2>
+                <a asp-area="Admin" asp-controller="Feedbacks" asp-action="Index" class="small">View all</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Feedback</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var f in feedbacks)
+                        {
+                            <tr>
+                                <td>@f.Name</td>
+                                <td>@(f.Message.Length > 40 ? f.Message.Substring(0, 40) + "..." : f.Message)</td>
+                                <td>@f.CreatedOn.ToString("dd MMM yyyy")</td>
+                            </tr>
+                        }
+                        @if (!feedbacks.Any())
+                        {
+                            <tr><td colspan="3" class="text-muted text-center">No feedback yet.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

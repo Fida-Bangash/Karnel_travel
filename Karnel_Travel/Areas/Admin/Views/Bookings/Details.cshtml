@@ -1,0 +1,134 @@
+@model Karnel_Travel.Models.Booking
+@using Karnel_Travel.Data
+
+@{
+    ViewData["Title"] = "Booking " + Model.BookingCode;
+    var b = Model;
+    var mailto = "mailto:" + b.CustomerEmail + "?subject=" + Uri.EscapeDataString("Your Karnel Travel booking " + b.BookingCode);
+    var canConfirm = BookingService.CanMove(b.Status, BookingStatus.Confirmed);
+    var canReject = BookingService.CanMove(b.Status, BookingStatus.Rejected);
+    var canComplete = BookingService.CanMove(b.Status, BookingStatus.Completed);
+    var canCancel = BookingService.CanMove(b.Status, BookingStatus.Cancelled);
+    var hasActions = canConfirm || canReject || canComplete || canCancel;
+}
+
+<link rel="stylesheet" href="~/admin/css/admin-bookings.css" asp-append-version="true" />
+
+<div class="bk-gold">
+
+    <div class="page-header">
+        <div>
+            <div class="bk-detail-code">@b.BookingCode</div>
+            <p class="page-subtitle">
+                <span class="bk-status @BookingUi.StatusClass(b.Status)">@BookingUi.StatusLabel(b.Status)</span>
+                &nbsp;Requested on @b.CreatedOn.ToString("dd MMMM yyyy, h:mm tt")
+            </p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-action="Index" class="btn-crud btn-crud-light"><i class="bi bi-arrow-left"></i> Back to List</a>
+            <a href="@mailto" class="btn-crud btn-crud-dark"><i class="bi bi-reply"></i> Email Customer</a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] is string ok) { <div class="bk-flash ok"><i class="bi bi-check-circle me-2"></i>@ok</div> }
+    @if (TempData["Error"] is string err) { <div class="bk-flash err"><i class="bi bi-exclamation-circle me-2"></i>@err</div> }
+
+    <div class="row g-4">
+
+        <!-- Left: booking info -->
+        <div class="col-lg-8">
+            <div class="crud-card mb-4">
+                <div class="crud-card-title"><i class="bi @BookingUi.TypeIconBi(b.ItemType)"></i> @BookingUi.TypeLabel(b.ItemType)</div>
+                <dl class="bk-kv">
+                    <div><dt>Item</dt><dd>@b.ItemName</dd></div>
+                    @if (!string.IsNullOrWhiteSpace(b.ItemLocation))
+                    {
+                        <div><dt>Location</dt><dd>@b.ItemLocation</dd></div>
+                    }
+                    <div><dt>@(b.ItemType is BookingType.Hotel or BookingType.Resort ? "Stay" : "Date")</dt><dd>@BookingUi.When(b)</dd></div>
+                    <div><dt>Reservation</dt><dd>@BookingUi.UnitsLabel(b)</dd></div>
+                    <div><dt>Rate</dt><dd>@(b.UnitPrice > 0 ? BookingUi.Money(b.UnitPrice) : "On request")</dd></div>
+                    @if (b.DiscountPercent > 0)
+                    {
+                        <div><dt>Discount</dt><dd>@b.DiscountPercent%</dd></div>
+                    }
+                    @if (b.UpdatedOn.HasValue)
+                    {
+                        <div><dt>Last updated</dt><dd>@b.UpdatedOn.Value.ToString("dd MMM yyyy, h:mm tt")</dd></div>
+                    }
+                </dl>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(b.Notes))
+            {
+                <div class="crud-card mb-4">
+                    <div class="crud-card-title"><i class="bi bi-chat-left-text"></i> Customer's special requests</div>
+                    <div class="message-body">@b.Notes</div>
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(b.AdminNote))
+            {
+                <div class="crud-card">
+                    <div class="crud-card-title"><i class="bi bi-sticky"></i> Your note (visible to the customer)</div>
+                    <div class="message-body">@b.AdminNote</div>
+                </div>
+            }
+        </div>
+
+        <!-- Right: total, customer, actions -->
+        <div class="col-lg-4">
+            <div class="bk-total-box mb-4">
+                <small>@(b.ItemType == BookingType.Restaurant ? "Estimated bill" : "Total amount")</small>
+                <strong>@(b.TotalPrice > 0 ? BookingUi.Money(b.TotalPrice) : "On request")</strong>
+                <small style="text-transform:none;letter-spacing:0;font-weight:600;color:rgba(255,255,255,.7)">Pay on arrival</small>
+            </div>
+
+            <div class="crud-card mb-4">
+                <div class="crud-card-title"><i class="bi bi-person"></i> Customer</div>
+                <dl class="bk-kv" style="grid-template-columns: 1fr">
+                    <div><dt>Name</dt><dd>@b.CustomerName</dd></div>
+                    <div><dt>Email</dt><dd><a href="@mailto">@b.CustomerEmail</a></dd></div>
+                    <div><dt>Phone</dt><dd><a href="tel:@b.CustomerPhone">@b.CustomerPhone</a></dd></div>
+                    <div><dt>Account</dt><dd>@(b.User != null ? b.User.Email : "Account deleted")</dd></div>
+                </dl>
+            </div>
+
+            <div class="crud-card">
+                <div class="crud-card-title"><i class="bi bi-lightning-charge"></i> Actions</div>
+                @if (!hasActions)
+                {
+                    <p class="text-muted mb-0">This booking is <strong>@BookingUi.StatusLabel(b.Status).ToLower()</strong> and can no longer be changed.</p>
+                }
+                else
+                {
+                    <form asp-action="SetStatus" method="post">
+                        <input type="hidden" name="id" value="@b.Id" />
+                        <input type="hidden" name="returnTo" value="details" />
+                        <label class="small fw-bold text-muted mb-1" for="adminNote">Note to customer (optional)</label>
+                        <textarea id="adminNote" name="adminNote" class="bk-note" maxlength="500" placeholder="e.g. Room 204 reserved, or reason for rejection...">@b.AdminNote</textarea>
+
+                        <div class="bk-action-btns">
+                            @if (canConfirm)
+                            {
+                                <button type="submit" name="status" value="Confirmed" class="btn-crud btn-crud-gold"><i class="bi bi-check-lg"></i> Confirm booking</button>
+                            }
+                            @if (canComplete)
+                            {
+                                <button type="submit" name="status" value="Completed" class="btn-crud btn-crud-dark"><i class="bi bi-flag"></i> Mark as completed</button>
+                            }
+                            @if (canReject)
+                            {
+                                <button type="submit" name="status" value="Rejected" class="btn-crud btn-crud-danger" onclick="return confirm('Reject this booking?');"><i class="bi bi-x-lg"></i> Reject</button>
+                            }
+                            @if (canCancel)
+                            {
+                                <button type="submit" name="status" value="Cancelled" class="btn-crud btn-crud-light" onclick="return confirm('Cancel this booking? The rooms/tables will be released.');"><i class="bi bi-slash-circle"></i> Cancel booking</button>
+                            }
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,79 @@
+@model Karnel_Travel.Models.ContactMessage
+
+@{
+    ViewData["Title"] = "Message Details";
+
+    // Split "[Request Type] subject" into a tag and the remaining subject
+    var subj = Model.Subject ?? "";
+    string tag = "";
+    string rest = subj;
+    if (subj.StartsWith("[") && subj.IndexOf(']') > 0)
+    {
+        tag = subj.Substring(1, subj.IndexOf(']') - 1);
+        rest = subj.Substring(subj.IndexOf(']') + 1).Trim();
+    }
+    var mailto = "mailto:" + Model.Email + "?subject=" + Uri.EscapeDataString("Re: " + subj);
+}
+
+<!-- Page heading -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">@(rest == "" ? "(no subject)" : rest)</h1>
+        <p class="page-subtitle">
+            @if (tag != "") { <span class="request-tag">@tag</span> }
+            Received on @Model.CreatedOn.ToString("dd MMMM yyyy, hh:mm tt")
+        </p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a asp-action="Index" class="btn-crud btn-crud-light"><i class="bi bi-arrow-left"></i> Back to List</a>
+        <a href="@mailto" class="btn-crud btn-crud-dark"><i class="bi bi-reply"></i> Reply by Email</a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-crud btn-crud-primary"><i class="bi bi-pencil-square"></i> Edit</a>
+        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn-crud btn-crud-danger"><i class="bi bi-trash"></i> Delete</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Message text -->
+    <div class="col-lg-8">
+        <div class="crud-card">
+            <div class="crud-card-title"><i class="bi bi-chat-left-text"></i> Message</div>
+            <div class="message-body">@Model.Message</div>
+        </div>
+    </div>
+
+    <!-- Sender information -->
+    <div class="col-lg-4">
+        <div class="crud-card">
+            <div class="crud-card-title"><i class="bi bi-person"></i> Sender</div>
+
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <span class="avatar-initial lg">@(string.IsNullOrWhiteSpace(Model.Name) ? "?" : Model.Name.Trim().Substring(0, 1))</span>
+                <div>
+                    <div class="fw-bold">@Model.Name</div>
+                    @if (Model.IsRead) { <span class="badge-table success">Read</span> } else { <span class="badge-table pending">New</span> }
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <div class="stat-chip">
+                    <i class="bi bi-envelope"></i>
+                    <div><div class="lbl">Email</div><div class="val"><a href="@mailto" class="text-decoration-none" style="color:inherit">@Model.Email</a></div></div>
+                </div>
+                <div class="stat-chip">
+                    <i class="bi bi-telephone"></i>
+                    <div>
+                        <div class="lbl">Phone</div>
+                        <div class="val">
+                            @if (string.IsNullOrWhiteSpace(Model.Phone)) { <span class="text-muted fw-normal">Not provided</span> }
+                            else { <a href="tel:@Model.Phone" class="text-decoration-none" style="color:inherit">@Model.Phone</a> }
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-chip">
+                    <i class="bi bi-calendar-event"></i>
+                    <div><div class="lbl">Received</div><div class="val">@Model.CreatedOn.ToString("dd MMM yyyy")</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

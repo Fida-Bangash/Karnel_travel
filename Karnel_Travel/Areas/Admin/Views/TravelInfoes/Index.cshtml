@@ -1,0 +1,90 @@
+@model IEnumerable<Karnel_Travel.Models.TravelInfo>
+
+@{
+    ViewData["Title"] = "Travel Info";
+}
+
+<!-- Page heading + Add button -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Travel Info</h1>
+        <p class="page-subtitle">@Model.Count() routes available.</p>
+    </div>
+    <a asp-action="Create" class="btn-crud btn-crud-primary">
+        <i class="bi bi-plus-lg"></i> Add Travel Info
+    </a>
+</div>
+
+<div class="table-card-custom">
+
+    <!-- Search box + filter chips -->
+    <div class="crud-toolbar">
+        <div class="crud-search">
+            <i class="bi bi-search"></i>
+            <input type="text" id="listSearch" placeholder="Search by city or mode..." autocomplete="off" />
+        </div>
+        <div class="crud-chips" id="listChips">
+            <button type="button" class="crud-chip active" data-filter="">All</button>
+            @foreach (var md in Model.Select(t => t.TransportMode).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().OrderBy(x => x))
+            {
+                <button type="button" class="crud-chip" data-filter="@md.ToLower()">@md</button>
+            }
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="crud-empty">
+            <i class="bi bi-truck"></i>
+            <strong>No travel info yet</strong>
+            <p class="mb-3">Add your first transport route.</p>
+            <a asp-action="Create" class="btn-crud btn-crud-primary"><i class="bi bi-plus-lg"></i> Add Travel Info</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-custom" id="listTable">
+                <thead>
+                    <tr>
+                        <th>Route</th>
+                        <th>Mode</th>
+                        <th>Fare</th>
+                        <th>Details</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var mode = (item.TransportMode ?? "").ToLower();
+                        var mIcon = mode.Contains("bus") ? "bi-bus-front" : mode.Contains("train") ? "bi-train-front" : (mode.Contains("flight") || mode.Contains("air")) ? "bi-airplane" : (mode.Contains("ship") || mode.Contains("boat")) ? "bi-water" : mode.Contains("car") ? "bi-car-front" : "bi-truck";
+                        <tr data-search="@((item.TransportMode + " " + item.FromCity + " " + item.ToCity).ToLower())"
+                            data-filter="@((item.TransportMode ?? "").ToLower())">
+                            <td><span class="route">@item.FromCity <i class="bi bi-arrow-right route-arrow"></i> @item.ToCity</span></td>
+                            <td><span class="mode-pill"><i class="bi @mIcon"></i> @item.TransportMode</span></td>
+                            <td><strong>Rs @item.Fare.ToString("0.##")</strong></td>
+                            <td><div class="cell-truncate" title="@item.Details">@(string.IsNullOrWhiteSpace(item.Details) ? "—" : item.Details)</div></td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="icon-btn" title="View"><i class="bi bi-eye"></i></a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="icon-btn" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="icon-btn danger" title="Delete"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Shown when search/filter matches nothing -->
+        <div class="crud-empty" id="noMatch" style="display:none">
+            <i class="bi bi-search"></i>
+            <strong>No matching results</strong>
+            <p class="mb-0">Try a different word or choose "All".</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/admin/js/crud-list.js"></script>
+}

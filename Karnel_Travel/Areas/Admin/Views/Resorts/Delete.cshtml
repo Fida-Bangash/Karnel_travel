@@ -1,0 +1,39 @@
+@model Karnel_Travel.Models.Resort
+
+@{
+    ViewData["Title"] = "Delete Resort";
+}
+
+<!-- Page heading -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Delete Resort</h1>
+        <p class="page-subtitle">Please confirm before removing this item.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-7 col-xl-6">
+        <div class="crud-card delete-card">
+
+            <span class="delete-icon"><i class="bi bi-exclamation-triangle"></i></span>
+            <h4 class="fw-bold mb-1">Are you sure you want to delete this resort?</h4>
+            <p class="text-muted mb-4">It will be removed from the website and from search results. This action cannot be undone.</p>
+
+            <!-- Summary of the item being deleted -->
+            <div class="table-user-cell p-3 mb-4" style="background:#F8FAF9;border-radius:var(--radius-lg)">
+                @if (!string.IsNullOrEmpty(Model.ImagePath)) { <img src="@Model.ImagePath" class="crud-thumb" alt="@Model.Name" /> } else { <span class="crud-thumb-empty"><i class="bi bi-house-door"></i></span> }
+                <div>
+                    <div class="table-user-name">@Model.Name</div>
+                    <div class="table-user-sub"><i class="bi bi-geo-alt-fill"></i> @Model.Location &bull; Rs @Model.Price.ToString("0.##")</div>
+                </div>
+            </div>
+
+            <form asp-action="Delete" class="d-flex gap-2 flex-wrap">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn-crud btn-crud-danger"><i class="bi bi-trash"></i> Yes, Delete</button>
+                <a asp-action="Index" class="btn-crud btn-crud-light">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>

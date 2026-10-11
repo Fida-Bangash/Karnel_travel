@@ -1,0 +1,55 @@
+@model Karnel_Travel.Models.Booking
+@{
+    var b = Model;
+    var priceOnRequest = b.TotalPrice <= 0;
+}
+
+<div class="vip-ticket">
+    <div class="vip-ticket-top">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <div class="vip-eyebrow mb-2"><i class="fa @BookingUi.TypeIcon(b.ItemType)"></i> @BookingUi.TypeLabel(b.ItemType)</div>
+                <h3 class="mb-1">@b.ItemName</h3>
+                @if (!string.IsNullOrWhiteSpace(b.ItemLocation))
+                {
+                    <div class="vip-muted"><i class="fa fa-map-marker-alt vip-gold me-2"></i>@b.ItemLocation</div>
+                }
+            </div>
+            <span class="vip-status @BookingUi.StatusClass(b.Status)">@BookingUi.StatusLabel(b.Status)</span>
+        </div>
+        <div class="mt-4">
+            <div class="vip-label mb-1">Booking code</div>
+            <div class="vip-code">@b.BookingCode</div>
+        </div>
+    </div>
+
+    <div class="vip-ticket-body">
+        <dl class="vip-kv mb-0">
+            <div><dt>Guest</dt><dd>@b.CustomerName</dd></div>
+            <div><dt>Date</dt><dd>@BookingUi.When(b)</dd></div>
+            <div><dt>Reservation</dt><dd>@BookingUi.UnitsLabel(b)</dd></div>
+            <div><dt>Email</dt><dd>@b.CustomerEmail</dd></div>
+            <div><dt>Phone</dt><dd>@b.CustomerPhone</dd></div>
+            <div><dt>Requested on</dt><dd>@b.CreatedOn.ToString("dd MMM yyyy, h:mm tt")</dd></div>
+            @if (!string.IsNullOrWhiteSpace(b.Notes))
+            {
+                <div style="grid-column: 1 / -1"><dt>Special requests</dt><dd>@b.Notes</dd></div>
+            }
+        </dl>
+    </div>
+
+    <div class="vip-ticket-total">
+        <div>
+            <div class="vip-label mb-0">@(b.ItemType == BookingType.Restaurant ? "Estimated bill (pay at restaurant)" : "Total amount")</div>
+            @if (b.DiscountPercent > 0)
+            {
+                <small class="vip-muted">Includes @b.DiscountPercent% package discount</small>
+            }
+            else
+            {
+                <small class="vip-muted">Pay on arrival &middot; no advance payment</small>
+            }
+        </div>
+        <strong>@(priceOnRequest ? "Price on confirmation" : BookingUi.Money(b.TotalPrice))</strong>
+    </div>
+</div>

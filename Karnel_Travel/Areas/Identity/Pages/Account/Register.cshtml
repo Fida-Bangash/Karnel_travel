@@ -1,0 +1,152 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+    ViewData["HideNavbar"] = true;
+    ViewData["HideFooter"] = true;
+}
+
+<link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+
+<div class="auth-card">
+    <div class="row g-0">
+
+        <!-- Left: image panel -->
+        <div class="col-lg-5 auth-side d-none d-lg-flex">
+            <div class="auth-side-inner">
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="auth-brand">
+                    <i class="fa fa-map-marker-alt"></i>Karnel Travel
+                </a>
+                <div>
+                    <h2>Start your journey</h2>
+                    <p>Create a free account and discover the best places to visit around the world.</p>
+                    <ul class="auth-points">
+                        <li><i class="fa fa-check"></i> Handpicked destinations</li>
+                        <li><i class="fa fa-check"></i> Best price deals</li>
+                        <li><i class="fa fa-check"></i> 24/7 support</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: form -->
+        <div class="col-lg-7">
+            <div class="auth-form-wrap">
+                <div class="auth-head">
+                    <span class="auth-icon"><i class="fa fa-user-plus"></i></span>
+                    <h2>Create account</h2>
+                    <p>Fill in the details below to get started</p>
+                </div>
+
+                <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                    <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+
+                    <div class="auth-field">
+                        <label asp-for="Input.FullName" class="auth-label">Full name</label>
+                        <div class="auth-input-wrap">
+                            <i class="fa fa-user auth-input-icon"></i>
+                            <input asp-for="Input.FullName" class="auth-input" autocomplete="name" aria-required="true" placeholder="Your full name" />
+                        </div>
+                        <span asp-validation-for="Input.FullName" class="auth-error"></span>
+                    </div>
+
+                    <div class="auth-field">
+                        <label asp-for="Input.Email" class="auth-label">Email address</label>
+                        <div class="auth-input-wrap">
+                            <i class="fa fa-envelope auth-input-icon"></i>
+                            <input asp-for="Input.Email" class="auth-input" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                        </div>
+                        <span asp-validation-for="Input.Email" class="auth-error"></span>
+                    </div>
+
+                    <div class="auth-field">
+                        <label asp-for="Input.PhoneNumber" class="auth-label">Phone number</label>
+                        <div class="auth-input-wrap">
+                            <i class="fa fa-phone-alt auth-input-icon"></i>
+                            <input asp-for="Input.PhoneNumber" class="auth-input" type="tel" inputmode="numeric" maxlength="11" pattern="03[0-9]{9}" autocomplete="tel" aria-required="true" placeholder="03001234567" />
+                        </div>
+                        <span asp-validation-for="Input.PhoneNumber" class="auth-error"></span>
+                    </div>
+
+                    <div class="auth-field">
+                        <label asp-for="Input.Password" class="auth-label">Password</label>
+                        <div class="auth-input-wrap has-toggle">
+                            <i class="fa fa-lock auth-input-icon"></i>
+                            <input asp-for="Input.Password" class="auth-input" autocomplete="new-password" aria-required="true" placeholder="Create a password" />
+                            <button type="button" class="auth-toggle" data-toggle-password="#Input_Password" aria-label="Show or hide password">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="auth-hint">At least 6 characters with an uppercase letter, a lowercase letter, a number and a symbol.</div>
+                        <span asp-validation-for="Input.Password" class="auth-error"></span>
+                    </div>
+
+                    <div class="auth-field">
+                        <label asp-for="Input.ConfirmPassword" class="auth-label">Confirm password</label>
+                        <div class="auth-input-wrap has-toggle">
+                            <i class="fa fa-lock auth-input-icon"></i>
+                            <input asp-for="Input.ConfirmPassword" class="auth-input" autocomplete="new-password" aria-required="true" placeholder="Repeat your password" />
+                            <button type="button" class="auth-toggle" data-toggle-password="#Input_ConfirmPassword" aria-label="Show or hide password">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Input.ConfirmPassword" class="auth-error"></span>
+                    </div>
+
+                    <div class="auth-field">
+                        <label asp-for="Input.Country" class="auth-label">Country</label>
+                        <div class="auth-input-wrap">
+                            <i class="fa fa-globe auth-input-icon"></i>
+                            <input asp-for="Input.Country" class="auth-input" autocomplete="country-name" aria-required="true" placeholder="e.g. Pakistan" />
+                        </div>
+                        <span asp-validation-for="Input.Country" class="auth-error"></span>
+                    </div>
+
+                    <button id="registerSubmit" type="submit" class="btn btn-primary auth-btn w-100 mt-2">
+                        Create account <i class="fa fa-arrow-right ms-2"></i>
+                    </button>
+                </form>
+
+                @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+                {
+                    <div class="auth-divider"><span>or sign up with</span></div>
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        <div class="auth-social">
+                            @foreach (var provider in Model.ExternalLogins!)
+                            {
+                                <button type="submit" class="btn auth-social-btn" name="provider" value="@provider.Name" title="Register using your @provider.DisplayName account">@provider.DisplayName</button>
+                            }
+                        </div>
+                    </form>
+                }
+
+                <p class="auth-switch">
+                    Already have an account?
+                    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Log in</a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Phone field me sirf digits allow karo aur 11 se zyada na jaane do
+        document.getElementById("Input_PhoneNumber").addEventListener("input", function () {
+            this.value = this.value.replace(/\D/g, "").slice(0, 11);
+        });
+    </script>
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelectorAll('[data-toggle-password]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var input = document.querySelector(btn.getAttribute('data-toggle-password'));
+                if (!input) return;
+                var show = input.type === 'password';
+                input.type = show ? 'text' : 'password';
+                btn.querySelector('i').className = show ? 'fa fa-eye-slash' : 'fa fa-eye';
+            });
+        });
+    </script>
+}

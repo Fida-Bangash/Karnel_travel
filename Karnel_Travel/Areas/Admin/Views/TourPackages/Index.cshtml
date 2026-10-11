@@ -1,0 +1,91 @@
+@model IEnumerable<Karnel_Travel.Models.TourPackage>
+
+@{
+    ViewData["Title"] = "Packages";
+}
+
+<!-- Page heading + Add button -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Packages</h1>
+        <p class="page-subtitle">@Model.Count() packages, @Model.Count(x => !x.ValidTill.HasValue || x.ValidTill.Value.Date >= DateTime.Today) currently active.</p>
+    </div>
+    <a asp-action="Create" class="btn-crud btn-crud-primary">
+        <i class="bi bi-plus-lg"></i> Add Package
+    </a>
+</div>
+
+<div class="table-card-custom">
+
+    <!-- Search box + filter chips -->
+    <div class="crud-toolbar">
+        <div class="crud-search">
+            <i class="bi bi-search"></i>
+            <input type="text" id="listSearch" placeholder="Search packages..." autocomplete="off" />
+        </div>
+        <div class="crud-chips" id="listChips">
+            <button type="button" class="crud-chip active" data-filter="">All</button>
+            <button type="button" class="crud-chip" data-filter="active">Active</button>
+            <button type="button" class="crud-chip" data-filter="expired">Expired</button>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="crud-empty">
+            <i class="bi bi-tag"></i>
+            <strong>No packages yet</strong>
+            <p class="mb-3">Add your first tour package or discount offer.</p>
+            <a asp-action="Create" class="btn-crud btn-crud-primary"><i class="bi bi-plus-lg"></i> Add Package</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-custom" id="listTable">
+                <thead>
+                    <tr>
+                        <th>Package</th>
+                        <th>Details</th>
+                        <th>Price</th>
+                        <th>Discount</th>
+                        <th>Valid Till</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var expired = item.ValidTill.HasValue && item.ValidTill.Value.Date < DateTime.Today;
+                        <tr data-search="@((item.Title + " " + (item.Details ?? "")).ToLower())"
+                            data-filter="@(expired ? "expired" : "active")">
+                            <td><div class="table-user-cell">@if (!string.IsNullOrEmpty(item.ImagePath)) { <img src="@item.ImagePath" class="crud-thumb" alt="@item.Title" /> } else { <span class="crud-thumb-empty"><i class="bi bi-tag"></i></span> }<div><div class="table-user-name">@item.Title</div></div></div></td>
+                            <td><div class="cell-truncate" title="@item.Details">@(string.IsNullOrWhiteSpace(item.Details) ? "—" : item.Details)</div></td>
+                            <td>@(item.Price > 0 ? "Rs " + item.Price.ToString("#,##0.##") : "Not set")</td>
+                            <td><span class="discount-badge">@item.DiscountPercent% OFF</span></td>
+                            <td>@if (item.ValidTill.HasValue) { <div>@item.ValidTill.Value.ToString("dd MMM yyyy")</div> } else { <div class="table-user-sub">No expiry</div> }</td>
+                            <td>@if (expired) { <span class="badge-table failed">Expired</span> } else { <span class="badge-table success">Active</span> }</td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="icon-btn" title="View"><i class="bi bi-eye"></i></a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="icon-btn" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="icon-btn danger" title="Delete"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Shown when search/filter matches nothing -->
+        <div class="crud-empty" id="noMatch" style="display:none">
+            <i class="bi bi-search"></i>
+            <strong>No matching results</strong>
+            <p class="mb-0">Try a different word or choose "All".</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/admin/js/crud-list.js"></script>
+}

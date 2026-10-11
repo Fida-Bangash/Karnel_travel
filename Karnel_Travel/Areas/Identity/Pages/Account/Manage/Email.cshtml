@@ -1,0 +1,55 @@
+@page
+@model EmailModel
+@{
+    ViewData["Title"] = "Manage Email";
+    ViewData["ActivePage"] = ManageNavPages.Email;
+}
+
+<div class="manage-head">
+    <span class="auth-icon"><i class="fa fa-envelope"></i></span>
+    <div>
+        <h3>@ViewData["Title"]</h3>
+        <p>See your current email or change it</p>
+    </div>
+</div>
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+<form id="email-form" method="post" class="manage-form">
+    <div asp-validation-summary="All" class="auth-alert" role="alert"></div>
+
+    <div class="auth-field">
+        <label asp-for="Email" class="auth-label"></label>
+        <div class="auth-input-wrap has-toggle">
+            <i class="fa fa-envelope auth-input-icon"></i>
+            <input asp-for="Email" class="auth-input" placeholder="Please enter your email." disabled />
+            @if (Model.IsEmailConfirmed)
+            {
+                <span class="manage-badge success"><i class="fa fa-check-circle me-1"></i>Verified</span>
+            }
+        </div>
+        @if (!Model.IsEmailConfirmed)
+        {
+            <button id="email-verification" type="submit" asp-page-handler="SendVerificationEmail" class="manage-link-btn">
+                <i class="fa fa-paper-plane me-1"></i>Send verification email
+            </button>
+        }
+    </div>
+
+    <div class="auth-field">
+        <label asp-for="Input.NewEmail" class="auth-label"></label>
+        <div class="auth-input-wrap">
+            <i class="fa fa-at auth-input-icon"></i>
+            <input asp-for="Input.NewEmail" class="auth-input" autocomplete="email" aria-required="true" placeholder="Please enter new email." />
+        </div>
+        <span asp-validation-for="Input.NewEmail" class="auth-error"></span>
+    </div>
+
+    <button id="change-email-button" type="submit" asp-page-handler="ChangeEmail" class="btn btn-primary auth-btn w-100">
+        <i class="fa fa-sync-alt me-2"></i>Change email
+    </button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

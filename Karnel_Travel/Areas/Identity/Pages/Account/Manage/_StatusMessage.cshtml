@@ -1,0 +1,11 @@
+@model string
+
+@if (!String.IsNullOrEmpty(Model))
+{
+    var isError = Model.StartsWith("Error");
+    <div class="manage-status @(isError ? "is-error" : "is-success") alert-dismissible" role="alert">
+        <i class="fa @(isError ? "fa-exclamation-circle" : "fa-check-circle")"></i>
+        <span>@Model</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}

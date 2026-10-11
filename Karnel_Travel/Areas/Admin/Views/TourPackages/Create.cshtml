@@ -1,0 +1,96 @@
+@model Karnel_Travel.Models.TourPackage
+
+@{
+    ViewData["Title"] = "Add Package";
+    var m = Model ?? new Karnel_Travel.Models.TourPackage();
+}
+
+<!-- Page heading -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Add Package</h1>
+        <p class="page-subtitle">Create an offer or discount. Valid packages appear on the Information page.</p>
+    </div>
+    <a asp-action="Index" class="btn-crud btn-crud-light"><i class="bi bi-arrow-left"></i> Back to List</a>
+</div>
+
+<form asp-action="Create" enctype="multipart/form-data" novalidate>
+    <div class="row g-4">
+
+        <!-- Left: details -->
+        <div class="col-lg-8">
+            <div class="crud-card">
+                <div class="crud-card-title"><i class="bi bi-tag"></i> Package Details</div>
+
+                <div asp-validation-summary="ModelOnly" class="crud-summary"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label asp-for="Title" class="crud-label">Package Title <span class="req">*</span></label>
+                        <input asp-for="Title" class="crud-input" placeholder="e.g. Northern Areas Summer Tour" maxlength="100" />
+                        <span asp-validation-for="Title" class="crud-error"></span>
+                    </div>
+                    <div class="col-md-12">
+                        <label asp-for="Details" class="crud-label">Details</label>
+                        <textarea asp-for="Details" class="crud-textarea" rows="6" maxlength="1000" placeholder="What is included? Days, hotels, transport..." data-counter="DetailsCount"></textarea>
+                        <div class="crud-counter" id="DetailsCount">0 / 1000</div>
+                        <span asp-validation-for="Details" class="crud-error"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Price" class="crud-label">Price per person <span class="req">*</span></label>
+                        <div class="input-affix"><span class="affix">Rs</span><input asp-for="Price" type="number" step="0.01" min="0" class="crud-input" placeholder="0.00" /></div>
+                        <div class="crud-help">Booking total = price x persons, minus the discount.</div>
+                        <span asp-validation-for="Price" class="crud-error"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="DiscountPercent" class="crud-label">Discount <span class="req">*</span></label>
+                        <div class="input-affix"><input asp-for="DiscountPercent" type="number" step="1" min="0" max="100" class="crud-input has-right" placeholder="0" /><span class="affix affix-right">%</span></div>
+                        <span asp-validation-for="DiscountPercent" class="crud-error"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ValidTill" class="crud-label">Valid Till</label>
+                        <input asp-for="ValidTill" type="date" class="crud-input" />
+                        <div class="crud-help">Leave empty if the offer never expires.</div>
+                        <span asp-validation-for="ValidTill" class="crud-error"></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right: image + buttons -->
+        <div class="col-lg-4">
+
+            <div class="crud-card">
+                <div class="crud-card-title"><i class="bi bi-image"></i> Package Image</div>
+
+                <div class="upload-box">
+                    <img id="imgPreview" class="upload-preview" alt="Preview" />
+                    <div id="imgPlaceholder" class="upload-placeholder">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        <strong>Click or drag an image here</strong>
+                    </div>
+                    <div id="imgName" class="upload-name"></div>
+                    <input type="file" name="imageFile" accept=".jpg,.jpeg,.png,.webp"
+                           data-preview="imgPreview" data-name="imgName"
+                           data-placeholder="imgPlaceholder" data-error="imgError" />
+                </div>
+                <div class="upload-hint mt-2">JPG, PNG or WEBP. Maximum 2 MB.</div>
+                <span id="imgError" class="crud-error"></span>
+                @Html.ValidationMessage("imageFile", new { @class = "crud-error" })
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn-crud btn-crud-primary justify-content-center">
+                    <i class="bi bi-check-lg"></i> Create Package
+                </button>
+                <a asp-action="Index" class="btn-crud btn-crud-light justify-content-center">Cancel</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/admin/js/crud-form.js"></script>
+}

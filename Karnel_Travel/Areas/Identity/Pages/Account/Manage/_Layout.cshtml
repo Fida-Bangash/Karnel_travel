@@ -1,0 +1,56 @@
+@{
+    if (ViewData.TryGetValue("ParentLayout", out var parentLayout) && parentLayout !=  null)
+    {
+        Layout = parentLayout.ToString();
+    }
+    else
+    {
+        Layout = "/Areas/Identity/Pages/_Layout.cshtml";
+    }
+}
+
+<link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+
+<div class="manage-wrap">
+
+    <!-- Page heading -->
+    <div class="text-center mb-5">
+        <span class="auth-icon"><i class="fa fa-user-cog"></i></span>
+        <h1 class="fw-bold mb-1">Manage your account</h1>
+        <p class="text-muted mb-0">Change your account settings</p>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Left: menu -->
+        <div class="col-lg-3">
+            <div class="manage-nav">
+                <partial name="_ManageNav" />
+            </div>
+        </div>
+
+        <!-- Right: page content -->
+        <div class="col-lg-9">
+            <div class="manage-card">
+                @RenderBody()
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @RenderSection("Scripts", required: false)
+    <script>
+        // Show / hide password buttons (same as the login page)
+        document.querySelectorAll('[data-toggle-password]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var input = document.querySelector(btn.getAttribute('data-toggle-password'));
+                if (!input) return;
+                var show = input.type === 'password';
+                input.type = show ? 'text' : 'password';
+                btn.querySelector('i').className = show ? 'fa fa-eye-slash' : 'fa fa-eye';
+            });
+        });
+    </script>
+}

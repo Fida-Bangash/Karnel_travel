@@ -1,0 +1,53 @@
+@page
+@model PersonalDataModel
+@{
+    ViewData["Title"] = "Personal Data";
+    ViewData["ActivePage"] = ManageNavPages.PersonalData;
+}
+
+<div class="manage-head">
+    <span class="auth-icon"><i class="fa fa-id-card"></i></span>
+    <div>
+        <h3>@ViewData["Title"]</h3>
+        <p>Download or delete the data you have given us</p>
+    </div>
+</div>
+
+<div class="manage-note">
+    <i class="fa fa-info-circle"></i>
+    <span>Your account contains personal data that you have given us. This page allows you to download or delete that data.</span>
+</div>
+
+<div class="row g-4">
+
+    <!-- Download -->
+    <div class="col-md-6">
+        <div class="manage-tile">
+            <span class="manage-tile-icon"><i class="fa fa-download"></i></span>
+            <h5>Download your data</h5>
+            <p>Get a copy of everything stored in your account.</p>
+            <form id="download-data" asp-page="DownloadPersonalData" method="post">
+                <button class="btn btn-primary auth-btn w-100" type="submit">
+                    <i class="fa fa-download me-2"></i>Download
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete -->
+    <div class="col-md-6">
+        <div class="manage-tile is-danger">
+            <span class="manage-tile-icon"><i class="fa fa-trash-alt"></i></span>
+            <h5>Delete your account</h5>
+            <p><strong>This will permanently remove your account and cannot be recovered.</strong></p>
+            <a id="delete" asp-page="DeletePersonalData" class="btn btn-danger auth-btn w-100 d-inline-flex align-items-center justify-content-center">
+                <i class="fa fa-trash-alt me-2"></i>Delete
+            </a>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

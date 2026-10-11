@@ -1,0 +1,95 @@
+@model IEnumerable<Karnel_Travel.Models.ContactMessage>
+
+@{
+    ViewData["Title"] = "Messages";
+}
+
+<!-- Page heading + Add button -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Messages</h1>
+        <p class="page-subtitle">@Model.Count(x => !x.IsRead) unread of @Model.Count() messages.</p>
+    </div>
+    <a asp-action="Create" class="btn-crud btn-crud-primary">
+        <i class="bi bi-plus-lg"></i> Add Message
+    </a>
+</div>
+
+<div class="table-card-custom">
+
+    <!-- Search box + filter chips -->
+    <div class="crud-toolbar">
+        <div class="crud-search">
+            <i class="bi bi-search"></i>
+            <input type="text" id="listSearch" placeholder="Search name, email or subject..." autocomplete="off" />
+        </div>
+        <div class="crud-chips" id="listChips">
+            <button type="button" class="crud-chip active" data-filter="">All</button>
+            <button type="button" class="crud-chip" data-filter="unread">Unread</button>
+            <button type="button" class="crud-chip" data-filter="read">Read</button>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="crud-empty">
+            <i class="bi bi-envelope"></i>
+            <strong>No messages yet</strong>
+            <p class="mb-3">Messages and orders from the Contact page will appear here.</p>
+            <a asp-action="Create" class="btn-crud btn-crud-primary"><i class="bi bi-plus-lg"></i> Add Message</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-custom" id="listTable">
+                <thead>
+                    <tr>
+                        <th>Sender</th>
+                        <th>Subject</th>
+                        <th>Received</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.OrderByDescending(x => x.CreatedOn))
+                    {
+                        var subj = item.Subject ?? "";
+                        string tag = "";
+                        string rest = subj;
+                        if (subj.StartsWith("[") && subj.IndexOf(']') > 0)
+                        {
+                            tag = subj.Substring(1, subj.IndexOf(']') - 1);
+                            rest = subj.Substring(subj.IndexOf(']') + 1).Trim();
+                        }
+                        <tr data-search="@((item.Name + " " + item.Email + " " + item.Subject).ToLower())"
+                            data-filter="@(item.IsRead ? "read" : "unread")"
+                            class="@(!item.IsRead ? "row-unread" : "")">
+                            <td><div class="table-user-cell"><span class="avatar-initial">@(string.IsNullOrWhiteSpace(item.Name) ? "?" : item.Name.Trim().Substring(0, 1))</span><div><div class="table-user-name">@item.Name</div><div class="table-user-sub">@item.Email</div></div></div></td>
+                            <td>@if (tag != "") { <span class="request-tag">@tag</span> }<span class="cell-truncate d-inline-block align-middle" style="color:var(--text-main)" title="@subj">@(rest == "" ? "(no subject)" : rest)</span></td>
+                            <td><div>@item.CreatedOn.ToString("dd MMM yyyy")</div><div class="table-user-sub">@item.CreatedOn.ToString("hh:mm tt")</div></td>
+                            <td>@if (item.IsRead) { <span class="badge-table success">Read</span> } else { <span class="badge-table pending">New</span> }</td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="icon-btn" title="View"><i class="bi bi-eye"></i></a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="icon-btn" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="icon-btn danger" title="Delete"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Shown when search/filter matches nothing -->
+        <div class="crud-empty" id="noMatch" style="display:none">
+            <i class="bi bi-search"></i>
+            <strong>No matching results</strong>
+            <p class="mb-0">Try a different word or choose "All".</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/admin/js/crud-list.js"></script>
+}

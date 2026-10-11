@@ -1,0 +1,178 @@
+@model Karnel_Travel.Models.AdminBookingsViewModel
+@using Karnel_Travel.Data
+
+@{
+    ViewData["Title"] = "Bookings";
+
+    bool filtered = !string.IsNullOrWhiteSpace(Model.Q) || !string.IsNullOrWhiteSpace(Model.Status) || !string.IsNullOrWhiteSpace(Model.Type) || Model.From.HasValue || Model.To.HasValue;
+}
+
+<link rel="stylesheet" href="~/admin/css/admin-bookings.css" asp-append-version="true" />
+
+<div class="bk-gold">
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Bookings</h1>
+            <p class="page-subtitle">@Model.PendingCount pending of @Model.AllCount total bookings.</p>
+        </div>
+    </div>
+
+    @if (TempData["Success"] is string ok) { <div class="bk-flash ok"><i class="bi bi-check-circle me-2"></i>@ok</div> }
+    @if (TempData["Error"] is string err) { <div class="bk-flash err"><i class="bi bi-exclamation-circle me-2"></i>@err</div> }
+
+    <!-- Stat cards -->
+    <div class="bk-stats">
+        <div class="bk-stat"><i class="bi bi-journal-bookmark"></i><div class="bk-stat-label">All bookings</div><div class="bk-stat-value">@Model.AllCount</div></div>
+        <a class="bk-stat alert-pending text-decoration-none" asp-action="Index" asp-route-status="Pending"><i class="bi bi-hourglass-split"></i><div class="bk-stat-label">Needs your action</div><div class="bk-stat-value">@Model.PendingCount</div></a>
+        <a class="bk-stat text-decoration-none" asp-action="Index" asp-route-status="Confirmed"><i class="bi bi-patch-check"></i><div class="bk-stat-label">Confirmed</div><div class="bk-stat-value">@Model.ConfirmedCount</div></a>
+        <div class="bk-stat vip"><i class="bi bi-gem"></i><div class="bk-stat-label">Revenue (confirmed + completed)</div><div class="bk-stat-value">@BookingUi.Money(Model.Revenue)</div></div>
+    </div>
+
+    <div class="table-card-custom">
+
+        <!-- Filters -->
+        <form method="get" asp-action="Index" class="bk-filters">
+            <div>
+                <label for="q">Search</label>
+                <input type="text" id="q" name="q" value="@Model.Q" class="form-control" placeholder="Code, name, email, phone or item..." />
+            </div>
+            <div>
+                <label for="status">Status</label>
+                <select id="status" name="status" class="form-select">
+                    <option value="">All</option>
+                    @foreach (var s in Enum.GetValues<BookingStatus>())
+                    {
+                        <option value="@s" selected="@(string.Equals(Model.Status, s.ToString(), StringComparison.OrdinalIgnoreCase))">@BookingUi.StatusLabel(s)</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label for="type">Type</label>
+                <select id="type" name="type" class="form-select">
+                    <option value="">All</option>
+                    @foreach (var t in Enum.GetValues<BookingType>())
+                    {
+                        <option value="@t" selected="@(string.Equals(Model.Type, t.ToString(), StringComparison.OrdinalIgnoreCase))">@BookingUi.TypeLabel(t)</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label for="from">Start from</label>
+                <input type="date" id="from" name="from" value="@Model.From?.ToString("yyyy-MM-dd")" class="form-control" />
+            </div>
+            <div>
+                <label for="to">Start to</label>
+                <input type="date" id="to" name="to" value="@Model.To?.ToString("yyyy-MM-dd")" class="form-control" />
+            </div>
+            <div class="bk-filter-actions">
+                <button type="submit" class="btn-crud btn-crud-dark"><i class="bi bi-funnel"></i> Filter</button>
+                @if (filtered)
+                {
+                    <a asp-action="Index" class="btn-crud btn-crud-light" title="Clear filters"><i class="bi bi-x-lg"></i></a>
+                }
+            </div>
+        </form>
+
+        @if (!Model.Bookings.Any())
+        {
+            <div class="crud-empty">
+                <i class="bi bi-journal-bookmark"></i>
+                <strong>@(filtered ? "No bookings match these filters" : "No bookings yet")</strong>
+                <p class="mb-0">@(filtered ? "Try clearing the filters." : "New bookings from customers will appear here for you to confirm.")</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Booking</th>
+                            <th>Customer</th>
+                            <th>Item</th>
+                            <th>When</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var b in Model.Bookings)
+                        {
+                            <tr class="@(b.Status == BookingStatus.Pending ? "bk-row-pending" : "")">
+                                <td>
+                                    <div class="bk-code">@b.BookingCode</div>
+                                    <div class="table-user-sub">@b.CreatedOn.ToString("dd MMM, h:mm tt")</div>
+                                </td>
+                                <td>
+                                    <div class="table-user-name">@b.CustomerName</div>
+                                    <div class="table-user-sub">@b.CustomerPhone</div>
+                                </td>
+                                <td>
+                                    <div class="bk-type">
+                                        <span class="bk-type-icon"><i class="bi @BookingUi.TypeIconBi(b.ItemType)"></i></span>
+                                        <div>
+                                            <div class="table-user-name cell-truncate" title="@b.ItemName">@b.ItemName</div>
+                                            <div class="table-user-sub">@BookingUi.TypeLabel(b.ItemType) &middot; @BookingUi.UnitsLabel(b)</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@BookingUi.When(b)</td>
+                                <td><strong>@(b.TotalPrice > 0 ? BookingUi.Money(b.TotalPrice) : "On request")</strong></td>
+                                <td><span class="bk-status @BookingUi.StatusClass(b.Status)">@BookingUi.StatusLabel(b.Status)</span></td>
+                                <td class="text-end">
+                                    <div class="bk-quick">
+                                        <a asp-action="Details" asp-route-id="@b.Id" class="icon-btn" title="View"><i class="bi bi-eye"></i></a>
+                                        @if (BookingService.CanMove(b.Status, BookingStatus.Confirmed))
+                                        {
+                                            <form asp-action="SetStatus" method="post">
+                                                <input type="hidden" name="id" value="@b.Id" />
+                                                <input type="hidden" name="status" value="Confirmed" />
+                                                <input type="hidden" name="returnTo" value="list" />
+                                                <button type="submit" class="icon-btn ok" title="Confirm"><i class="bi bi-check-lg"></i></button>
+                                            </form>
+                                        }
+                                        @if (BookingService.CanMove(b.Status, BookingStatus.Rejected))
+                                        {
+                                            <form asp-action="SetStatus" method="post" onsubmit="return confirm('Reject this booking?');">
+                                                <input type="hidden" name="id" value="@b.Id" />
+                                                <input type="hidden" name="status" value="Rejected" />
+                                                <input type="hidden" name="returnTo" value="list" />
+                                                <button type="submit" class="icon-btn danger" title="Reject"><i class="bi bi-x-lg"></i></button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="bk-pager">
+                <span>Showing @((Model.Page - 1) * Model.PageSize + 1)&ndash;@((Model.Page - 1) * Model.PageSize + Model.Bookings.Count) of @Model.TotalItems</span>
+                @if (Model.TotalPages > 1)
+                {
+                    <div class="pages">
+                        @if (Model.Page > 1) { <a asp-action="Index" asp-all-route-data="@(new Dictionary<string, string?> { ["q"] = Model.Q, ["status"] = Model.Status, ["type"] = Model.Type, ["from"] = Model.From?.ToString("yyyy-MM-dd"), ["to"] = Model.To?.ToString("yyyy-MM-dd"), ["page"] = (Model.Page - 1).ToString() })">&lsaquo;</a> }
+                        else { <span class="disabled">&lsaquo;</span> }
+
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            if (i == Model.Page) { <span class="current">@i</span> }
+                            else if (i == 1 || i == Model.TotalPages || Math.Abs(i - Model.Page) <= 1)
+                            {
+                                <a asp-action="Index" asp-all-route-data="@(new Dictionary<string, string?> { ["q"] = Model.Q, ["status"] = Model.Status, ["type"] = Model.Type, ["from"] = Model.From?.ToString("yyyy-MM-dd"), ["to"] = Model.To?.ToString("yyyy-MM-dd"), ["page"] = i.ToString() })">@i</a>
+                            }
+                            else if (Math.Abs(i - Model.Page) == 2) { <span class="disabled">&hellip;</span> }
+                        }
+
+                        @if (Model.Page < Model.TotalPages) { <a asp-action="Index" asp-all-route-data="@(new Dictionary<string, string?> { ["q"] = Model.Q, ["status"] = Model.Status, ["type"] = Model.Type, ["from"] = Model.From?.ToString("yyyy-MM-dd"), ["to"] = Model.To?.ToString("yyyy-MM-dd"), ["page"] = (Model.Page + 1).ToString() })">&rsaquo;</a> }
+                        else { <span class="disabled">&rsaquo;</span> }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

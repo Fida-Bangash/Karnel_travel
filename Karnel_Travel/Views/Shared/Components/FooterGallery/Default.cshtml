@@ -1,0 +1,20 @@
+@model List<Karnel_Travel.Models.TouristSpot>
+
+@* Footer Gallery: tourist spots ki images (admin panel se upload hui images), zyada se zyada 6 *@
+@if (Model.Any())
+{
+    <div class="d-flex flex-wrap gap-2 pt-2">
+        @foreach (var s in Model.Take(6))
+        {
+            <a asp-area="" asp-controller="Information" asp-action="Spots" title="@s.Name">
+                <!-- Chhota fixed square size (64px) taake alag size ki images ka grid barabar rahe -->
+                <img class="bg-light p-1" src="@Url.Content(s.ImagePath!)" alt="@s.Name"
+                     style="width:64px; height:64px; object-fit:cover; border-radius:4px;" />
+            </a>
+        }
+    </div>
+}
+else
+{
+    <p class="mb-0">Tourist spot photos will appear here.</p>
+}

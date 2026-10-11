@@ -1,0 +1,196 @@
+@{
+   
+    string Active(string controller, string? action = null)
+    {
+        var c = ViewContext.RouteData.Values["controller"]?.ToString();
+        var a = ViewContext.RouteData.Values["action"]?.ToString();
+        var ok = string.Equals(c, controller, StringComparison.OrdinalIgnoreCase)
+              && (action == null || string.Equals(a, action, StringComparison.OrdinalIgnoreCase));
+        return ok ? "active" : "";
+    }
+
+    var hideNavbar = ViewData["HideNavbar"] is true;
+    var hideFooter = ViewData["HideFooter"] is true;
+
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>@ViewData["Title"] - Karnel Travel</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+
+    <!-- Favicon -->
+    <link href="~/favicon.ico" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="~/lib/animate/animate.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="~/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="~/css/style.css" asp-append-version="true" rel="stylesheet">
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+
+<body>
+    <!-- Spinner Start -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    <!-- Spinner End -->
+
+    <!-- Navbar & Hero Start -->
+    @* Hero wali pages (Home, About...) par navbar hero image ke upar aata hai (white links).
+       Baqi pages (Information, Search...) par hero nahi hota, isliye navbar-solid lagta hai:
+       white background + dark links, taake links page ke white background me gum na ho. *@
+    @{ var hasHero = IsSectionDefined("Hero"); }
+    <div class="container-fluid p-0 @(hasHero ? "position-relative" : "navbar-solid-wrap")">
+        @if (!hideNavbar)
+        {
+        <nav class="navbar navbar-expand-lg navbar-light px-4 px-lg-5 py-3 py-lg-0 @(hasHero ? "" : "navbar-solid")">
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand p-0">
+               <h1 class="text-primary m-0"><i class="fa fa-map-marker-alt me-3"></i>Karnel Travel</h1>
+                <!-- <img src="~/img/logo.png" alt="Logo"> -->
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="fa fa-bars"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <div class="navbar-nav ms-auto py-0">
+                        <a asp-area="" asp-controller="Home" asp-action="Index" class="nav-item nav-link @Active("Home", "Index")">Home</a>
+                        <a asp-area="" asp-controller="Home" asp-action="About" class="nav-item nav-link @Active("Home", "About")">About Us</a>
+                        <a asp-area="" asp-controller="Search" asp-action="Index" class="nav-item nav-link @Active("Search")">Search</a>
+                        <!-- Information dropdown: Overview + 5 information pages -->
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle @Active("Information")" data-bs-toggle="dropdown">Information</a>
+                            <div class="dropdown-menu m-0">
+                                <a asp-area="" asp-controller="Information" asp-action="Index" class="dropdown-item">Overview</a>
+                                <a asp-area="" asp-controller="Information" asp-action="Spots" class="dropdown-item">Tourist Spots</a>
+                                <a asp-area="" asp-controller="Information" asp-action="Travel" class="dropdown-item">Travel Information</a>
+                                <a asp-area="" asp-controller="Information" asp-action="Hotels" class="dropdown-item">Hotels</a>
+                                <a asp-area="" asp-controller="Information" asp-action="Restaurants" class="dropdown-item">Restaurants</a>
+                                <a asp-area="" asp-controller="Information" asp-action="Resorts" class="dropdown-item">Resorts</a>
+                            </div>
+                        </div>
+                        <a asp-area="" asp-controller="Home" asp-action="Contact" class="nav-item nav-link @Active("Home", "Contact")">Contact Us</a>
+                    </div>
+
+                <partial name="_LoginPartial" />
+
+            </div>
+        </nav>
+        }
+        @await RenderSectionAsync("Hero", required: false)
+    </div>
+    <!-- Navbar & Hero End -->
+
+    @if (IsSectionDefined("Hero"))
+    {
+        @RenderBody()
+    }
+    else
+    {
+        <div class="container py-5">
+            @RenderBody()
+        </div>
+    }
+
+    <!-- Footer Start -->
+    @if (!hideFooter)
+    {
+    <div class="container-fluid bg-dark text-light footer pt-4 mt-4 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container py-4">
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-3">Company</h4>
+                    <a class="btn btn-link" asp-area="" asp-controller="Home" asp-action="About">About Us</a>
+                    <a class="btn btn-link" asp-area="" asp-controller="Home" asp-action="Contact">Contact Us</a>
+                    <a class="btn btn-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-3">Contact</h4>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>Karnel Travels, Karachi, Pakistan</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+92 300 1234567</p>
+                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@karneltravelguide.com</p>
+                    @* <div class="d-flex pt-2">
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-twitter"></i></a>
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-youtube"></i></a>
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-linkedin-in"></i></a>
+                    </div> *@
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-3">Gallery</h4>
+                     @await Component.InvokeAsync("FooterGallery")
+                </div>
+                 <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-3">Explore</h4>
+                    <a class="btn btn-link" asp-area="" asp-controller="Search" asp-action="Index">Search</a>
+                    <a class="btn btn-link" asp-area="" asp-controller="Search" asp-action="Advanced">Advanced Search</a>
+                    <a class="btn btn-link" asp-area="" asp-controller="Information" asp-action="Hotels">Hotels</a>
+                    <a class="btn btn-link" asp-area="" asp-controller="Information" asp-action="Restaurants">Restaurants</a>
+                    <a class="btn btn-link" asp-area="" asp-controller="Information" asp-action="Resorts">Resorts</a>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="copyright">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                        &copy; <a class="border-bottom" href="#">Karnel Travel</a>, All Right Reserved.
+
+                        <!--/*** The author’s attribution link below must remain intact on your website. ***/-->
+                        <!--/*** If you wish to remove this credit link, please purchase the Pro Version from https://htmlcodex.com . ***/-->
+                        Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                         <div class="footer-menu">
+                            <a asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a asp-area="" asp-controller="Search" asp-action="Index">Search</a>
+                            <a asp-area="" asp-controller="Information" asp-action="Index">Information</a>
+                            <a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+    <!-- Footer End -->
+
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/wow/wow.min.js"></script>
+    <script src="~/lib/easing/easing.min.js"></script>
+    <script src="~/lib/waypoints/waypoints.min.js"></script>
+
+    <!-- Template Javascript -->
+    <script src="~/js/main.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

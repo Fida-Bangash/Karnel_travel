@@ -1,0 +1,45 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Profile";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<div class="manage-head">
+    <span class="auth-icon"><i class="fa fa-user"></i></span>
+    <div>
+        <h3>@ViewData["Title"]</h3>
+        <p>Your username and contact number</p>
+    </div>
+</div>
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+<form id="profile-form" method="post" class="manage-form">
+    <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+
+    <div class="auth-field">
+        <label asp-for="Username" class="auth-label"></label>
+        <div class="auth-input-wrap">
+            <i class="fa fa-user auth-input-icon"></i>
+            <input asp-for="Username" class="auth-input" placeholder="Please choose your username." disabled />
+        </div>
+    </div>
+
+    <div class="auth-field">
+        <label asp-for="Input.PhoneNumber" class="auth-label"></label>
+        <div class="auth-input-wrap">
+            <i class="fa fa-phone-alt auth-input-icon"></i>
+            <input asp-for="Input.PhoneNumber" class="auth-input" placeholder="Please enter your phone number." />
+        </div>
+        <span asp-validation-for="Input.PhoneNumber" class="auth-error"></span>
+    </div>
+
+    <button id="update-profile-button" type="submit" class="btn btn-primary auth-btn w-100">
+        <i class="fa fa-save me-2"></i>Save
+    </button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

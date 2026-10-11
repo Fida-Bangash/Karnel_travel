@@ -1,0 +1,308 @@
+@model Karnel_Travel.Models.ContactMessage
+@{
+    ViewData["Title"] = "Contact";
+}
+
+@section Hero {
+<div class="container-fluid bg-primary py-5 mb-5 hero-header">
+            <div class="container py-5">
+                <div class="row justify-content-center py-5">
+                    <div class="col-lg-10 pt-lg-5 mt-lg-5 text-center">
+                        <h1 class="display-3 text-white animated slideInDown">Contact Us</h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb justify-content-center">
+                                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                                <li class="breadcrumb-item text-white active" aria-current="page">Contact</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+}
+
+    <!-- Contact Start -->
+    <div class="container-fluid py-5">
+        <div class="container">
+
+            <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                <h6 class="section-title bg-white text-center text-primary px-3">Contact Us</h6>
+                <h1 class="mb-3">Contact For Any Query</h1>
+                <p class="text-muted mb-5">Send us a message and we will get back to you soon.</p>
+            </div>
+
+            @* Success / error messages *@
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success border-0 shadow-sm d-flex align-items-center mb-4" role="alert">
+                    <i class="fa fa-check-circle fs-4 me-3"></i>
+                    <div>@TempData["Success"]</div>
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center mb-4" role="alert">
+                    <i class="fa fa-exclamation-circle fs-4 me-3"></i>
+                    <div>@TempData["Error"]</div>
+                </div>
+            }
+
+            <!-- ================= Contact info cards ================= -->
+            <div class="row g-4 mb-5">
+
+                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="card spot-card h-100 border-0 shadow-sm text-center p-4">
+                        <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary text-white mx-auto mb-3"
+                             style="width:70px; height:70px; font-size:1.6rem;">
+                            <i class="fa fa-map-marker-alt"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1">Office</h5>
+                        <p class="text-muted mb-0">Karnel Travels, Karachi, Pakistan</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                    <div class="card spot-card h-100 border-0 shadow-sm text-center p-4">
+                        <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary text-white mx-auto mb-3"
+                             style="width:70px; height:70px; font-size:1.6rem;">
+                            <i class="fa fa-phone-alt"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1">Mobile</h5>
+                        <p class="text-muted mb-0">+92 300 1234567</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-12 wow fadeInUp" data-wow-delay="0.5s">
+                    <div class="card spot-card h-100 border-0 shadow-sm text-center p-4">
+                        <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary text-white mx-auto mb-3"
+                             style="width:70px; height:70px; font-size:1.6rem;">
+                            <i class="fa fa-envelope-open"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1">Email</h5>
+                        <p class="text-muted mb-0">info@karneltravelguide.com</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= Contact form + Feedback form ================= -->
+            <div class="row g-4 align-items-stretch">
+
+                <!-- ---------- Contact form ---------- -->
+                <div class="col-lg-7 wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="card border-0 shadow-lg h-100 overflow-hidden">
+
+                        <!-- Primary header -->
+                        <div class="bg-primary text-white p-4 d-flex align-items-center">
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white text-primary me-3"
+                                  style="width:52px; height:52px; font-size:1.3rem;">
+                                <i class="fa fa-paper-plane"></i>
+                            </span>
+                            <div>
+                                <h4 class="mb-0 text-white">Send Us a Message</h4>
+                                <small>Orders, bookings or any question, we reply soon.</small>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-4 p-lg-5">
+
+                            <form asp-controller="Home" asp-action="Contact" method="post" data-ajax-form>
+
+                                @* Success / error message yahin form ke andar dikhta hai (page reload nahi hota) *@
+                                <div class="form-alert"></div>
+
+                                <div class="row g-3">
+
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white text-primary"><i class="fa fa-user"></i></span>
+                                            <input asp-for="Name" class="form-control py-3" placeholder="Your Name" />
+                                        </div>
+                                        <span asp-validation-for="Name" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white text-primary"><i class="fa fa-envelope"></i></span>
+                                            <input asp-for="Email" type="email" class="form-control py-3" placeholder="Your Email" />
+                                        </div>
+                                        <span asp-validation-for="Email" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white text-primary"><i class="fa fa-phone-alt"></i></span>
+                                            <input asp-for="Phone" class="form-control py-3" placeholder="Phone" />
+                                        </div>
+                                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                                    </div>
+
+                                    @* Customer yahan se batata hai ke wo kya karna chahta hai (order / booking / general inquiry) *@
+                                    @{
+                                        var selectedType = ViewBag.RequestType as string ?? "General Inquiry";
+                                        var requestTypes = new[] { "General Inquiry", "Custom Tour Request" };
+                                    }
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white text-primary"><i class="fa fa-tag"></i></span>
+                                            <select name="requestType" class="form-select py-3">
+                                                @foreach (var t in requestTypes)
+                                                {
+                                                    <option value="@t" selected="@(t == selectedType)">@t</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white text-primary"><i class="fa fa-heading"></i></span>
+                                            <input asp-for="Subject" class="form-control py-3" placeholder="Subject" />
+                                        </div>
+                                        <span asp-validation-for="Subject" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <textarea asp-for="Message" class="form-control p-3" placeholder="Write your message here..." rows="6"></textarea>
+                                        <span asp-validation-for="Message" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <button class="btn btn-primary w-100 py-3 fw-bold" type="submit">
+                                            <i class="fa fa-paper-plane me-2"></i>Send Message
+                                        </button>
+                                    </div>
+
+                                </div>
+
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ---------- Feedback form (dark premium card) ---------- -->
+                <div class="col-lg-5 wow fadeInUp" data-wow-delay="0.3s">
+                    <div class="card border-0 shadow-lg h-100 overflow-hidden bg-dark text-white">
+
+                        <!-- Primary strip -->
+                        <div class="bg-primary" style="height:6px;"></div>
+
+                        <div class="card-body p-4 p-lg-5 d-flex flex-column">
+
+                            <div class="text-center mb-4">
+                                <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white mb-3"
+                                      style="width:70px; height:70px; font-size:1.6rem;">
+                                    <i class="fa fa-star"></i>
+                                </span>
+                                <h4 class="text-white mb-1">Share Your Feedback</h4>
+                                <small class="text-white-50">Your opinion helps us serve you better.</small>
+                            </div>
+
+                            <form asp-controller="Home" asp-action="Feedback" method="post" class="d-flex flex-column flex-grow-1" data-ajax-form>
+
+                                <div class="form-alert"></div>
+
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text bg-white text-primary"><i class="fa fa-user"></i></span>
+                                    <input name="Name" class="form-control py-3" placeholder="Your Name" required />
+                                </div>
+                                <span data-valmsg-for="Name" class="text-danger small d-block mb-2"></span>
+
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text bg-white text-primary"><i class="fa fa-envelope"></i></span>
+                                    <input name="Email" type="email" class="form-control py-3" placeholder="Your Email" required />
+                                </div>
+                                <span data-valmsg-for="Email" class="text-danger small d-block mb-2"></span>
+
+                                <textarea name="Message" class="form-control p-3 mb-3 flex-grow-1" placeholder="Your feedback" rows="5" required></textarea>
+                                <span data-valmsg-for="Message" class="text-danger small d-block mb-2"></span>
+
+                                <button class="btn btn-primary w-100 py-3 fw-bold" type="submit">
+                                    <i class="fa fa-comment-dots me-2"></i>Submit Feedback
+                                </button>
+
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= Map ================= -->
+            <div class="card border-0 shadow-sm overflow-hidden mt-5 wow fadeInUp" data-wow-delay="0.1s">
+                <iframe class="w-100"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3620.021647056237!2d67.07171697360397!3d24.863110245154903!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3eb33ea3db108f41%3A0x42acc4507358b160!2sAptech%20Learning%2C%20Shahrah%20e%20Faisal%20Center!5e0!3m2!1sen!2s!4v1791235746461!5m2!1sen!2s"
+                        frameborder="0" style="min-height: 350px; border:0;" allowfullscreen="" aria-hidden="false"
+                        tabindex="0"></iframe>
+            </div>
+
+        </div>
+    </div>
+    <!-- Contact End -->
+
+@section Scripts {
+    <script>
+        // Contact aur Feedback forms ko AJAX se submit karta hai: page reload nahi hota, sirf form me message/errors dikhte hain
+        document.querySelectorAll('form[data-ajax-form]').forEach(function (form) {
+            var alertBox = form.querySelector('.form-alert');
+            var button = form.querySelector('button[type=submit]');
+
+            // Form ke upar message dikhao (success = green, danger = red)
+            function showAlert(type, text) {
+                alertBox.innerHTML = '';
+                var box = document.createElement('div');
+                box.className = 'alert alert-' + type + ' border-0 shadow-sm py-2 mb-3';
+                box.textContent = text;
+                alertBox.appendChild(box);
+            }
+
+            // Pichhle errors saaf karo
+            function clearErrors() {
+                alertBox.innerHTML = '';
+                form.querySelectorAll('[data-valmsg-for]').forEach(function (span) { span.textContent = ''; });
+            }
+
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                // Browser ki apni checks (required, email format) pehle
+                if (!form.checkValidity()) { form.reportValidity(); return; }
+
+                clearErrors();
+                var originalText = button.innerHTML;
+                button.disabled = true;
+                button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+
+                try {
+                    var response = await fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),   // anti-forgery token isi me hota hai
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    var data = await response.json();
+
+                    if (data.success) {
+                        showAlert('success', data.message);
+                        form.reset();
+                        form.querySelectorAll('input:not([type=hidden]), textarea').forEach(function (el) { el.value = ''; });
+                    } else {
+                        showAlert('danger', data.message || 'Something went wrong. Please try again.');
+                        // Har field ke neeche uska error dikhao
+                        Object.keys(data.errors || {}).forEach(function (field) {
+                            var span = form.querySelector('[data-valmsg-for="' + field + '"]');
+                            if (span) span.textContent = data.errors[field][0];
+                        });
+                    }
+                } catch (err) {
+                    showAlert('danger', 'Could not send. Please check your connection and try again.');
+                } finally {
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,78 @@
+@model IEnumerable<Karnel_Travel.Models.Feedback>
+
+@{
+    ViewData["Title"] = "Feedback";
+}
+
+<!-- Page heading + Add button -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Feedback</h1>
+        <p class="page-subtitle">@Model.Count() feedback received from visitors.</p>
+    </div>
+    <a asp-action="Create" class="btn-crud btn-crud-primary">
+        <i class="bi bi-plus-lg"></i> Add Feedback
+    </a>
+</div>
+
+<div class="table-card-custom">
+
+    <!-- Search box + filter chips -->
+    <div class="crud-toolbar">
+        <div class="crud-search">
+            <i class="bi bi-search"></i>
+            <input type="text" id="listSearch" placeholder="Search name, email or message..." autocomplete="off" />
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="crud-empty">
+            <i class="bi bi-chat-dots"></i>
+            <strong>No feedback yet</strong>
+            <p class="mb-3">Visitor feedback from the Contact page will appear here.</p>
+            <a asp-action="Create" class="btn-crud btn-crud-primary"><i class="bi bi-plus-lg"></i> Add Feedback</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-custom" id="listTable">
+                <thead>
+                    <tr>
+                        <th>From</th>
+                        <th>Feedback</th>
+                        <th>Received</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.OrderByDescending(x => x.CreatedOn))
+                    {
+                        <tr data-search="@((item.Name + " " + item.Email + " " + item.Message).ToLower())">
+                            <td><div class="table-user-cell"><span class="avatar-initial">@(string.IsNullOrWhiteSpace(item.Name) ? "?" : item.Name.Trim().Substring(0, 1))</span><div><div class="table-user-name">@item.Name</div><div class="table-user-sub">@item.Email</div></div></div></td>
+                            <td><div class="cell-truncate" style="max-width:420px;color:var(--text-main)" title="@item.Message">@item.Message</div></td>
+                            <td><div>@item.CreatedOn.ToString("dd MMM yyyy")</div><div class="table-user-sub">@item.CreatedOn.ToString("hh:mm tt")</div></td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="icon-btn" title="View"><i class="bi bi-eye"></i></a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="icon-btn" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="icon-btn danger" title="Delete"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Shown when search/filter matches nothing -->
+        <div class="crud-empty" id="noMatch" style="display:none">
+            <i class="bi bi-search"></i>
+            <strong>No matching results</strong>
+            <p class="mb-0">Try a different word or choose "All".</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/admin/js/crud-list.js"></script>
+}

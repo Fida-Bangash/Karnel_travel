@@ -1,0 +1,72 @@
+/* ===== Admin: Bookings (admin panel ke forest-green + lime theme ke mutabiq) ===== */
+
+/* ---------- stat cards ---------- */
+.bk-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.1rem; margin-bottom: 1.5rem; }
+.bk-stat {
+    position: relative; overflow: hidden; border-radius: var(--radius-lg, 14px); padding: 1.15rem 1.3rem;
+    background: var(--card-background, #fff); border: 1px solid var(--border-light, #e9efef); box-shadow: var(--shadow-sm);
+}
+.bk-stat .bk-stat-label { font-size: .74rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted-green, #6c7e75); }
+.bk-stat .bk-stat-value { font-size: 1.85rem; font-weight: 800; color: var(--text-main, #0b130f); line-height: 1.2; margin-top: .25rem; }
+.bk-stat i { position: absolute; right: 1.1rem; top: 1rem; font-size: 1.5rem; color: #cbd5d0; }
+.bk-stat.vip { background: linear-gradient(135deg, var(--brand-forest-dark, #051C12), var(--brand-forest-medium, #072F1F)); border-color: rgba(180,241,5,.35); }
+.bk-stat.vip .bk-stat-label { color: var(--brand-lime, #B4F105); }
+.bk-stat.vip .bk-stat-value { color: #fff; }
+.bk-stat.vip i { color: rgba(180,241,5,.6); }
+.bk-stat.alert-pending { border-color: rgba(245,158,11,.5); background: #fffaf0; }
+.bk-stat.alert-pending .bk-stat-value { color: #b45309; }
+
+/* ---------- filters ---------- */
+.bk-filters { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: .75rem; padding: 1.1rem 1.3rem; align-items: end; border-bottom: 1px solid var(--border-light, #e9efef); }
+.bk-filters label { display: block; font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted-green, #6c7e75); margin-bottom: .3rem; }
+.bk-filters .form-control, .bk-filters .form-select { border-radius: 10px; font-size: .9rem; padding: .55rem .8rem; }
+.bk-filters .form-control:focus, .bk-filters .form-select:focus { border-color: var(--brand-lime, #B4F105); box-shadow: 0 0 0 3px rgba(180,241,5,.25); }
+.bk-filter-actions { display: flex; gap: .5rem; }
+@media (max-width: 1199.98px) { .bk-filters { grid-template-columns: repeat(3, 1fr); } .bk-filters > :first-child { grid-column: 1 / -1; } }
+@media (max-width: 575.98px) { .bk-filters { grid-template-columns: 1fr 1fr; } }
+
+/* ---------- status + type chips ---------- */
+.bk-status { display: inline-flex; align-items: center; gap: .4rem; padding: .25rem .75rem; border-radius: 50px; font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.bk-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.bk-status.st-pending { color: #b45309; background: #fef3c7; }
+.bk-status.st-confirmed { color: #15803d; background: #dcfce7; }
+.bk-status.st-completed { color: #1d4ed8; background: #dbeafe; }
+.bk-status.st-cancelled { color: #6b7280; background: #f1f5f9; }
+.bk-status.st-rejected { color: #b91c1c; background: #fee2e2; }
+
+.bk-type { display: inline-flex; align-items: center; gap: .5rem; }
+.bk-type-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: #3f6b05; background: var(--brand-lime-translucent, rgba(180,241,5,.15)); font-size: 1rem; flex-shrink: 0; }
+.bk-code { font-family: 'Courier New', monospace; font-weight: 800; letter-spacing: .06em; color: #3f6b05; }
+tr.bk-row-pending td { background: rgba(245,158,11,.05); }
+
+/* ---------- quick actions ---------- */
+.bk-quick { display: inline-flex; gap: .35rem; }
+.bk-quick form { margin: 0; }
+.icon-btn.ok { color: #15803d; }
+.icon-btn.ok:hover { background: #dcfce7; color: #15803d; }
+
+/* ---------- pagination ---------- */
+.bk-pager { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .75rem; padding: 1rem 1.3rem; border-top: 1px solid var(--border-light, #e9efef); font-size: .88rem; color: var(--text-muted-green, #6c7e75); }
+.bk-pager .pages { display: flex; gap: .35rem; flex-wrap: wrap; }
+.bk-pager .pages a, .bk-pager .pages span { min-width: 34px; height: 34px; padding: 0 .6rem; display: inline-grid; place-items: center; border-radius: 9px; border: 1px solid var(--border-light, #e9efef); text-decoration: none; color: var(--text-main, #0b130f); font-weight: 700; }
+.bk-pager .pages a:hover { border-color: var(--brand-lime, #B4F105); }
+.bk-pager .pages .current { background: var(--brand-forest-dark, #051C12); color: var(--brand-lime, #B4F105); border-color: var(--brand-forest-dark, #051C12); }
+.bk-pager .pages .disabled { opacity: .4; }
+
+/* ---------- details ---------- */
+.bk-detail-code { font-family: 'Courier New', monospace; font-size: 1.5rem; font-weight: 800; letter-spacing: .1em; color: #3f6b05; }
+.bk-kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem 1.5rem; margin: 0; }
+.bk-kv dt { font-size: .7rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted-green, #6c7e75); margin-bottom: .2rem; }
+.bk-kv dd { margin: 0; font-weight: 600; color: var(--text-main, #0b130f); word-break: break-word; }
+.bk-total-box { background: linear-gradient(135deg, var(--brand-forest-dark, #051C12), var(--brand-forest-medium, #072F1F)); border-radius: 14px; padding: 1.2rem 1.4rem; color: #fff; border: 1px solid rgba(180,241,5,.35); }
+.bk-total-box small { color: var(--brand-lime, #B4F105); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; font-size: .7rem; }
+.bk-total-box strong { display: block; font-size: 1.8rem; line-height: 1.2; }
+.bk-action-btns { display: grid; gap: .6rem; margin-top: .9rem; }
+.bk-action-btns button { width: 100%; justify-content: center; }
+.btn-crud-gold { background: var(--brand-lime, #B4F105); color: var(--brand-forest-dark, #051C12); box-shadow: 0 6px 16px rgba(180,241,5,.3); }
+.btn-crud-gold:hover { background: var(--brand-lime-hover, #c1f824); color: var(--brand-forest-dark, #051C12); }
+.bk-note { width: 100%; border: 1px solid var(--border-light, #e9efef); border-radius: 10px; padding: .65rem .85rem; font-size: .92rem; min-height: 80px; resize: vertical; }
+.bk-note:focus { outline: none; border-color: var(--brand-lime, #B4F105); box-shadow: 0 0 0 3px rgba(180,241,5,.25); }
+.bk-flash { padding: .8rem 1.1rem; border-radius: 12px; margin-bottom: 1.1rem; font-weight: 600; font-size: .92rem; }
+.bk-flash.ok { background: #dcfce7; color: #15803d; }
+.bk-flash.err { background: #fee2e2; color: #b91c1c; }

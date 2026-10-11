@@ -1,0 +1,37 @@
+@model Karnel_Travel.Models.Booking
+@{
+    ViewData["Title"] = "Booking Request Received";
+}
+
+@section Styles { <partial name="_Styles" /> }
+
+<div class="vip-page py-4">
+    <div class="vip-head">
+        <span class="vip-eyebrow">Request received</span>
+        <h1 class="vip-title">Thank you, <span>@Model.CustomerName.Split(' ')[0]</span></h1>
+        <p class="vip-sub">Your booking request has been sent to our team. We will review it and confirm shortly. Keep your booking code safe.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <partial name="_Ticket" model="Model" />
+
+            <div class="vip-card mt-4">
+                <div class="vip-card-body">
+                    <h4 class="vip-card-title"><i class="fa fa-route"></i> What happens next</h4>
+                    <partial name="_Timeline" model="Model" />
+                    <p class="vip-muted text-center mt-4 mb-0 small">
+                        We will contact you on <strong class="vip-gold">@Model.CustomerPhone</strong> or <strong class="vip-gold">@Model.CustomerEmail</strong>.
+                        You can track or cancel this booking anytime from My Bookings.
+                    </p>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
+                <a asp-action="Details" asp-route-id="@Model.Id" class="vip-btn vip-btn-gold"><i class="fa fa-ticket-alt"></i> View booking</a>
+                <a asp-action="My" class="vip-btn vip-btn-ghost"><i class="fa fa-list"></i> My bookings</a>
+                <a asp-controller="Information" asp-action="Index" class="vip-btn vip-btn-ghost"><i class="fa fa-compass"></i> Explore more</a>
+            </div>
+        </div>
+    </div>
+</div>

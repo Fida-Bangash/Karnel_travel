@@ -1,0 +1,48 @@
+@* =====================================================================
+   _SpotCard.cshtml
+   ONE card design for every tourist spot on the website.
+   Used on: Home, Destination, Information/Spots, Search, Advanced Search.
+   Usage:   <partial name="_SpotCard" model="spot" />
+   Shows:   image, category badge, name, location, short description,
+            and a "Plan This Trip" button (opens Contact with the spot name filled in).
+   ===================================================================== *@
+@model Karnel_Travel.Models.TouristSpot
+
+@{
+    // If no image was uploaded, show a default picture
+    var img = string.IsNullOrWhiteSpace(Model.ImagePath) ? "/img/destination-1.jpg" : Model.ImagePath;
+}
+
+<div class="card spot-card h-100 border-0 shadow-sm">
+
+    <!-- Image + category badge -->
+    <div class="position-relative overflow-hidden">
+        <img src="@Url.Content(img)" class="card-img-top spot-card-img" alt="@Model.Name" />
+        @if (!string.IsNullOrWhiteSpace(Model.Category))
+        {
+            <span class="badge bg-primary position-absolute top-0 start-0 m-3 px-3 py-2">@Model.Category</span>
+        }
+    </div>
+
+    <div class="card-body d-flex flex-column">
+        <!-- Name -->
+        <h5 class="mb-1">@Model.Name</h5>
+
+        <!-- Location -->
+        <p class="text-muted mb-2">
+            <i class="fa fa-map-marker-alt text-primary me-2"></i>@Model.Location
+        </p>
+
+        <!-- Short description (max 3 lines) -->
+        <p class="spot-card-desc flex-grow-1">
+            @(string.IsNullOrWhiteSpace(Model.Description) ? "Explore this beautiful destination with Karnel Travel." : Model.Description)
+        </p>
+
+        <!-- Order button: Contact page opens with the spot name already filled -->
+        <a asp-controller="Booking" asp-action="Create"
+           asp-route-type="Spot" asp-route-id="@Model.Id"
+           class="btn btn-primary btn-sm mt-2 align-self-start">
+            <i class="fa fa-paper-plane me-1"></i> Book a Visit
+        </a>
+    </div>
+</div>

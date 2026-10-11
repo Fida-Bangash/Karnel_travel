@@ -1,0 +1,289 @@
+@using Microsoft.EntityFrameworkCore
+@inject Karnel_Travel.Data.Karnel_TravelContext BookingDb
+@{
+    // Sidebar ke "Bookings" badge ke liye: kitni bookings admin ke action ka intezar kar rahi hain
+    var pendingBookings = await BookingDb.Bookings.CountAsync(x => x.Status == Karnel_Travel.Models.BookingStatus.Pending);
+
+    string Active(string action) =>
+        string.Equals(ViewContext.RouteData.Values["action"]?.ToString(), action, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+
+  
+    string ActiveCtrl(string controller) =>
+        string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), controller, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@ViewData["Title"] - Karnel Travel Admin</title>
+
+  <!-- SEO Optimization -->
+  <meta name="description" content="Karnel Travel Guide - Admin Panel">
+  <meta name="author" content="Karnel Travel">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="~/admin/images/favicon.ico">
+
+  <!-- Local Third-Party Libraries (100% Offline Compatible) -->
+  <link rel="stylesheet" href="~/admin/libs/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="~/admin/libs/bootstrap-icons/bootstrap-icons.css">
+  <link rel="stylesheet" href="~/admin/libs/apexcharts/apexcharts.css">
+  <link rel="stylesheet" href="~/admin/libs/flatpickr/flatpickr.min.css">
+
+  <!-- Main Design System & Custom Stylesheet -->
+  <link rel="stylesheet" href="~/admin/css/main.css">
+  <!-- Styles for admin list / create / edit / details / delete pages -->
+  <link rel="stylesheet" href="~/admin/css/admin-crud.css">
+</head>
+
+<body>
+
+  <!-- ==========================================
+         START: Sidebar Component
+         Highly polished, dark-green sticky navigation
+         ========================================== -->
+  <div class="sidebar-wrapper" id="sidebar">
+    <!-- Brand Logo / Identity -->
+    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="sidebar-brand">
+      <i class="bi bi-asterisk"></i>
+      <span>Karnel Admin</span>
+    </a>
+
+    <!-- Navigation Menu -->
+    <div class="flex-grow-1 overflow-y-auto">
+      <!-- Group: Menu -->
+      <div class="sidebar-menu-section">
+        <div class="sidebar-menu-title">Menu</div>
+        <ul class="sidebar-menu-list">
+          <li class="sidebar-menu-item">
+            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="sidebar-menu-link @ActiveCtrl("Dashboard")" title="Dashboard">
+              <i class="bi bi-grid-fill"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+            <!-- Group: Travel Data -->
+            <div class="sidebar-menu-section">
+                <div class="sidebar-menu-title">Travel Data</div>
+                <ul class="sidebar-menu-list">
+                    <li class="sidebar-menu-item">
+                        <a asp-area="Admin" asp-controller="TouristSpots" asp-action="Index" class="sidebar-menu-link @ActiveCtrl("TouristSpots")" title="Tourist Spots">
+                            <i class="bi bi-geo-alt"></i><span>Tourist Spots</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-menu-item">
+                        <a asp-area="Admin" asp-controller="TravelInfoes" asp-action="Index" class="sidebar-menu-link @ActiveCtrl("TravelInfoes")" title="Travel Info">
+                            <i class="bi bi-truck"></i><span>Travel Info</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-menu-item">
+                        <a asp-area="Admin" asp-controller="Hotels" asp-action="Index" class="sidebar-menu-link @ActiveCtrl("Hotels")" title="Hotels">
+                            <i class="bi bi-building"></i><span>Hotels</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-menu-item">
+                        <a asp-area="Admin" asp-controller="Restaurants" asp-action="Index" class="sidebar-menu-link @ActiveCtrl("Restaurants")" title="Restaurants">
+                            <i class="bi bi-shop"></i><span>Restaurants</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-menu-item">
+                        <a asp-area="Admin" asp-controller="Resorts" asp-action="Index" class="sidebar-menu-link @ActiveCtrl("Resorts")" title="Resorts">
+                            <i class="bi bi-house-door"></i><span>Resorts</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-menu-item">
+                        <a asp-area="Admin" asp-controller="TourPackages" asp-action="Index" class="sidebar-menu-link @ActiveCtrl("TourPackages")" title="Packages">
+                            <i class="bi bi-tag"></i><span>Packages & Offers</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Group: Bookings -->
+            <div class="sidebar-menu-section">
+                <div class="sidebar-menu-title">Bookings</div>
+                <ul class="sidebar-menu-list">
+                    <li class="sidebar-menu-item">
+                        <a asp-area="Admin" asp-controller="Bookings" asp-action="Index" class="sidebar-menu-link @ActiveCtrl("Bookings")" title="Bookings">
+                            <i class="bi bi-journal-bookmark"></i><span>Bookings</span>
+                            @if (pendingBookings > 0)
+                            {
+                                <span class="badge rounded-pill ms-auto" style="background:var(--brand-lime);color:var(--brand-forest-dark);font-weight:800">@pendingBookings</span>
+                            }
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Group: Customers -->
+            <div class="sidebar-menu-section">
+                <div class="sidebar-menu-title">Customers</div>
+                <ul class="sidebar-menu-list">
+                    <li class="sidebar-menu-item">
+                        <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="sidebar-menu-link @ActiveCtrl("Users")" title="Users">
+                            <i class="bi bi-people"></i><span>Users</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-menu-item">
+                        <a asp-area="Admin" asp-controller="ContactMessages" asp-action="Index" class="sidebar-menu-link @ActiveCtrl("ContactMessages")" title="Messages">
+                            <i class="bi bi-envelope"></i><span>Messages</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-menu-item">
+                        <a asp-area="Admin" asp-controller="Feedbacks" asp-action="Index" class="sidebar-menu-link @ActiveCtrl("Feedbacks")" title="Feedback">
+                            <i class="bi bi-chat-dots"></i><span>Feedback</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            </div>
+
+    <!-- Sidebar Profile Card (Dynamic Footer) -->
+    <div class="sidebar-profile">
+      <div class="sidebar-profile-info">
+        <div class="sidebar-profile-name">Administrator</div>
+        <div class="sidebar-profile-email">admin@karneltravel.com</div>
+      </div>
+    </div>
+  </div>
+  <!-- ==========================================
+         END: Sidebar Component
+         ========================================== -->
+
+
+  <!-- ==========================================
+         START: Main Content Area
+         ========================================== -->
+  <div class="main-wrapper">
+
+        <!-- START: Top Navbar Component -->
+    <header class="navbar-custom">
+      <div class="navbar-left">
+        <!-- Desktop sidebar toggle (visible on large screens only) -->
+        <button class="btn-desktop-toggle d-none d-xl-flex align-items-center justify-content-center me-3"
+          id="desktop-sidebar-toggle" aria-label="Minimize Sidebar">
+          <i class="bi bi-chevron-bar-left"></i>
+        </button>
+        <!-- Mobile sidebar toggle -->
+        <button class="sidebar-toggle-btn me-2" id="sidebar-toggle" aria-label="Toggle Navigation">
+          <i class="bi bi-list"></i>
+        </button>
+
+        <!-- Quick Add: nayi cheez jaldi banane ke shortcuts -->
+        <div class="dropdown ms-2">
+          <button class="btn-quick-action dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+            id="quick-actions-dropdown">
+            <i class="bi bi-plus-lg"></i>
+            <span>Create</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-quick-action" aria-labelledby="quick-actions-dropdown">
+            <li class="dropdown-header">Quick Add</li>
+            <li><a class="dropdown-item" asp-area="Admin" asp-controller="TouristSpots" asp-action="Create"><i class="bi bi-geo-alt"></i> Tourist Spot</a></li>
+            <li><a class="dropdown-item" asp-area="Admin" asp-controller="TravelInfoes" asp-action="Create"><i class="bi bi-truck"></i> Travel Info</a></li>
+            <li><a class="dropdown-item" asp-area="Admin" asp-controller="Hotels" asp-action="Create"><i class="bi bi-building"></i> Hotel</a></li>
+            <li><a class="dropdown-item" asp-area="Admin" asp-controller="Restaurants" asp-action="Create"><i class="bi bi-shop"></i> Restaurant</a></li>
+            <li><a class="dropdown-item" asp-area="Admin" asp-controller="Resorts" asp-action="Create"><i class="bi bi-house-door"></i> Resort</a></li>
+            <li><a class="dropdown-item" asp-area="Admin" asp-controller="TourPackages" asp-action="Create"><i class="bi bi-tag"></i> Package</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Right actions -->
+      <div class="navbar-actions ms-auto" style="grid-column: 3;">
+        <!-- Fullscreen Toggle -->
+        <button class="navbar-action-btn me-1" aria-label="Toggle Fullscreen" id="btn-fullscreen">
+          <i class="bi bi-arrows-fullscreen"></i>
+        </button>
+
+        <!-- Bookings shortcut -->
+        <a asp-area="Admin" asp-controller="Bookings" asp-action="Index"
+           class="navbar-action-btn me-1 position-relative" title="Bookings" aria-label="Bookings">
+          <i class="bi bi-journal-bookmark"></i>
+          @if (pendingBookings > 0)
+          {
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background:var(--brand-lime);color:var(--brand-forest-dark);font-size:.65rem">@pendingBookings</span>
+          }
+        </a>
+
+        <!-- Messages shortcut -->
+        <a asp-area="Admin" asp-controller="ContactMessages" asp-action="Index"
+           class="navbar-action-btn me-1" title="Messages" aria-label="Messages">
+          <i class="bi bi-envelope"></i>
+        </a>
+
+        <!-- Profile Dropdown -->
+        <div class="dropdown ms-2">
+          <button class="navbar-profile-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
+            aria-expanded="false" id="profile-dropdown">
+            <span class="navbar-profile-name">Administrator</span>
+            <i class="bi bi-chevron-down navbar-profile-caret"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-profile" aria-labelledby="profile-dropdown">
+            <li class="dropdown-header">Welcome !</li>
+            <li>
+              <a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-globe"></i> View Website
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                <i class="bi bi-person"></i> My Account
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post">
+                <button type="submit" class="dropdown-item text-danger">
+                  <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
+    <!-- END: Top Navbar Component -->
+
+    @RenderBody()
+
+        <!-- START: Footer Component -->
+    <footer class="footer-custom">
+      <div class="footer-left">
+        <span class="footer-logo">
+          <i class="bi bi-asterisk"></i> Karnel Admin
+        </span>
+        <span class="footer-separator">|</span>
+        <span class="footer-copy">&copy; 2026 Karnel Travel Guide
+        </span>
+      </div>
+      <div class="footer-right">
+        <ul class="footer-links">
+          <li><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="footer-link">Dashboard</a></li>
+          <li><a asp-area="Admin" asp-controller="ContactMessages" asp-action="Index" class="footer-link">Messages</a></li>
+          <li><a asp-area="" asp-controller="Home" asp-action="Index" class="footer-link">View Website</a></li>
+        </ul>
+      </div>
+    </footer>
+    <!-- END: Footer Component -->
+
+  </div>
+  <!-- ==========================================
+         END: Main Content Area
+         ========================================== -->
+
+  <!-- Local Third-Party Libraries Script dependencies -->
+  <script src="~/admin/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="~/admin/libs/apexcharts/apexcharts.min.js"></script>
+  <script src="~/admin/libs/flatpickr/flatpickr.min.js"></script>
+
+  <!-- Local dashboard interactions controller -->
+  <script src="~/admin/js/dashboard.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+  @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

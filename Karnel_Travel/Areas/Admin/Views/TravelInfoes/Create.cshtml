@@ -1,0 +1,81 @@
+@model Karnel_Travel.Models.TravelInfo
+
+@{
+    ViewData["Title"] = "Add Travel Info";
+    var m = Model ?? new Karnel_Travel.Models.TravelInfo();
+}
+
+<!-- Page heading -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Add Travel Info</h1>
+        <p class="page-subtitle">Add a transport option between two cities.</p>
+    </div>
+    <a asp-action="Index" class="btn-crud btn-crud-light"><i class="bi bi-arrow-left"></i> Back to List</a>
+</div>
+
+<form asp-action="Create" novalidate>
+    <div class="row g-4">
+
+        <!-- Left: details -->
+        <div class="col-lg-8">
+            <div class="crud-card">
+                <div class="crud-card-title"><i class="bi bi-truck"></i> Route Details</div>
+
+                <div asp-validation-summary="ModelOnly" class="crud-summary"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label asp-for="TransportMode" class="crud-label">Transport Mode <span class="req">*</span></label>
+                        <input asp-for="TransportMode" class="crud-input" list="TransportModeList" placeholder="e.g. Bus" maxlength="50" />
+                        <datalist id="TransportModeList"><option value="Bus"></option><option value="Train"></option><option value="Flight"></option><option value="Ship"></option><option value="Car"></option><option value="Van"></option></datalist>
+                        <span asp-validation-for="TransportMode" class="crud-error"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="FromCity" class="crud-label">From City <span class="req">*</span></label>
+                        <input asp-for="FromCity" class="crud-input" placeholder="e.g. Karachi" maxlength="100" />
+                        <span asp-validation-for="FromCity" class="crud-error"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ToCity" class="crud-label">To City <span class="req">*</span></label>
+                        <input asp-for="ToCity" class="crud-input" placeholder="e.g. Lahore" maxlength="100" />
+                        <span asp-validation-for="ToCity" class="crud-error"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Fare" class="crud-label">Fare <span class="req">*</span></label>
+                        <div class="input-affix"><span class="affix">Rs</span><input asp-for="Fare" type="number" step="0.01" min="0" class="crud-input" placeholder="0.00" /></div>
+                        <span asp-validation-for="Fare" class="crud-error"></span>
+                    </div>
+                    <div class="col-md-12">
+                        <label asp-for="Details" class="crud-label">Details</label>
+                        <textarea asp-for="Details" class="crud-textarea" rows="5" maxlength="1000" placeholder="Timings, stops, facilities..." data-counter="DetailsCount"></textarea>
+                        <div class="crud-counter" id="DetailsCount">0 / 1000</div>
+                        <span asp-validation-for="Details" class="crud-error"></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right: tip + buttons -->
+        <div class="col-lg-4">
+
+            <div class="crud-card">
+                <div class="crud-card-title"><i class="bi bi-lightbulb"></i> Tip</div>
+                <p class="mb-0 text-muted" style="font-size:.85rem">Add one record per route. For example: Bus from Karachi to Lahore with its fare. Customers see these on the Travel Information page.</p>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn-crud btn-crud-primary justify-content-center">
+                    <i class="bi bi-check-lg"></i> Create Travel Info
+                </button>
+                <a asp-action="Index" class="btn-crud btn-crud-light justify-content-center">Cancel</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/admin/js/crud-form.js"></script>
+}
