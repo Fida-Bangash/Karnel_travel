@@ -1,11 +1,12 @@
 namespace Karnel_Travel.Models
 {
-    // Error page ko data deta hai (koi masla aaye to ye page dikhta hai)
+    // Data for the error page.
     public class ErrorViewModel
     {
-        public string? RequestId { get; set; } // Request ki unique ID (masla dhoondne ke liye)
+        // Unique request id, used to trace the problem.
+        public string? RequestId { get; set; }
 
-        // Sirf tab true jab RequestId maujood ho (page par ID dikhane ke liye)
+        // True when a request id exists (shown on the page).
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
     }
 }

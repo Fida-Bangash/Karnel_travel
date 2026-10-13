@@ -1,0 +1,377 @@
+@model Karnel_Travel.Models.Booking
+@{
+    // Booking shortcut, title and formatted amount
+    var b = Model;
+    ViewData["Title"] = "Payment · " + b.BookingCode;
+    var amount = BookingUi.Money(b.TotalPrice);
+}
+
+@* Load page styles *@
+@section Styles { <partial name="_Styles" /> }
+
+<!-- Page header -->
+<div class="vip-page py-4">
+    <div class="vip-head">
+        <span class="vip-eyebrow">Secure checkout</span>
+        <h1 class="vip-title">Complete your <span>payment</span></h1>
+        <p class="vip-sub">Your booking <strong class="vip-gold">@b.BookingCode</strong> is saved. Pay now to secure it faster, or choose to pay on arrival.</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+
+        <!-- ================= Left: payment form ================= -->
+        <div class="col-lg-7">
+
+            <!-- Payment error message -->
+            @if (TempData["Error"] is string err)
+            {
+                <div class="vip-alert error"><i class="fa fa-exclamation-circle mt-1"></i><div>@err</div></div>
+            }
+
+            <!-- Demo payment notice -->
+            <div class="pay-demo-banner">
+                <i class="fa fa-flask"></i>
+                <div>
+                    <strong>Demo payment</strong> &mdash; no real money is charged and no card details are stored.
+                    Test card: <code>4242 4242 4242 4242</code>, any future expiry, any CVV.
+                    <span class="d-block mt-1">Decline test: <code>4000 0000 0000 0002</code></span>
+                </div>
+            </div>
+
+            <!-- Payment form -->
+            <form id="payForm" method="post" asp-action="Payment" asp-route-id="@b.Id" novalidate>
+                <div class="vip-card">
+                    <div class="vip-card-body">
+                        <h4 class="vip-card-title"><i class="fa fa-credit-card"></i> Payment method</h4>
+
+                        <!-- Payment method choices -->
+                        <div class="pay-methods" role="radiogroup" aria-label="Payment method">
+                            <label class="pay-method">
+                                <input type="radio" name="Method" value="Card" checked />
+                                <span><i class="fa fa-credit-card"></i> Debit / Credit Card</span>
+                            </label>
+                            <label class="pay-method">
+                                <input type="radio" name="Method" value="JazzCash" />
+                                <span><i class="fa fa-mobile-alt"></i> JazzCash</span>
+                            </label>
+                            <label class="pay-method">
+                                <input type="radio" name="Method" value="Easypaisa" />
+                                <span><i class="fa fa-wallet"></i> Easypaisa</span>
+                            </label>
+                        </div>
+
+                        <!-- Client-side error box -->
+                        <div id="payError" class="vip-alert error" style="display:none" role="alert">
+                            <i class="fa fa-exclamation-circle mt-1"></i><div id="payErrorText"></div>
+                        </div>
+
+                        <!-- ---------- Card panel ---------- -->
+                        <div class="pay-panel" data-panel="Card">
+                            <div class="pay-cc" id="ccPreview" aria-hidden="true">
+                                <div class="pay-cc-top"><i class="fa fa-wifi"></i><span class="pay-cc-brand" id="ccBrand">CARD</span></div>
+                                <div class="pay-cc-chip"></div>
+                                <div class="pay-cc-num" id="ccNumPrev">&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull;</div>
+                                <div class="pay-cc-bot">
+                                    <div><small>Card holder</small><span id="ccNamePrev">YOUR NAME</span></div>
+                                    <div><small>Expires</small><span id="ccExpPrev">MM/YY</span></div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="vip-label" for="CardHolder">Name on card</label>
+                                    <input class="vip-input" id="CardHolder" name="CardHolder" value="@b.CustomerName" maxlength="60" autocomplete="cc-name" placeholder="As printed on your card" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="vip-label" for="ccNumber">Card number</label>
+                                    <div class="pay-input-icon">
+                                        <input class="vip-input" id="ccNumber" inputmode="numeric" autocomplete="cc-number" maxlength="19" placeholder="1234 5678 9012 3456" />
+                                        <i class="fa fa-lock"></i>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <label class="vip-label" for="ccExp">Expiry</label>
+                                    <input class="vip-input" id="ccExp" inputmode="numeric" autocomplete="cc-exp" maxlength="5" placeholder="MM/YY" />
+                                </div>
+                                <div class="col-6">
+                                    <label class="vip-label" for="ccCvv">CVV</label>
+                                    <input class="vip-input" id="ccCvv" type="password" inputmode="numeric" autocomplete="cc-csc" maxlength="4" placeholder="•••" />
+                                </div>
+                            </div>
+                            <input type="hidden" id="Last4" name="Last4" value="" />
+                        </div>
+
+                        <!-- ---------- JazzCash panel ---------- -->
+                        <div class="pay-panel" data-panel="JazzCash" hidden>
+                            <label class="vip-label" for="walletJazz">JazzCash mobile account</label>
+                            <input class="vip-input" id="walletJazz" name="WalletNumber" inputmode="tel" maxlength="20" placeholder="03XX XXXXXXX" disabled />
+                            <p class="vip-muted small mt-2 mb-0">In a live system you would approve the payment from the JazzCash app. Here it is simulated.</p>
+                        </div>
+
+                        <!-- ---------- Easypaisa panel ---------- -->
+                        <div class="pay-panel" data-panel="Easypaisa" hidden>
+                            <label class="vip-label" for="walletEasy">Easypaisa mobile account</label>
+                            <input class="vip-input" id="walletEasy" name="WalletNumber" inputmode="tel" maxlength="20" placeholder="03XX XXXXXXX" disabled />
+                            <p class="vip-muted small mt-2 mb-0">In a live system you would approve the payment from the Easypaisa app. Here it is simulated.</p>
+                        </div>
+
+                        <!-- Pay button and security note -->
+                        <button type="submit" id="payBtn" class="vip-btn vip-btn-gold vip-btn-block mt-4">
+                            <i class="fa fa-lock"></i> <span id="payBtnText">Pay @amount</span>
+                        </button>
+
+                        <div class="pay-secure"><i class="fa fa-shield-alt"></i> 256-bit encrypted checkout &middot; Demo mode</div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Skip payment link -->
+            <div class="text-center mt-3">
+                <a asp-action="Success" asp-route-id="@b.Id" class="vip-muted small">Skip for now &mdash; I will pay on arrival</a>
+            </div>
+        </div>
+
+        <!-- ================= Right: order summary ================= -->
+        <div class="col-lg-5">
+            <div class="vip-card position-sticky" style="top: 100px">
+                <div class="vip-card-body">
+                    <h4 class="vip-card-title"><i class="fa fa-receipt"></i> Order summary</h4>
+
+                    <!-- Booked item summary -->
+                    <div class="d-flex gap-3 align-items-center mb-3">
+                        <div class="vip-bk-icon" style="width:64px;height:64px;font-size:1.5rem"><i class="fa @BookingUi.TypeIcon(b.ItemType)"></i></div>
+                        <div>
+                            <div class="vip-code-sm">@b.BookingCode</div>
+                            <strong>@b.ItemName</strong>
+                            @if (!string.IsNullOrWhiteSpace(b.ItemLocation))
+                            {
+                                <div class="vip-muted small"><i class="fa fa-map-marker-alt vip-gold me-1"></i>@b.ItemLocation</div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Price breakdown -->
+                    <div class="vip-summary">
+                        <div class="vip-sum-row"><span>Date</span><b>@BookingUi.When(b)</b></div>
+                        <div class="vip-sum-row"><span>Reservation</span><b>@BookingUi.UnitsLabel(b)</b></div>
+                        <div class="vip-sum-row"><span>Guest</span><b>@b.CustomerName</b></div>
+                        @if (b.DiscountPercent > 0)
+                        {
+                            <div class="vip-sum-row"><span>Package discount</span><b>-@b.DiscountPercent%</b></div>
+                        }
+                        <div class="vip-sum-total"><span>Total to pay</span><strong>@amount</strong></div>
+                    </div>
+
+                    <!-- Reassurance perks -->
+                    <ul class="vip-perks px-0 pb-0 pt-3 mb-0">
+                        <li><i class="fa fa-undo"></i> Free cancellation before the start date</li>
+                        <li><i class="fa fa-bolt"></i> Instant payment receipt</li>
+                        <li><i class="fa fa-headset"></i> Support from our team</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Processing overlay -->
+<div id="payOverlay" class="pay-overlay" aria-live="polite" hidden>
+    <div class="pay-overlay-box">
+        <div class="pay-spinner"></div>
+        <h5 class="mb-1">Processing payment&hellip;</h5>
+        <p class="vip-muted mb-0 small">Please do not close or refresh this page.</p>
+    </div>
+</div>
+
+@* Page scripts *@
+@section Scripts {
+    <script>
+        // Payment form behavior
+        (function () {
+            var form = document.getElementById('payForm');
+            if (!form) return;
+
+            // Cache form elements
+            var amount = @Json.Serialize(amount);
+            var radios = form.querySelectorAll('input[name="Method"]');
+            var panels = form.querySelectorAll('.pay-panel');
+            var btn = document.getElementById('payBtn');
+            var btnText = document.getElementById('payBtnText');
+            var overlay = document.getElementById('payOverlay');
+            var errBox = document.getElementById('payError');
+            var errText = document.getElementById('payErrorText');
+
+            var num = document.getElementById('ccNumber');
+            var exp = document.getElementById('ccExp');
+            var cvv = document.getElementById('ccCvv');
+            var holder = document.getElementById('CardHolder');
+            var last4 = document.getElementById('Last4');
+            var brandEl = document.getElementById('ccBrand');
+            var numPrev = document.getElementById('ccNumPrev');
+            var namePrev = document.getElementById('ccNamePrev');
+            var expPrev = document.getElementById('ccExpPrev');
+
+            // Get selected payment method
+            function currentMethod() {
+                for (var i = 0; i < radios.length; i++) if (radios[i].checked) return radios[i].value;
+                return 'Card';
+            }
+
+            // Show and hide error box
+            function showError(msg) {
+                errText.textContent = msg;
+                errBox.style.display = 'flex';
+            }
+            function hideError() { errBox.style.display = 'none'; }
+
+            // ---------- Method tabs ----------
+            // Show panel for chosen method
+            function applyMethod() {
+                var m = currentMethod();
+                for (var i = 0; i < panels.length; i++) {
+                    var on = panels[i].getAttribute('data-panel') === m;
+                    panels[i].hidden = !on;
+                    // Chhupe hue panel ke inputs submit na hon
+                    var inputs = panels[i].querySelectorAll('input');
+                    for (var j = 0; j < inputs.length; j++) {
+                        if (inputs[j].type === 'hidden') continue;
+                        if (inputs[j].name) inputs[j].disabled = !on;
+                    }
+                }
+                var labels = form.querySelectorAll('.pay-method');
+                for (var k = 0; k < labels.length; k++) {
+                    labels[k].classList.toggle('active', labels[k].querySelector('input').checked);
+                }
+                btnText.textContent = 'Pay ' + amount;
+                hideError();
+            }
+            // Switch panel on method change
+            for (var r = 0; r < radios.length; r++) radios[r].addEventListener('change', applyMethod);
+
+            // ---------- Card helpers ----------
+            // Digits-only helper
+            function digits(v) { return (v || '').replace(/\D/g, ''); }
+
+            // Detect card brand
+            function brandOf(d) {
+                if (/^4/.test(d)) return 'VISA';
+                if (/^(5[1-5]|2(2[2-9][1-9]|2[3-9]\d|[3-6]\d\d|7[01]\d|720))/.test(d)) return 'MASTERCARD';
+                if (/^3[47]/.test(d)) return 'AMEX';
+                return 'CARD';
+            }
+
+            // Luhn checksum validation
+            function luhn(d) {
+                var sum = 0, alt = false;
+                for (var i = d.length - 1; i >= 0; i--) {
+                    var n = parseInt(d.charAt(i), 10);
+                    if (alt) { n *= 2; if (n > 9) n -= 9; }
+                    sum += n; alt = !alt;
+                }
+                return d.length > 0 && sum % 10 === 0;
+            }
+
+            // Format card number groups
+            function fmtNumber(d) {
+                if (brandOf(d) === 'AMEX') {
+                    d = d.slice(0, 15);
+                    return [d.slice(0, 4), d.slice(4, 10), d.slice(10, 15)].filter(Boolean).join(' ');
+                }
+                d = d.slice(0, 16);
+                return d.replace(/(.{4})/g, '$1 ').trim();
+            }
+
+            // Update live card preview
+            function updatePreview() {
+                var d = digits(num.value);
+                var b = brandOf(d);
+                brandEl.textContent = b;
+                cvv.maxLength = b === 'AMEX' ? 4 : 3;
+
+                var shown = '';
+                var padded = (d + '################').slice(0, b === 'AMEX' ? 15 : 16);
+                shown = fmtNumber(padded.replace(/#/g, '0'));
+                // Bina likhe hue digits ko bullets se dikhao
+                var out = '', di = 0;
+                for (var i = 0; i < shown.length; i++) {
+                    if (shown.charAt(i) === ' ') { out += ' '; continue; }
+                    out += di < d.length ? shown.charAt(i) : '\u2022';
+                    di++;
+                }
+                numPrev.textContent = out;
+                namePrev.textContent = (holder.value || 'YOUR NAME').toUpperCase();
+                expPrev.textContent = exp.value || 'MM/YY';
+            }
+
+            // Card field input handlers
+            num.addEventListener('input', function () {
+                num.value = fmtNumber(digits(num.value));
+                updatePreview();
+            });
+            exp.addEventListener('input', function () {
+                var d = digits(exp.value).slice(0, 4);
+                exp.value = d.length > 2 ? d.slice(0, 2) + '/' + d.slice(2) : d;
+                updatePreview();
+            });
+            cvv.addEventListener('input', function () { cvv.value = digits(cvv.value); });
+            holder.addEventListener('input', updatePreview);
+            updatePreview();
+
+            // ---------- Validation ----------
+            // Validate card fields
+            function validateCard() {
+                if (!holder.value.trim()) return 'Please enter the name on the card.';
+                var d = digits(num.value);
+                var minLen = brandOf(d) === 'AMEX' ? 15 : 16;
+                if (d.length < minLen || !luhn(d)) return 'That card number does not look right. Please check it.';
+
+                var m = /^(\d{2})\/(\d{2})$/.exec(exp.value);
+                if (!m) return 'Enter the expiry date as MM/YY.';
+                var mm = parseInt(m[1], 10), yy = 2000 + parseInt(m[2], 10);
+                if (mm < 1 || mm > 12) return 'The expiry month is not valid.';
+                var now = new Date();
+                if (yy < now.getFullYear() || (yy === now.getFullYear() && mm < now.getMonth() + 1)) return 'This card has expired.';
+
+                var need = brandOf(d) === 'AMEX' ? 4 : 3;
+                if (digits(cvv.value).length !== need) return 'Enter the ' + need + '-digit security code (CVV).';
+
+                if (d === '4000000000000002') return 'Your card was declined. Please try another card. (demo test card)';
+                return '';
+            }
+
+            // Validate wallet number
+            function validateWallet(input) {
+                var d = digits(input.value);
+                if (d.length < 10 || d.length > 13) return 'Enter a valid mobile account number, e.g. 0300 1234567.';
+                return '';
+            }
+
+            // ---------- Submit ----------
+            // Validate then submit payment
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                hideError();
+
+                var m = currentMethod();
+                var msg = '';
+                if (m === 'Card') {
+                    msg = validateCard();
+                } else {
+                    var field = form.querySelector('.pay-panel[data-panel="' + m + '"] input[name="WalletNumber"]');
+                    msg = field ? validateWallet(field) : 'Please choose a payment method.';
+                }
+                if (msg) { showError(msg); errBox.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+
+                // Sirf aakhri 4 digits server ko jate hain
+                last4.value = m === 'Card' ? digits(num.value).slice(-4) : '';
+
+                btn.disabled = true;
+                overlay.hidden = false;
+                setTimeout(function () { form.submit(); }, 1800);
+            });
+
+            // Apply initial method
+            applyMethod();
+        })();
+    </script>
+}

@@ -1,5 +1,7 @@
+@* Model bound to this view. *@
 @model Karnel_Travel.Models.Feedback
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Edit Feedback";
     var m = Model ?? new Karnel_Travel.Models.Feedback();
@@ -14,29 +16,38 @@
     <a asp-action="Index" class="btn-crud btn-crud-light"><i class="bi bi-arrow-left"></i> Back to List</a>
 </div>
 
+@* Form posted to the server. *@
 <form asp-action="Edit" novalidate>
+    @* Keeps the record id on submit. *@
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="CreatedOn" />
+    @* Two-column page layout. *@
     <div class="row g-4">
 
         <!-- Left: details -->
         <div class="col-lg-8">
+            @* Card: Feedback Details. *@
             <div class="crud-card">
                 <div class="crud-card-title"><i class="bi bi-chat-dots"></i> Feedback Details</div>
 
+                @* Model-level validation errors. *@
                 <div asp-validation-summary="ModelOnly" class="crud-summary"></div>
 
+                @* Form fields grid. *@
                 <div class="row g-3">
+                    @* Field: Name. *@
                     <div class="col-md-6">
                         <label asp-for="Name" class="crud-label">Name <span class="req">*</span></label>
                         <input asp-for="Name" class="crud-input" placeholder="Customer name" maxlength="100" />
                         <span asp-validation-for="Name" class="crud-error"></span>
                     </div>
+                    @* Field: Email. *@
                     <div class="col-md-6">
                         <label asp-for="Email" class="crud-label">Email <span class="req">*</span></label>
                         <input asp-for="Email" type="email" class="crud-input" placeholder="name@example.com" maxlength="254" />
                         <span asp-validation-for="Email" class="crud-error"></span>
                     </div>
+                    @* Field: Message. *@
                     <div class="col-md-12">
                         <label asp-for="Message" class="crud-label">Feedback <span class="req">*</span></label>
                         <textarea asp-for="Message" class="crud-textarea" rows="7" maxlength="2000" placeholder="Write the feedback..." data-counter="MessageCount"></textarea>
@@ -51,11 +62,13 @@
         <!-- Right: tip + buttons -->
         <div class="col-lg-4">
 
+            @* Card: Tip. *@
             <div class="crud-card">
                 <div class="crud-card-title"><i class="bi bi-lightbulb"></i> Tip</div>
-                <p class="mb-0 text-muted" style="font-size:.85rem">Feedback arrives automatically from the Contact page. Edit only to fix a typo.</p>
+                <p class="mb-0 text-muted" style="font-size:.85rem">Reviews arrive automatically after a booking is complete. Edit only to fix a typo.</p>
             </div>
 
+            @* Submit and cancel buttons. *@
             <div class="d-grid gap-2">
                 <button type="submit" class="btn-crud btn-crud-primary justify-content-center">
                     <i class="bi bi-check-lg"></i> Save Changes
@@ -66,6 +79,7 @@
     </div>
 </form>
 
+@* Page-specific scripts. *@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script src="~/admin/js/crud-form.js"></script>

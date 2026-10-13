@@ -1,5 +1,7 @@
+@* Model bound to this view. *@
 @model Karnel_Travel.Models.TouristSpot
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Add Tourist Spot";
 }
@@ -13,23 +15,30 @@
     <a asp-action="Index" class="btn-crud btn-crud-light"><i class="bi bi-arrow-left"></i> Back to List</a>
 </div>
 
+@* Form posted to the server (supports file upload). *@
 <form asp-action="Create" enctype="multipart/form-data" novalidate>
+    @* Two-column page layout. *@
     <div class="row g-4">
 
         <!-- Left: text details -->
         <div class="col-lg-8">
+            @* Card: Spot Details. *@
             <div class="crud-card">
                 <div class="crud-card-title"><i class="bi bi-geo-alt"></i> Spot Details</div>
 
+                @* Model-level validation errors. *@
                 <div asp-validation-summary="ModelOnly" class="crud-summary"></div>
 
+                @* Form fields grid. *@
                 <div class="row g-3">
+                    @* Field: Name. *@
                     <div class="col-md-12">
                         <label asp-for="Name" class="crud-label">Spot Name <span class="req">*</span></label>
                         <input asp-for="Name" class="crud-input" placeholder="e.g. Clifton Beach" maxlength="100" />
                         <span asp-validation-for="Name" class="crud-error"></span>
                     </div>
 
+                    @* Field: Category. *@
                     <div class="col-md-6">
                         <label asp-for="Category" class="crud-label">Category <span class="req">*</span></label>
                         <input asp-for="Category" class="crud-input" list="categoryList" placeholder="e.g. Beach" maxlength="50" />
@@ -48,6 +57,7 @@
                         <span asp-validation-for="Category" class="crud-error"></span>
                     </div>
 
+                    @* Field: Location. *@
                     <div class="col-md-6">
                         <label asp-for="Location" class="crud-label">Location <span class="req">*</span></label>
                         <input asp-for="Location" class="crud-input" placeholder="e.g. Karachi, Sindh" maxlength="100" />
@@ -68,9 +78,11 @@
 
         <!-- Right: image upload -->
         <div class="col-lg-4">
+            @* Card: Spot Image. *@
             <div class="crud-card">
                 <div class="crud-card-title"><i class="bi bi-image"></i> Spot Image</div>
 
+                @* Image picker with live preview. *@
                 <div class="upload-box">
                     <img id="imgPreview" class="upload-preview" alt="Preview" />
                     <div id="imgPlaceholder" class="upload-placeholder">
@@ -82,10 +94,12 @@
                            data-preview="imgPreview" data-name="imgName"
                            data-placeholder="imgPlaceholder" data-error="imgError" />
                 </div>
+                @* Upload rules. *@
                 <div class="upload-hint mt-2">JPG, PNG or WEBP. Maximum 2 MB.</div>
                 <span id="imgError" class="crud-error"></span>
             </div>
 
+            @* Submit and cancel buttons. *@
             <div class="d-grid gap-2">
                 <button type="submit" class="btn-crud btn-crud-primary justify-content-center">
                     <i class="bi bi-check-lg"></i> Create Spot
@@ -96,6 +110,7 @@
     </div>
 </form>
 
+@* Page-specific scripts. *@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script src="~/admin/js/crud-form.js"></script>

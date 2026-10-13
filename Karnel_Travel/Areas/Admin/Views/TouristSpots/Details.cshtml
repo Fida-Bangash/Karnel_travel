@@ -1,5 +1,7 @@
+@* Model bound to this view. *@
 @model Karnel_Travel.Models.TouristSpot
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Tourist Spot Details";
 }
@@ -10,6 +12,7 @@
         <h1 class="page-title">@Model.Name</h1>
         <p class="page-subtitle"><i class="bi bi-geo-alt-fill"></i> @Model.Location</p>
     </div>
+    @* Header action buttons. *@
     <div class="d-flex gap-2 flex-wrap">
         <a asp-action="Index" class="btn-crud btn-crud-light"><i class="bi bi-arrow-left"></i> Back to List</a>
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-crud btn-crud-primary"><i class="bi bi-pencil-square"></i> Edit</a>
@@ -17,10 +20,13 @@
     </div>
 </div>
 
+@* Two-column page layout. *@
 <div class="row g-4">
     <!-- Image -->
     <div class="col-lg-5">
+        @* Content card. *@
         <div class="crud-card">
+            @* Show the image, or a placeholder if none. *@
             @if (!string.IsNullOrEmpty(Model.ImagePath))
             {
                 <img src="@Model.ImagePath" class="detail-hero" alt="@Model.Name" />
@@ -34,21 +40,26 @@
 
     <!-- Information -->
     <div class="col-lg-7">
+        @* Card: Information. *@
         <div class="crud-card">
             <div class="crud-card-title"><i class="bi bi-info-circle"></i> Information</div>
 
+            @* Detail: Name. *@
             <div class="detail-row">
                 <div class="k">Name</div>
                 <div class="v">@Model.Name</div>
             </div>
+            @* Detail: Category. *@
             <div class="detail-row">
                 <div class="k">Category</div>
                 <div class="v"><span class="tag-pill">@Model.Category</span></div>
             </div>
+            @* Detail: Location. *@
             <div class="detail-row">
                 <div class="k">Location</div>
                 <div class="v">@Model.Location</div>
             </div>
+            @* Detail: Description. *@
             <div class="detail-row">
                 <div class="k">Description</div>
                 <div class="v">@(string.IsNullOrWhiteSpace(Model.Description) ? "No description added." : Model.Description)</div>

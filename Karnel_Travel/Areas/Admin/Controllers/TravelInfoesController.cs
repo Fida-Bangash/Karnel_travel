@@ -7,27 +7,31 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Karnel_Travel.Areas.Admin.Controllers
 {
+    // Admin area controller; access limited to the Admin role.
     [Area("Admin")]
     [Authorize(Roles = "Admin")]
 
     public class TravelInfoesController : Controller
     {
+        // Database context.
         private readonly Karnel_TravelContext _context;
 
+        // Constructor: dependencies are injected by ASP.NET.
         public TravelInfoesController(Karnel_TravelContext context)
         {
             _context = context;
         }
 
-        // GET: TRAVELINFOS
+        // Lists records.
         public async Task<IActionResult> Index()
         {
             return View(await _context.TravelInfos.ToListAsync());
         }
 
-        // GET: TRAVELINFOS/Details/5
+        // Shows a single record.
         public async Task<IActionResult> Details(int? id)
         {
+            // Reject requests without an id.
             if (id == null)
             {
                 return NotFound();
@@ -35,6 +39,7 @@ namespace Karnel_Travel.Areas.Admin.Controllers
 
             var travelinfo = await _context.TravelInfos
                 .FirstOrDefaultAsync(m => m.Id == id);
+            // Return 404 when the record does not exist.
             if (travelinfo == null)
             {
                 return NotFound();
@@ -43,37 +48,40 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             return View(travelinfo);
         }
 
-        // GET: TRAVELINFOS/Create
+        // Displays the create form.
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: TRAVELINFOS/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // Validates input and saves the new record.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,TransportMode,FromCity,ToCity,Fare,Details")] TravelInfo travelinfo)
         {
+            // Proceed only when validation passes.
             if (ModelState.IsValid)
             {
+                // Stage the new record.
                 _context.Add(travelinfo);
+                // Persist changes to the database.
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(travelinfo);
         }
 
-        // GET: TRAVELINFOS/Edit/5
+        // Displays the edit form.
         public async Task<IActionResult> Edit(int? id)
         {
+            // Reject requests without an id.
             if (id == null)
             {
                 return NotFound();
             }
 
             var travelinfo = await _context.TravelInfos.FindAsync(id);
+            // Return 404 when the record does not exist.
             if (travelinfo == null)
             {
                 return NotFound();
@@ -81,23 +89,24 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             return View(travelinfo);
         }
 
-        // POST: TRAVELINFOS/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // Saves the edited record.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int? id, [Bind("Id,TransportMode,FromCity,ToCity,Fare,Details")] TravelInfo travelinfo)
         {
+            // Reject a mismatched id.
             if (id != travelinfo.Id)
             {
                 return NotFound();
             }
 
+            // Proceed only when validation passes.
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(travelinfo);
+                    // Persist changes to the database.
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -116,9 +125,10 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             return View(travelinfo);
         }
 
-        // GET: TRAVELINFOS/Delete/5
+        // Shows the delete confirmation page.
         public async Task<IActionResult> Delete(int? id)
         {
+            // Reject requests without an id.
             if (id == null)
             {
                 return NotFound();
@@ -126,6 +136,7 @@ namespace Karnel_Travel.Areas.Admin.Controllers
 
             var travelinfo = await _context.TravelInfos
                 .FirstOrDefaultAsync(m => m.Id == id);
+            // Return 404 when the record does not exist.
             if (travelinfo == null)
             {
                 return NotFound();
@@ -134,7 +145,7 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             return View(travelinfo);
         }
 
-        // POST: TRAVELINFOS/Delete/5
+        // Deletes the record after confirmation.
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int? id)
@@ -142,13 +153,16 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             var travelinfo = await _context.TravelInfos.FindAsync(id);
             if (travelinfo != null)
             {
+                // Remove the record.
                 _context.TravelInfos.Remove(travelinfo);
             }
 
+            // Persist changes to the database.
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
+        // Helper: checks whether the record exists.
         private bool TravelInfoExists(int? id)
         {
             return _context.TravelInfos.Any(e => e.Id == id);

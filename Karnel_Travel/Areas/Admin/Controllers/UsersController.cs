@@ -6,54 +6,57 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Karnel_Travel.Areas.Admin.Controllers
 {
-    // Admin ke liye Users page: registered users ki list, Active/Deactive option aur pagination (10 per page)
+    // Admin area controller; access limited to the Admin role.
     [Area("Admin")]
     [Authorize(Roles = "Admin")]
     public class UsersController : Controller
     {
-        // Ek page par kitne users dikhane hain
+        // Number of rows shown per page.
         private const int PageSize = 10;
 
+        // Identity user manager.
         private readonly UserManager<ApplicationUser> _userManager;
 
-        // Constructor: ASP.NET khud UserManager de deta hai (dependency injection)
+        // Constructor: dependencies are injected by ASP.NET.
         public UsersController(UserManager<ApplicationUser> userManager)
         {
             _userManager = userManager;
         }
 
-        // GET: Admin/Users
-        // q = naam/email search, status = "active" ya "inactive", page = page number
+        // Lists users with search, status filter and pagination.
         public async Task<IActionResult> Index(string? q, string? status, int page = 1)
         {
+            // Current UTC time used for lockout checks.
             var now = DateTimeOffset.UtcNow;
+            // Base query over all users.
             var query = _userManager.Users.AsQueryable();
 
-            // Naam ya email se search
+            // Search by name or email.
             if (!string.IsNullOrWhiteSpace(q))
             {
                 q = q.Trim();
                 query = query.Where(u => (u.FullName ?? "").Contains(q) || (u.Email ?? "").Contains(q));
             }
 
-            // Active = lockout nahi laga hua. Deactive = lockout aage tak laga hua hai
+            // Filter by status: active = not locked out; inactive = locked out.
             if (status == "active")
                 query = query.Where(u => u.LockoutEnd == null || u.LockoutEnd <= now);
             else if (status == "inactive")
                 query = query.Where(u => u.LockoutEnd != null && u.LockoutEnd > now);
 
-            // Pagination ka hisab
+            // Pagination calculations.
             int totalItems = await query.CountAsync();
             int totalPages = Math.Max(1, (int)Math.Ceiling(totalItems / (double)PageSize));
             page = Math.Clamp(page, 1, totalPages);
 
+            // Fetch the current page of users.
             var users = await query
                 .OrderBy(u => u.Email)
                 .Skip((page - 1) * PageSize)
                 .Take(PageSize)
                 .ToListAsync();
 
-            // Is page ke users ki rows tayyar karo (role ke saath)
+            // Build display rows, including each user's role.
             var rows = new List<UserRow>();
             foreach (var u in users)
             {
@@ -69,6 +72,7 @@ namespace Karnel_Travel.Areas.Admin.Controllers
                 });
             }
 
+            // Assemble the view model with paging and summary counts.
             var model = new UsersIndexViewModel
             {
                 Users = rows,
@@ -78,46 +82,46 @@ namespace Karnel_Travel.Areas.Admin.Controllers
                 PageSize = PageSize,
                 TotalPages = totalPages,
                 TotalItems = totalItems,
-                // Upar ke subtitle ke liye poore system ki ginti
                 AllUsers = await _userManager.Users.CountAsync(),
                 ActiveUsers = await _userManager.Users.CountAsync(u => u.LockoutEnd == null || u.LockoutEnd <= now)
             };
-            // Deactive = total - active
+            // Inactive users = total minus active.
             model.InactiveUsers = model.AllUsers - model.ActiveUsers;
 
             return View(model);
         }
 
-        // POST: Admin/Users/ToggleStatus
-        // Active user ko Deactive aur Deactive ko Active kar deta hai
+        // Activates or deactivates a user account.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleStatus(string id, string? q, string? status, int page = 1)
         {
+            // Load the target user.
             var user = await _userManager.FindByIdAsync(id);
+            // Return 404 when the record does not exist.
             if (user == null) return NotFound();
 
-            // Admin account ya apna khud ka account deactivate nahi ho sakta
+            // Admin accounts and the signed-in user cannot be deactivated.
             if (await _userManager.IsInRoleAsync(user, DbSeeder.AdminRole) || user.Id == _userManager.GetUserId(User))
             {
                 TempData["Error"] = "Admin accounts cannot be deactivated.";
                 return RedirectToAction(nameof(Index), new { q, status, page });
             }
 
+            // Check whether the account is currently active.
             bool isActive = !(user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow);
 
+            // Deactivate: lock the account indefinitely and invalidate active sessions.
             if (isActive)
             {
-                // Deactivate: lockout hamesha ke liye laga do (Login par block ho jayega)
                 await _userManager.SetLockoutEnabledAsync(user, true);
                 await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
-                // Security stamp badalne se agar user abhi login hai to wo bhi logout ho jayega
                 await _userManager.UpdateSecurityStampAsync(user);
                 TempData["Success"] = $"{user.Email} has been deactivated.";
             }
+            // Activate: remove the lockout and reset failed attempts.
             else
             {
-                // Activate: lockout hata do
                 await _userManager.SetLockoutEndDateAsync(user, null);
                 await _userManager.ResetAccessFailedCountAsync(user);
                 TempData["Success"] = $"{user.Email} has been activated.";
@@ -127,7 +131,7 @@ namespace Karnel_Travel.Areas.Admin.Controllers
         }
     }
 
-    // Table ki ek row ka data
+    // Row model for the users table.
     public class UserRow
     {
         public string Id { get; set; } = "";
@@ -138,7 +142,7 @@ namespace Karnel_Travel.Areas.Admin.Controllers
         public bool IsActive { get; set; }
     }
 
-    // Poore Users page ka data (list + filters + pagination)
+    // View model for the users list page.
     public class UsersIndexViewModel
     {
         public List<UserRow> Users { get; set; } = new();

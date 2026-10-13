@@ -1,10 +1,13 @@
 @model Karnel_Travel.Models.Booking
 @{
+    // Booking shortcut and price flag
     var b = Model;
     var priceOnRequest = b.TotalPrice <= 0;
 }
 
+<!-- Ticket container -->
 <div class="vip-ticket">
+    <!-- Ticket header: item and code -->
     <div class="vip-ticket-top">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
             <div>
@@ -23,6 +26,7 @@
         </div>
     </div>
 
+    <!-- Guest and booking details -->
     <div class="vip-ticket-body">
         <dl class="vip-kv mb-0">
             <div><dt>Guest</dt><dd>@b.CustomerName</dd></div>
@@ -31,6 +35,20 @@
             <div><dt>Email</dt><dd>@b.CustomerEmail</dd></div>
             <div><dt>Phone</dt><dd>@b.CustomerPhone</dd></div>
             <div><dt>Requested on</dt><dd>@b.CreatedOn.ToString("dd MMM yyyy, h:mm tt")</dd></div>
+            <!-- Payment details when not unpaid -->
+            @if (b.PaymentStatus != PaymentStatus.Unpaid)
+            {
+                <div><dt>Payment</dt><dd><span class="vip-pay @BookingUi.PaymentClass(b.PaymentStatus)">@BookingUi.PaymentLabel(b.PaymentStatus)</span> <span class="vip-muted ms-1">@BookingUi.PaymentSummary(b)</span></dd></div>
+                if (!string.IsNullOrWhiteSpace(b.PaymentReference))
+                {
+                    <div><dt>Transaction ID</dt><dd style="font-family:'Courier New',monospace">@b.PaymentReference</dd></div>
+                }
+                if (b.PaidOn.HasValue)
+                {
+                    <div><dt>Paid on</dt><dd>@b.PaidOn.Value.ToString("dd MMM yyyy, h:mm tt")</dd></div>
+                }
+            }
+            <!-- Special requests -->
             @if (!string.IsNullOrWhiteSpace(b.Notes))
             {
                 <div style="grid-column: 1 / -1"><dt>Special requests</dt><dd>@b.Notes</dd></div>
@@ -38,12 +56,25 @@
         </dl>
     </div>
 
+    <!-- Total amount and payment note -->
     <div class="vip-ticket-total">
         <div>
             <div class="vip-label mb-0">@(b.ItemType == BookingType.Restaurant ? "Estimated bill (pay at restaurant)" : "Total amount")</div>
             @if (b.DiscountPercent > 0)
             {
                 <small class="vip-muted">Includes @b.DiscountPercent% package discount</small>
+            }
+            else if (b.PaymentStatus == PaymentStatus.Paid)
+            {
+                <small class="vip-muted"><i class="fa fa-check-circle vip-gold me-1"></i>Paid via @BookingUi.PaymentSummary(b)</small>
+            }
+            else if (b.PaymentStatus == PaymentStatus.Refunded)
+            {
+                <small class="vip-muted"><i class="fa fa-undo vip-gold me-1"></i>Refunded to @BookingUi.PaymentSummary(b) (demo)</small>
+            }
+            else if (b.NeedsPayment)
+            {
+                <small class="vip-muted">Payment pending &middot; pay now or on arrival</small>
             }
             else
             {

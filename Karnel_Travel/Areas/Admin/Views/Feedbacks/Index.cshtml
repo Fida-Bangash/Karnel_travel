@@ -1,5 +1,7 @@
+@* Model bound to this view. *@
 @model IEnumerable<Karnel_Travel.Models.Feedback>
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Feedback";
 }
@@ -8,13 +10,14 @@
 <div class="page-header">
     <div>
         <h1 class="page-title">Feedback</h1>
-        <p class="page-subtitle">@Model.Count() feedback received from visitors.</p>
+        <p class="page-subtitle">@Model.Count() review@(Model.Count() == 1 ? "" : "s") from customers@(Model.Any(x => x.Rating > 0) ? " · average " + Model.Where(x => x.Rating > 0).Average(x => x.Rating).ToString("0.0") + " ★" : "").</p>
     </div>
     <a asp-action="Create" class="btn-crud btn-crud-primary">
         <i class="bi bi-plus-lg"></i> Add Feedback
     </a>
 </div>
 
+@* List card: toolbar and data table. *@
 <div class="table-card-custom">
 
     <!-- Search box + filter chips -->
@@ -25,34 +28,45 @@
         </div>
     </div>
 
+    @* Empty state when there are no records. *@
     @if (!Model.Any())
     {
         <div class="crud-empty">
             <i class="bi bi-chat-dots"></i>
             <strong>No feedback yet</strong>
-            <p class="mb-3">Visitor feedback from the Contact page will appear here.</p>
+            <p class="mb-3">Customer reviews appear here after they complete a booking.</p>
             <a asp-action="Create" class="btn-crud btn-crud-primary"><i class="bi bi-plus-lg"></i> Add Feedback</a>
         </div>
     }
     else
     {
+        @* Data table. *@
         <div class="table-responsive">
             <table class="table-custom" id="listTable">
+                @* Table header. *@
                 <thead>
                     <tr>
                         <th>From</th>
+                        <th>Rating</th>
+                        <th>For</th>
                         <th>Feedback</th>
                         <th>Received</th>
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
+                @* Table body. *@
                 <tbody>
+                    @* Render each record as a table row. *@
                     @foreach (var item in Model.OrderByDescending(x => x.CreatedOn))
                     {
-                        <tr data-search="@((item.Name + " " + item.Email + " " + item.Message).ToLower())">
+                        @* Row with search and filter metadata. *@
+                        <tr data-search="@((item.Name + " " + item.Email + " " + item.Message + " " + item.ItemName).ToLower())">
                             <td><div class="table-user-cell"><span class="avatar-initial">@(string.IsNullOrWhiteSpace(item.Name) ? "?" : item.Name.Trim().Substring(0, 1))</span><div><div class="table-user-name">@item.Name</div><div class="table-user-sub">@item.Email</div></div></div></td>
+                            <td>@if (item.Rating > 0) { <span style="color:#f5b301;white-space:nowrap">@(new string('★', item.Rating))<span style="color:#d5d9de">@(new string('★', 5 - item.Rating))</span></span> } else { <span class="text-muted">—</span> }</td>
+                            <td>@if (!string.IsNullOrWhiteSpace(item.ItemName)) { <div>@item.ItemName</div><div class="table-user-sub">@item.ItemType</div> } else { <span class="text-muted">General</span> }</td>
                             <td><div class="cell-truncate" style="max-width:420px;color:var(--text-main)" title="@item.Message">@item.Message</div></td>
                             <td><div>@item.CreatedOn.ToString("dd MMM yyyy")</div><div class="table-user-sub">@item.CreatedOn.ToString("hh:mm tt")</div></td>
+                            @* Row actions. *@
                             <td class="text-end">
                                 <a asp-action="Details" asp-route-id="@item.Id" class="icon-btn" title="View"><i class="bi bi-eye"></i></a>
                                 <a asp-action="Edit" asp-route-id="@item.Id" class="icon-btn" title="Edit"><i class="bi bi-pencil-square"></i></a>
@@ -73,6 +87,7 @@
     }
 </div>
 
+@* Page-specific scripts. *@
 @section Scripts {
     <script src="~/admin/js/crud-list.js"></script>
 }

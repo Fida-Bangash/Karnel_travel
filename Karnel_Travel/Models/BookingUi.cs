@@ -2,11 +2,13 @@ using System.Globalization;
 
 namespace Karnel_Travel.Models
 {
-    // Views me booking ke labels, icons aur rang ek jagah se milte hain
+    // Central place for booking labels, icons, CSS classes and formatting used by views.
     public static class BookingUi
     {
+        // Formats an amount, e.g. "Rs 1,234".
         public static string Money(decimal v) => "Rs " + v.ToString("#,##0.##", CultureInfo.InvariantCulture);
 
+        // Display name for a booking type.
         public static string TypeLabel(BookingType t) => t switch
         {
             BookingType.Hotel => "Hotel",
@@ -18,6 +20,7 @@ namespace Karnel_Travel.Models
             _ => t.ToString()
         };
 
+        // Font Awesome icon for a booking type.
         public static string TypeIcon(BookingType t) => t switch
         {
             BookingType.Hotel => "fa-hotel",
@@ -29,7 +32,7 @@ namespace Karnel_Travel.Models
             _ => "fa-star"
         };
 
-        // Admin panel (Bootstrap Icons) ke liye
+        // Bootstrap Icons icon for a booking type (admin panel).
         public static string TypeIconBi(BookingType t) => t switch
         {
             BookingType.Hotel => "bi-building",
@@ -41,6 +44,7 @@ namespace Karnel_Travel.Models
             _ => "bi-star"
         };
 
+        // Display text for a booking status.
         public static string StatusLabel(BookingStatus s) => s switch
         {
             BookingStatus.Pending => "Pending",
@@ -51,6 +55,7 @@ namespace Karnel_Travel.Models
             _ => s.ToString()
         };
 
+        // CSS class for a status badge.
         public static string StatusClass(BookingStatus s) => s switch
         {
             BookingStatus.Pending => "st-pending",
@@ -61,26 +66,60 @@ namespace Karnel_Travel.Models
             _ => ""
         };
 
-        // "19:00" -> "7:00 PM"
+        // Display text for a payment status.
+        public static string PaymentLabel(PaymentStatus s) => s switch
+        {
+            PaymentStatus.Paid => "Paid",
+            PaymentStatus.Refunded => "Refunded",
+            _ => "Unpaid"
+        };
+
+        // CSS class for a payment badge.
+        public static string PaymentClass(PaymentStatus s) => s switch
+        {
+            PaymentStatus.Paid => "pay-paid",
+            PaymentStatus.Refunded => "pay-refunded",
+            _ => "pay-unpaid"
+        };
+
+        // Short payment text, e.g. "Card •••• 4242" or "JazzCash".
+        public static string PaymentSummary(Booking b)
+        {
+            // No payment recorded.
+            if (string.IsNullOrWhiteSpace(b.PaymentMethod)) return "";
+            // Cards show masked digits; other methods show their name.
+            return b.PaymentMethod == "Card" && !string.IsNullOrWhiteSpace(b.PaymentLast4)
+                ? $"Card •••• {b.PaymentLast4}"
+                : b.PaymentMethod!;
+        }
+
+        // Converts "19:00" to "7:00 PM".
         public static string Slot(string? slot)
         {
+            // Nothing to format.
             if (string.IsNullOrWhiteSpace(slot)) return "";
+            // Format as 12-hour time; fall back to the raw value.
             return TimeSpan.TryParse(slot, CultureInfo.InvariantCulture, out var ts)
                 ? DateTime.Today.Add(ts).ToString("h:mm tt", CultureInfo.InvariantCulture)
                 : slot;
         }
 
-        // "12 Oct 2026 -> 15 Oct 2026 (3 nights)" jaisa chhota summary
+        // One-line date summary, e.g. "12 Oct 2026 → 15 Oct 2026 (3 nights)".
         public static string When(Booking b)
         {
+            // Start date text.
             var start = b.StartDate.ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
+            // Stays: show the date range and number of nights.
             if (b.ItemType is BookingType.Hotel or BookingType.Resort && b.EndDate.HasValue)
                 return $"{start} → {b.EndDate.Value:dd MMM yyyy} ({b.Nights} night{(b.Nights == 1 ? "" : "s")})";
+            // Restaurants: show the date and time slot.
             if (b.ItemType == BookingType.Restaurant && !string.IsNullOrWhiteSpace(b.TimeSlot))
                 return $"{start} · {Slot(b.TimeSlot)}";
+            // Other types: start date only.
             return start;
         }
 
+        // Quantity text per booking type, e.g. "2 rooms · 4 guests".
         public static string UnitsLabel(Booking b) => b.ItemType switch
         {
             BookingType.Hotel => $"{b.Units} room{(b.Units == 1 ? "" : "s")} · {b.Guests} guest{(b.Guests == 1 ? "" : "s")}",

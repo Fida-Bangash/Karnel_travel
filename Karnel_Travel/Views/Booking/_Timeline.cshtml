@@ -1,16 +1,19 @@
 @model Karnel_Travel.Models.Booking
 @{
+    // Status flags for timeline steps
     var s = Model.Status;
     var closed = s == BookingStatus.Cancelled || s == BookingStatus.Rejected;
     var confirmed = s == BookingStatus.Confirmed || s == BookingStatus.Completed;
     var completed = s == BookingStatus.Completed;
 }
 
+<!-- Booking progress steps -->
 <ol class="vip-steps">
     <li class="done">
         <div class="dot"><i class="fa fa-paper-plane"></i></div>
         Request sent
     </li>
+    <!-- Closed or normal flow -->
     @if (closed)
     {
         <li class="bad">

@@ -1,5 +1,7 @@
+@* Model bound to this view. *@
 @model IEnumerable<Karnel_Travel.Models.Resort>
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Resorts";
 }
@@ -15,6 +17,7 @@
     </a>
 </div>
 
+@* List card: toolbar and data table. *@
 <div class="table-card-custom">
 
     <!-- Search box + filter chips -->
@@ -30,6 +33,7 @@
         </div>
     </div>
 
+    @* Empty state when there are no records. *@
     @if (!Model.Any())
     {
         <div class="crud-empty">
@@ -41,8 +45,10 @@
     }
     else
     {
+        @* Data table. *@
         <div class="table-responsive">
             <table class="table-custom" id="listTable">
+                @* Table header. *@
                 <thead>
                     <tr>
                         <th>Resort</th>
@@ -53,9 +59,12 @@
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
+                @* Table body. *@
                 <tbody>
+                    @* Render each record as a table row. *@
                     @foreach (var item in Model)
                     {
+                        @* Row with search and filter metadata. *@
                         <tr data-search="@((item.Name + " " + item.Location).ToLower())"
                             data-filter="@(item.IsAvailable && item.Quantity > 0 ? "available" : "unavailable")">
                             <td><div class="table-user-cell">@if (!string.IsNullOrEmpty(item.ImagePath)) { <img src="@item.ImagePath" class="crud-thumb" alt="@item.Name" /> } else { <span class="crud-thumb-empty"><i class="bi bi-house-door"></i></span> }<div><div class="table-user-name">@item.Name</div><div class="table-user-sub"><i class="bi bi-geo-alt-fill"></i> @item.Location</div></div></div></td>
@@ -63,6 +72,7 @@
                             <td><span class="stars">@for (var i = 1; i <= 5; i++) { <i class="bi @(i <= item.Rating ? "bi-star-fill" : "bi-star")"></i> }</span></td>
                             <td>@item.Quantity <span class="table-user-sub">units</span></td>
                             <td>@if (item.IsAvailable && item.Quantity > 0) { <span class="badge-table success">Available</span> } else { <span class="badge-table failed">Unavailable</span> }</td>
+                            @* Row actions. *@
                             <td class="text-end">
                                 <a asp-action="Details" asp-route-id="@item.Id" class="icon-btn" title="View"><i class="bi bi-eye"></i></a>
                                 <a asp-action="Edit" asp-route-id="@item.Id" class="icon-btn" title="Edit"><i class="bi bi-pencil-square"></i></a>
@@ -83,6 +93,7 @@
     }
 </div>
 
+@* Page-specific scripts. *@
 @section Scripts {
     <script src="~/admin/js/crud-list.js"></script>
 }

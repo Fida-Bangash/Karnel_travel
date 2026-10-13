@@ -1,18 +1,25 @@
+@* Identity and app namespaces *@
 @using Microsoft.AspNetCore.Identity
 @using Karnel_Travel.Data
+@* Inject identity services *@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
+<!-- Right side of navbar -->
 <div class="navbar-nav align-items-lg-center ms-lg-3">
+@* Signed-in users get a menu *@
 @if (SignInManager.IsSignedIn(User))
 {
+    // Load user and display values
     var currentUser = await UserManager.GetUserAsync(User);
     var displayName = (!string.IsNullOrWhiteSpace(currentUser?.FullName)
         ? currentUser!.FullName
         : UserManager.GetUserName(User)) ?? "User";
     var initial = displayName.Substring(0, 1).ToUpper();
+    // Check for admin role
     var isAdmin = User.IsInRole("Admin");
 
+    <!-- User dropdown styles -->
     <style>
         /* ===== User dropdown (theme: Tourist) ===== */
         .user-menu-btn {
@@ -30,12 +37,14 @@
             text-decoration: none;
             transition: .3s;
         }
+        /* Hover and open state */
         .user-menu-btn:hover,
         .user-menu-btn[aria-expanded="true"] {
             background: var(--primary);
             border-color: var(--primary);
             color: #fff;
         }
+        /* Button inside sticky navbar */
         .sticky-top .user-menu-btn {
             color: var(--dark);
             border-color: #e3e6ea;
@@ -47,6 +56,7 @@
             border-color: var(--primary);
             color: #fff;
         }
+        /* Avatar circle */
         .user-avatar {
             width: 36px;
             height: 36px;
@@ -60,23 +70,27 @@
             font-size: 16px;
             flex-shrink: 0;
         }
+        /* Avatar on button hover */
         .user-menu-btn:hover .user-avatar,
         .user-menu-btn[aria-expanded="true"] .user-avatar {
             background: #fff;
             color: var(--primary);
         }
+        /* User name truncation */
         .user-menu-name {
             max-width: 130px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        /* Caret icon */
         .user-menu-caret {
             font-size: 11px;
             transition: transform .3s;
         }
         .user-menu-btn[aria-expanded="true"] .user-menu-caret { transform: rotate(180deg); }
 
+        /* Dropdown panel */
         .user-menu {
             min-width: 260px;
             padding: 8px;
@@ -86,6 +100,7 @@
             box-shadow: 0 14px 40px rgba(20, 20, 31, .18);
             font-family: 'Nunito', sans-serif;
         }
+        /* Dropdown header */
         .user-menu-head {
             display: flex;
             align-items: center;
@@ -96,6 +111,7 @@
             background: linear-gradient(135deg, rgba(134, 184, 23, .16), rgba(254, 136, 0, .08));
         }
         .user-menu-head .user-avatar { width: 46px; height: 46px; font-size: 20px; }
+        /* User name and email */
         .user-menu-info { min-width: 0; }
         .user-menu-info strong {
             display: block;
@@ -114,6 +130,7 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        /* Role badge */
         .user-role {
             display: inline-block;
             margin-top: 4px;
@@ -128,6 +145,7 @@
         }
         .user-role.is-admin { background: var(--secondary); }
 
+        /* Dropdown items */
         .user-menu .dropdown-item {
             display: flex;
             align-items: center;
@@ -140,6 +158,7 @@
             font-weight: 600;
             transition: .2s;
         }
+        /* Item icons */
         .user-menu .dropdown-item .item-icon {
             width: 34px;
             height: 34px;
@@ -152,6 +171,7 @@
             font-size: 14px;
             transition: .2s;
         }
+        /* Item hover state */
         .user-menu .dropdown-item:hover,
         .user-menu .dropdown-item:focus,
         .user-menu .dropdown-item:active {
@@ -162,7 +182,9 @@
             background: var(--primary);
             color: #fff;
         }
+        /* Divider */
         .user-menu .dropdown-divider { margin: 6px 4px; border-color: #eef0f2; }
+        /* Logout item colors */
         .user-menu .dropdown-item.logout-item .item-icon {
             background: rgba(220, 53, 69, .1);
             color: #dc3545;
@@ -178,12 +200,14 @@
             color: #fff;
         }
 
+        /* Mobile layout tweaks */
         @@media (max-width: 991.98px) {
             .user-menu-btn { color: var(--dark); border-color: #ddd; background: #f7f9f2; margin: 8px 0; }
             .user-menu { box-shadow: none; border: 1px solid #eee; margin-top: 4px !important; }
         }
     </style>
 
+    <!-- User menu dropdown -->
     <div class="nav-item dropdown">
         <a href="#" class="user-menu-btn" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             <span class="user-avatar">@initial</span>
@@ -191,7 +215,9 @@
             <i class="fa fa-chevron-down user-menu-caret"></i>
         </a>
 
+        <!-- Menu panel -->
         <div class="dropdown-menu dropdown-menu-end user-menu" aria-labelledby="userDropdown">
+            <!-- User info header -->
             <div class="user-menu-head">
                 <span class="user-avatar">@initial</span>
                 <div class="user-menu-info">
@@ -201,12 +227,14 @@
                 </div>
             </div>
 
+            @* Admin-only dashboard link *@
             @if (isAdmin)
             {
                 <a class="dropdown-item" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
                     <span class="item-icon"><i class="fa fa-tachometer-alt"></i></span>Dashboard
                 </a>
             }
+            <!-- Links for all users -->
             <a class="dropdown-item" asp-area="" asp-controller="Booking" asp-action="My">
                 <span class="item-icon"><i class="fa fa-suitcase-rolling"></i></span>My Bookings
             </a>
@@ -216,6 +244,7 @@
 
             <div class="dropdown-divider"></div>
 
+            <!-- Logout form -->
             <form asp-area="Identity" asp-page="/Account/Logout"
                   asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
                 <button type="submit" class="dropdown-item logout-item">
@@ -227,6 +256,7 @@
 }
 else
 {
+    <!-- Guest links: register and login -->
     <a class="nav-item nav-link" asp-area="Identity" asp-page="/Account/Register">Register</a>
     <a class="btn btn-primary rounded-pill py-2 px-4" asp-area="Identity" asp-page="/Account/Login">Login</a>
 }

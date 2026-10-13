@@ -1,5 +1,7 @@
+@* Model bound to this view. *@
 @model Karnel_Travel.Models.Hotel
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Edit Hotel";
     var m = Model ?? new Karnel_Travel.Models.Hotel();
@@ -15,29 +17,39 @@
     <a asp-action="Index" class="btn-crud btn-crud-light"><i class="bi bi-arrow-left"></i> Back to List</a>
 </div>
 
+@* Form posted to the server (supports file upload). *@
 <form asp-action="Edit" enctype="multipart/form-data" novalidate>
+    @* Keeps the record id on submit. *@
     <input type="hidden" asp-for="Id" />
+    @* Keeps the current image when no new file is chosen. *@
     <input type="hidden" asp-for="ImagePath" />
+    @* Two-column page layout. *@
     <div class="row g-4">
 
         <!-- Left: details -->
         <div class="col-lg-8">
+            @* Card: Hotel Details. *@
             <div class="crud-card">
                 <div class="crud-card-title"><i class="bi bi-building"></i> Hotel Details</div>
 
+                @* Model-level validation errors. *@
                 <div asp-validation-summary="ModelOnly" class="crud-summary"></div>
 
+                @* Form fields grid. *@
                 <div class="row g-3">
+                    @* Field: Name. *@
                     <div class="col-md-12">
                         <label asp-for="Name" class="crud-label">Hotel Name <span class="req">*</span></label>
                         <input asp-for="Name" class="crud-input" placeholder="e.g. Pearl Continental" maxlength="100" />
                         <span asp-validation-for="Name" class="crud-error"></span>
                     </div>
+                    @* Field: Location. *@
                     <div class="col-md-12">
                         <label asp-for="Location" class="crud-label">Location <span class="req">*</span></label>
                         <input asp-for="Location" class="crud-input" placeholder="e.g. Karachi" maxlength="100" />
                         <span asp-validation-for="Location" class="crud-error"></span>
                     </div>
+                    @* Field: Description. *@
                     <div class="col-md-12">
                         <label asp-for="Description" class="crud-label">Description</label>
                         <textarea asp-for="Description" class="crud-textarea" rows="5" maxlength="1000" placeholder="Facilities, view, meals, nearby places..." data-counter="DescriptionCount"></textarea>
@@ -47,22 +59,28 @@
                 </div>
             </div>
 
+            @* Card: Pricing & Availability. *@
             <div class="crud-card">
                 <div class="crud-card-title"><i class="bi bi-cash-coin"></i> Pricing & Availability</div>
 
+                @* Form fields grid. *@
                 <div class="row g-3">
+                    @* Field: Price. *@
                     <div class="col-md-6">
                         <label asp-for="Price" class="crud-label">Price per night <span class="req">*</span></label>
                         <div class="input-affix"><span class="affix">Rs</span><input asp-for="Price" type="number" step="0.01" min="0" class="crud-input" placeholder="0.00" /></div>
                         <span asp-validation-for="Price" class="crud-error"></span>
                     </div>
+                    @* Field: Quantity. *@
                     <div class="col-md-6">
                         <label asp-for="Quantity" class="crud-label">Available rooms <span class="req">*</span></label>
                         <div class="input-affix"><input asp-for="Quantity" type="number" step="1" min="0" class="crud-input has-right" placeholder="0" /><span class="affix affix-right">rooms</span></div>
                         <span asp-validation-for="Quantity" class="crud-error"></span>
                     </div>
+                    @* Field: Rating (quality). *@
                     <div class="col-md-12">
                         <label class="crud-label">Rating (quality)</label>
+                        @* Star rating input (radio buttons). *@
                         <div class="star-rating">
                             @for (var i = 5; i >= 1; i--)
                             {
@@ -74,10 +92,12 @@
                     </div>
                     <div class="col-md-12">
                         @{ var isIsAvailable = Model == null ? true : Model.IsAvailable; }
+                        @* Availability toggle. *@
                         <label class="switch-row">
                             <span class="switch"><input type="checkbox" name="IsAvailable" value="true" @(isIsAvailable ? "checked" : "") /><span class="slider"></span></span>
                             <span><strong>Available for booking</strong><small>Turn off to hide it from available-only searches.</small></span>
                         </label>
+                        @* Hidden fallback so an unchecked toggle posts false. *@
                         <input type="hidden" name="IsAvailable" value="false" />
     
                     </div>
@@ -89,9 +109,11 @@
         <!-- Right: image + buttons -->
         <div class="col-lg-4">
 
+            @* Card: Hotel Image. *@
             <div class="crud-card">
                 <div class="crud-card-title"><i class="bi bi-image"></i> Hotel Image</div>
 
+                @* Image picker with live preview. *@
                 <div class="upload-box">
                     <img id="imgPreview" class="upload-preview @(hasImage ? "show" : "")"
                          src="@(hasImage ? Model.ImagePath : "")" alt="Current image" />
@@ -104,11 +126,14 @@
                            data-preview="imgPreview" data-name="imgName"
                            data-placeholder="imgPlaceholder" data-error="imgError" />
                 </div>
+                @* Upload rules. *@
                 <div class="upload-hint mt-2">Leave empty to keep the current image. JPG, PNG or WEBP, max 2 MB.</div>
                 <span id="imgError" class="crud-error"></span>
+                @* Server-side image error. *@
                 @Html.ValidationMessage("imageFile", new { @class = "crud-error" })
             </div>
 
+            @* Submit and cancel buttons. *@
             <div class="d-grid gap-2">
                 <button type="submit" class="btn-crud btn-crud-primary justify-content-center">
                     <i class="bi bi-check-lg"></i> Save Changes
@@ -119,6 +144,7 @@
     </div>
 </form>
 
+@* Page-specific scripts. *@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script src="~/admin/js/crud-form.js"></script>

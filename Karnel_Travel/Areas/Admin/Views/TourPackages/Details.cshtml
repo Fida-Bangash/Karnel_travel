@@ -1,5 +1,7 @@
+@* Model bound to this view. *@
 @model Karnel_Travel.Models.TourPackage
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Package Details";
 }
@@ -10,6 +12,7 @@
         <h1 class="page-title">@Model.Title</h1>
         <p class="page-subtitle"><span class="discount-badge">@Model.DiscountPercent% OFF</span></p>
     </div>
+    @* Header action buttons. *@
     <div class="d-flex gap-2 flex-wrap">
         <a asp-action="Index" class="btn-crud btn-crud-light"><i class="bi bi-arrow-left"></i> Back to List</a>
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-crud btn-crud-primary"><i class="bi bi-pencil-square"></i> Edit</a>
@@ -17,10 +20,13 @@
     </div>
 </div>
 
+@* Two-column page layout. *@
 <div class="row g-4">
     <!-- Image -->
     <div class="col-lg-5">
+        @* Content card. *@
         <div class="crud-card">
+            @* Show the image, or a placeholder if none. *@
             @if (!string.IsNullOrEmpty(Model.ImagePath))
             {
                 <img src="@Model.ImagePath" class="detail-hero" alt="@Model.Title" />
@@ -33,29 +39,36 @@
     </div>
     <!-- Information -->
     <div class="col-lg-7">
+        @* Card: Information. *@
         <div class="crud-card">
             <div class="crud-card-title"><i class="bi bi-info-circle"></i> Information</div>
 
+            @* Detail: Title. *@
             <div class="detail-row">
                 <div class="k">Title</div>
                 <div class="v">@Model.Title</div>
             </div>
+            @* Detail: Price. *@
             <div class="detail-row">
                 <div class="k">Price</div>
                 <div class="v">@(Model.Price > 0 ? "Rs " + Model.Price.ToString("#,##0.##") + " per person" : "Not set (price on confirmation)")</div>
             </div>
+            @* Detail: Discount. *@
             <div class="detail-row">
                 <div class="k">Discount</div>
                 <div class="v"><span class="discount-badge">@Model.DiscountPercent% OFF</span></div>
             </div>
+            @* Detail: Valid Till. *@
             <div class="detail-row">
                 <div class="k">Valid Till</div>
                 <div class="v">@(Model.ValidTill.HasValue ? Model.ValidTill.Value.ToString("dd MMMM yyyy") : "No expiry date")</div>
             </div>
+            @* Detail: Status. *@
             <div class="detail-row">
                 <div class="k">Status</div>
                 <div class="v">@if (Model.ValidTill.HasValue && Model.ValidTill.Value.Date < DateTime.Today) { <span class="badge-table failed">Expired</span> } else { <span class="badge-table success">Active</span> }</div>
             </div>
+            @* Detail: Details. *@
             <div class="detail-row">
                 <div class="k">Details</div>
                 <div class="v">@(string.IsNullOrWhiteSpace(Model.Details) ? "No details added." : Model.Details)</div>

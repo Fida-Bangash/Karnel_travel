@@ -1,0 +1,64 @@
+@model Karnel_Travel.Models.ReviewFormViewModel
+@{
+    // Page title and booking shortcut
+    ViewData["Title"] = "Review " + Model.Booking.ItemName;
+    var b = Model.Booking;
+}
+
+@* Load page styles *@
+@section Styles { <partial name="_Styles" /> }
+
+<!-- Page header -->
+<div class="vip-page py-4">
+    <div class="vip-head">
+        <span class="vip-eyebrow">Your experience</span>
+        <h1 class="vip-title">Rate your <span>stay</span></h1>
+        <p class="vip-sub">@b.ItemName · @BookingUi.When(b)</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <!-- Review form card -->
+            <div class="vip-card">
+                <div class="vip-card-body">
+                    <h4 class="vip-card-title"><i class="fa fa-star"></i> Write a review</h4>
+
+                    <!-- Review form -->
+                    <form asp-action="Review" asp-route-id="@b.Id" method="post" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="vip-alert error"></div>
+
+                        <div class="mb-4">
+                            <label class="vip-label">Your rating</label>
+                            <!-- Star rating picker -->
+                            <div class="rv-stars" role="radiogroup" aria-label="Star rating">
+                                @for (var i = 5; i >= 1; i--)
+                                {
+                                    <input type="radio" name="Input.Rating" id="star@(i)" value="@i" @(Model.Input.Rating == i ? "checked" : null) />
+                                    <label for="star@(i)" title="@i star@(i == 1 ? "" : "s")">★</label>
+                                }
+                            </div>
+                            <span asp-validation-for="Input.Rating" class="vip-field-error"></span>
+                        </div>
+
+                        <!-- Review message field -->
+                        <div class="mb-4">
+                            <label asp-for="Input.Message" class="vip-label">Your review</label>
+                            <textarea asp-for="Input.Message" class="vip-textarea" rows="6" maxlength="1000"
+                                      placeholder="How was the service, the place, the food...?"></textarea>
+                            <span asp-validation-for="Input.Message" class="vip-field-error"></span>
+                        </div>
+
+                        <!-- Form buttons -->
+                        <div class="d-flex flex-wrap gap-3 justify-content-end">
+                            <a asp-action="Details" asp-route-id="@b.Id" class="vip-btn vip-btn-ghost">Cancel</a>
+                            <button type="submit" class="vip-btn vip-btn-gold"><i class="fa fa-paper-plane"></i> Submit review</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Validation scripts *@
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

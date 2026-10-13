@@ -1,27 +1,35 @@
 ﻿namespace Karnel_Travel.Models;
 
-// Search aur Advanced Search page ka data: filters (input) aur results (output) ek hi class me
+// Data for Search and Advanced Search: filters (input) and results (output) in one class.
 public class SearchViewModel
 {
-    // ---------- Filters (user jo form me bharta hai) ----------
-    public string? Keyword { get; set; }        // Naam ya category ka lafz
+    // Filter: name or category keyword.
+    public string? Keyword { get; set; }
 
-    public string? Location { get; set; }       // Shehar ya jagah
+    // Filter: city or place.
+    public string? Location { get; set; }
 
-    public decimal? MaxPrice { get; set; }      // Zyada se zyada price
+    // Filter: maximum price.
+    public decimal? MaxPrice { get; set; }
 
-    public int? MinRating { get; set; }        // Kam az kam rating (quality)
+    // Filter: minimum rating.
+    public int? MinRating { get; set; }
 
-    public int? MinQuantity { get; set; }       // Kam az kam rooms/tables/units (quantity)
+    // Filter: minimum rooms, tables or units.
+    public int? MinQuantity { get; set; }
 
-    public bool AvailableOnly { get; set; }     // Sirf available wale dikhao
+    // Filter: show only available items.
+    public bool AvailableOnly { get; set; }
 
-    // ---------- Results (search ke natije) ----------
+    // Result: matching tourist spots.
     public List<TouristSpot> Spots { get; set; } = new();
 
+    // Result: matching hotels.
     public List<Hotel> Hotels { get; set; } = new();
 
+    // Result: matching restaurants.
     public List<Restaurant> Restaurants { get; set; } = new();
 
+    // Result: matching resorts.
     public List<Resort> Resorts { get; set; } = new();
 }

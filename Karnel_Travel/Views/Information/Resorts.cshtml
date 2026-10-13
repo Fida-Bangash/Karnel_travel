@@ -1,16 +1,20 @@
 ﻿@model List<Karnel_Travel.Models.Resort>
 
 @{
+    // Set the browser page title
     ViewData["Title"] = "Resorts";
 }
 
 <div class="container py-5">
 
+    <!-- Page heading -->
     <h1 class="mb-2 text-center">Resorts</h1>
     <p class="text-center text-muted mb-5">Relax at the best holiday resorts.</p>
 
+    <!-- Resort cards grid -->
     <div class="row g-4">
 
+        @* Render one card per resort *@
         @foreach (var r in Model)
         {
             // If no image was uploaded, show a default picture
@@ -29,6 +33,7 @@
                         </span>
                     </div>
 
+                    <!-- Card body -->
                     <div class="card-body d-flex flex-column">
 
                         <!-- Name -->
@@ -73,6 +78,7 @@
 
     </div>
 
+    @* Message when no resorts exist *@
     @if (!Model.Any())
     {
         <p class="text-center text-muted">No resorts added yet.</p>

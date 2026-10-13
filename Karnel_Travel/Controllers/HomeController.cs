@@ -6,19 +6,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Karnel_Travel.Controllers
 {
-    // Public website ke main pages: Home, About, Services, Destination, Contact, Privacy
+    // Public website pages: home, about, services, destinations, contact and reviews.
     public class HomeController : Controller
     {
-        // Database ka context (tables tak pahunchne ke liye)
+        // Database context.
         private readonly Karnel_TravelContext _db;
 
-        // Constructor: ASP.NET khud database context de deta hai (dependency injection)
+        // Constructor: dependencies are injected by ASP.NET.
         public HomeController(Karnel_TravelContext db)
         {
             _db = db;
         }
 
-        // Destination page: saare tourist spots database se dikhata hai
+        // Destination page: lists all tourist spots.
         public async Task<IActionResult> Destination()
         {
             var spots = await _db.TouristSpots.ToListAsync();
@@ -26,35 +26,46 @@ namespace Karnel_Travel.Controllers
             return View(spots);
         }
 
-        // Home page: "Popular Destination" section ke liye sab se naye 4 tourist spots
+        // Home page: newest spots and recent customer reviews.
         public async Task<IActionResult> Index()
         {
+            // Four newest spots for the Popular Destinations section.
             ViewBag.PopularSpots = await _db.TouristSpots
                 .OrderByDescending(s => s.Id)
                 .Take(4)
                 .ToListAsync();
 
+            // Reviews come only from completed bookings (rated feedback).
+            var reviews = _db.Feedbacks.AsNoTracking().Where(f => f.BookingId != null && f.Rating > 0);
+            // Latest 6 reviews.
+            ViewBag.Reviews = await reviews.OrderByDescending(f => f.CreatedOn).Take(6).ToListAsync();
+            // Review count and average rating.
+            int reviewCount = await reviews.CountAsync();
+            ViewBag.ReviewCount = reviewCount;
+            ViewBag.ReviewAverage = reviewCount > 0 ? await reviews.AverageAsync(f => (double)f.Rating) : 0.0;
+
             return View();
         }
 
-        // About Us page (company ki jankari)
+        // About Us page.
         public IActionResult About()
         {
             return View();
         }
 
-        // Services page
+        // Services page.
         public IActionResult Service()
         {
             return View();
         }
 
-        // True agar request JavaScript (fetch/AJAX) se aayi hai, tab page reload nahi hota, JSON wapas jata hai
+        // True for fetch/AJAX requests, which get JSON instead of a page reload.
         private bool IsAjax => Request.Headers["X-Requested-With"] == "XMLHttpRequest";
 
-        // Validation ke errors ko JSON me badalta hai: { success:false, errors:{ Name:["..."], Email:["..."] } }
+        // Converts validation errors into JSON for AJAX forms.
         private JsonResult ValidationErrorsJson()
         {
+            // Map each field to its error messages.
             var errors = ModelState
                 .Where(e => e.Value != null && e.Value.Errors.Count > 0)
                 .ToDictionary(e => e.Key, e => e.Value!.Errors.Select(x => x.ErrorMessage).ToArray());
@@ -62,99 +73,91 @@ namespace Karnel_Travel.Controllers
             return Json(new { success = false, message = "Please fix the errors below.", errors });
         }
 
-        // Contact form me jo request types allowed hain (order, booking ya general inquiry)
+        // Request types accepted from the contact form.
         private static readonly string[] AllowedRequestTypes =
         {
             "General Inquiry", "Custom Tour Request"
         };
 
-        // Contact page (GET): form dikhata hai
-        // "Order Now" / "Book Now" button se aaye to type aur item (package/hotel ka naam) pehle se bhar deta hai
+        // Shows the contact form, prefilled when coming from an order or booking button.
         [HttpGet]
         public IActionResult Contact(string? type, string? item)
         {
+            // Start with an empty message.
             var model = new ContactMessage();
 
-            // Item ka naam subject me daal do (Subject ki limit 150 characters hai)
+            // Prefill the subject with the item name (max 150 characters).
             if (!string.IsNullOrWhiteSpace(item))
             {
                 model.Subject = item.Length > 150 ? item[..150] : item;
             }
 
-            // Sirf allowed type hi dropdown me select hoga
+            // Preselect the request type only if it is allowed.
             ViewBag.RequestType = AllowedRequestTypes.Contains(type) ? type : "General Inquiry";
 
             return View(model);
         }
 
-        // Contact form submit (POST): message database me save karta hai
-        // [Bind] sirf wahi fields leta hai jo form me hain (extra fields ignore hote hain)
+        // Validates and saves the contact message. [Bind] limits the accepted fields.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Contact([Bind("Name,Email,Phone,Subject,Message")] ContactMessage model, string? requestType)
         {
-            // Agar data galat ho (khali ya galat email) to form wapas dikhao errors ke saath
+            // Return validation errors (JSON for AJAX, otherwise redisplay the form).
             if (!ModelState.IsValid)
             {
-                // AJAX request ho to sirf errors JSON me bhejo (page reload nahi hoga)
+                // AJAX: return errors as JSON without a page reload.
                 if (IsAjax) return ValidationErrorsJson();
 
+                // Keep the selected request type when redisplaying.
                 ViewBag.RequestType = requestType;
                 return View(model);
             }
 
-            // Agar customer ne order/booking chuna hai to subject ke shuru me tag laga do,
-            // taake admin ko messages list me hi pata chal jaye ke ye order hai ya inquiry
+            // Tag the subject so admins can tell orders from inquiries.
             if (AllowedRequestTypes.Contains(requestType) && requestType != "General Inquiry")
             {
                 var tagged = $"[{requestType}] {model.Subject}";
                 model.Subject = tagged.Length > 150 ? tagged[..150] : tagged;
             }
 
+            // Save the message.
             _db.ContactMessages.Add(model);
+            // Persist changes to the database.
             await _db.SaveChangesAsync();
 
+            // Confirmation text shown to the user.
             const string successMessage = "Thank you! Your request has been sent. We will contact you soon.";
 
-            // AJAX request ho to success JSON bhejo, form wahi rehta hai
+            // AJAX: return success JSON; the form stays on the page.
             if (IsAjax) return Json(new { success = true, message = successMessage });
 
-            // Success message agle page par dikhane ke liye
+            // Show the message on the next page load.
             TempData["Success"] = successMessage;
 
+            // Post/Redirect/Get to prevent duplicate submissions.
             return RedirectToAction(nameof(Contact));
         }
 
-        // Feedback form submit (POST): feedback database me save karta hai
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Feedback([Bind("Name,Email,Message")] Feedback model)
+        // Lists customer reviews (latest 100, from completed bookings only).
+        public async Task<IActionResult> Reviews()
         {
-            if (!ModelState.IsValid)
-            {
-                if (IsAjax) return ValidationErrorsJson();
+            var list = await _db.Feedbacks.AsNoTracking()
+                .Where(f => f.BookingId != null && f.Rating > 0)
+                .OrderByDescending(f => f.CreatedOn)
+                .Take(100)
+                .ToListAsync();
 
-                TempData["Error"] = "Please enter valid feedback details.";
-                return RedirectToAction(nameof(Contact));
-            }
-
-            _db.Feedbacks.Add(model);
-            await _db.SaveChangesAsync();
-
-            if (IsAjax) return Json(new { success = true, message = "Thanks for your feedback!" });
-
-            TempData["Success"] = "Thanks for your feedback!";
-
-            return RedirectToAction(nameof(Contact));
+            return View(list);
         }
 
-        // Privacy Policy page
+        // Privacy Policy page.
         public IActionResult Privacy()
         {
             return View();
         }
 
-        // Error page: koi masla aaye to ye dikhta hai
+        // Error page that shows the request id for troubleshooting.
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

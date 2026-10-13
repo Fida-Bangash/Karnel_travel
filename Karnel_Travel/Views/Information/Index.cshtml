@@ -1,4 +1,5 @@
 ﻿@{
+    // Set the browser page title
     ViewData["Title"] = "Information";
 }
 
@@ -27,8 +28,10 @@
         };
     }
 
+    <!-- Information cards grid -->
     <div class="row g-4 justify-content-center">
 
+        @* Render one card per entry *@
         @foreach (var c in infoCards)
         {
             <div class="col-lg-4 col-md-6">
@@ -38,9 +41,11 @@
 
                     <div class="card spot-card h-100 border-0 shadow-sm">
 
+                        <!-- Card top color strip -->
                         <!-- Top strip in primary color -->
                         <div class="bg-primary" style="height:6px;"></div>
 
+                        <!-- Card body -->
                         <div class="card-body d-flex flex-column align-items-center text-center p-4">
 
                             <!-- Icon circle -->
@@ -51,8 +56,10 @@
 
                             <h4 class="fw-bold mb-2">@c.Title</h4>
 
+                            <!-- Card description -->
                             <p class="text-muted flex-grow-1">@c.Text</p>
 
+                            <!-- Card button label -->
                             <span class="btn btn-primary btn-sm px-4 mt-2">
                                 @c.Button <i class="fa fa-long-arrow-alt-right ms-1"></i>
                             </span>
@@ -68,6 +75,7 @@
     </div>
 
     @{
+    // Newly added listings from ViewBag
     
     var newHotels = ViewBag.NewHotels as List<Hotel> ?? new List<Hotel>();
     var newResorts = ViewBag.NewResorts as List<Resort> ?? new List<Resort>();
@@ -78,24 +86,31 @@
 <!-- Newly Added -->
 @{
     // Hotels, resorts aur restaurants ko ek hi list me jama karo taake ek hi card design use ho
+    // Combined list of new items
     var newItems = new List<(string Type, string Name, string Location, string? Image, string DefaultImage, string? Desc, string Price, string Unit, string ContactType, string ButtonText, bool Available)>();
 
+    // Add new hotels
     foreach (var h in newHotels)
         newItems.Add(("Hotel", h.Name, h.Location, h.ImagePath, "/img/destination-1.jpg", h.Description, "Rs " + h.Price.ToString("0.##"), "/ night", "Hotel:" + h.Id, "Book Now", h.IsAvailable));
 
+    // Add new resorts
     foreach (var r in newResorts)
         newItems.Add(("Resort", r.Name, r.Location, r.ImagePath, "/img/destination-2.jpg", r.Description, "Rs " + r.Price.ToString("0.##"), "", "Resort:" + r.Id, "Book Now", r.IsAvailable));
 
+    // Add new restaurants
     foreach (var r in newRestaurants)
         newItems.Add(("Restaurant", r.Name, r.Location, r.ImagePath, "/img/destination-3.jpg", r.Description, "Rs " + r.Price.ToString("0.##"), "/ avg. meal", "Restaurant:" + r.Id, "Reserve Table", r.IsAvailable));
 }
 
+<!-- Newly added section -->
 <div class="mt-5">
     <h2 class="mb-4 text-center">Newly Added</h2>
     <div class="row g-4">
 
+        @* Render one card per new item *@
         @foreach (var item in newItems)
         {
+            // Use default image when none set
             var img = string.IsNullOrWhiteSpace(item.Image) ? item.DefaultImage : item.Image;
 
             <div class="col-lg-4 col-md-6">
@@ -126,6 +141,7 @@
 
                         <!-- Price (left) + button (right) -->
                         <div class="d-flex justify-content-between align-items-center mt-2">
+                            <!-- Price and unit -->
                             <div>
                                 <span class="fs-4 fw-bold text-primary">@item.Price</span>
                                 <small class="text-muted">@item.Unit</small>
@@ -150,6 +166,7 @@
 
     </div>
 
+    @* Message when nothing is new *@
     @if (!newItems.Any())
     {
         <p class="text-center text-muted">No new listings yet.</p>
@@ -165,8 +182,10 @@
 
     <div class="row g-4">
 
+        @* Render one card per package *@
         @foreach (var p in packages)
         {
+            // Use default image when none set
             var pkgImg = string.IsNullOrWhiteSpace(p.ImagePath) ? "/img/destination-4.jpg" : p.ImagePath;
 
             <div class="col-lg-4 col-md-6">
@@ -190,6 +209,7 @@
                             <p class="mb-2"><span class="fs-5 fw-bold text-primary">Rs @p.Price.ToString("#,##0.##")</span> <small class="text-muted">/ person</small></p>
                         }
 
+                        @* Show price if set *@
                         <!-- Valid till -->
                         @if (p.ValidTill != null)
                         {
@@ -221,6 +241,7 @@
             <div class="col-12">
                 <p class="text-center text-muted">No offers available right now.</p>
             </div>
+        @* Message when no packages exist *@
         }
 
     </div>

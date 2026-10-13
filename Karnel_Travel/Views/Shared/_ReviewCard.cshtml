@@ -1,0 +1,24 @@
+@* Model: one feedback entry *@
+@model Karnel_Travel.Models.Feedback
+<!-- Review card -->
+<div class="card border-0 shadow-sm h-100">
+    <div class="card-body p-4 d-flex flex-column">
+        <!-- Star rating -->
+        <div class="mb-2" style="color:#f5b301;letter-spacing:.1em" aria-label="@Model.Rating out of 5">
+            @for (var i = 1; i <= 5; i++) { <span style="@(i <= Model.Rating ? "" : "color:#d5d9de")">★</span> }
+        </div>
+        <!-- Review message -->
+        <p class="flex-grow-1 mb-3">“@Model.Message”</p>
+        <!-- Author initial and name -->
+        <div class="d-flex align-items-center">
+            <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white fw-bold me-3"
+                  style="width:42px;height:42px">@(string.IsNullOrWhiteSpace(Model.Name) ? "?" : Model.Name.Trim()[..1].ToUpper())</span>
+            <div>
+                <div class="fw-bold">@Model.Name</div>
+                <small class="text-muted">
+                    @if (!string.IsNullOrWhiteSpace(Model.ItemName)) { <span>@Model.ItemName · </span> }@Model.CreatedOn.ToString("dd MMM yyyy")
+                </small>
+            </div>
+        </div>
+    </div>
+</div>

@@ -7,26 +7,30 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Karnel_Travel.Areas.Admin.Controllers
 {
+    // Admin area controller; access limited to the Admin role.
     [Area("Admin")]
     [Authorize(Roles = "Admin")]
     public class FeedbacksController : Controller
     {
+        // Database context.
         private readonly Karnel_TravelContext _context;
 
+        // Constructor: dependencies are injected by ASP.NET.
         public FeedbacksController(Karnel_TravelContext context)
         {
             _context = context;
         }
 
-        // GET: FEEDBACKS
+        // Lists records.
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Feedbacks.ToListAsync());
+            return View(await _context.Feedbacks.AsNoTracking().ToListAsync());
         }
 
-        // GET: FEEDBACKS/Details/5
+        // Shows a single record.
         public async Task<IActionResult> Details(int? id)
         {
+            // Reject requests without an id.
             if (id == null)
             {
                 return NotFound();
@@ -34,6 +38,7 @@ namespace Karnel_Travel.Areas.Admin.Controllers
 
             var feedback = await _context.Feedbacks
                 .FirstOrDefaultAsync(m => m.Id == id);
+            // Return 404 when the record does not exist.
             if (feedback == null)
             {
                 return NotFound();
@@ -42,37 +47,40 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             return View(feedback);
         }
 
-        // GET: FEEDBACKS/Create
+        // Displays the create form.
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: FEEDBACKS/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // Validates input and saves the new record.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Email,Message,CreatedOn")] Feedback feedback)
         {
+            // Proceed only when validation passes.
             if (ModelState.IsValid)
             {
+                // Stage the new record.
                 _context.Add(feedback);
+                // Persist changes to the database.
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(feedback);
         }
 
-        // GET: FEEDBACKS/Edit/5
+        // Displays the edit form.
         public async Task<IActionResult> Edit(int? id)
         {
+            // Reject requests without an id.
             if (id == null)
             {
                 return NotFound();
             }
 
             var feedback = await _context.Feedbacks.FindAsync(id);
+            // Return 404 when the record does not exist.
             if (feedback == null)
             {
                 return NotFound();
@@ -80,44 +88,44 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             return View(feedback);
         }
 
-        // POST: FEEDBACKS/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // Saves the edited record.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int? id, [Bind("Id,Name,Email,Message,CreatedOn")] Feedback feedback)
         {
+            // Reject a mismatched id.
             if (id != feedback.Id)
             {
                 return NotFound();
             }
 
+            // Proceed only when validation passes.
             if (ModelState.IsValid)
             {
-                try
+                // Load the existing record to update.
+                var existing = await _context.Feedbacks.FindAsync(id);
+                // Return 404 when the record does not exist.
+                if (existing == null)
                 {
-                    _context.Update(feedback);
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!FeedbackExists(feedback.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+
+                // Copy the edited values onto the tracked entity.
+                existing.Name = feedback.Name;
+                existing.Email = feedback.Email;
+                existing.Message = feedback.Message;
+                existing.CreatedOn = feedback.CreatedOn;
+                // Persist changes to the database.
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(feedback);
         }
 
-        // GET: FEEDBACKS/Delete/5
+        // Shows the delete confirmation page.
         public async Task<IActionResult> Delete(int? id)
         {
+            // Reject requests without an id.
             if (id == null)
             {
                 return NotFound();
@@ -125,6 +133,7 @@ namespace Karnel_Travel.Areas.Admin.Controllers
 
             var feedback = await _context.Feedbacks
                 .FirstOrDefaultAsync(m => m.Id == id);
+            // Return 404 when the record does not exist.
             if (feedback == null)
             {
                 return NotFound();
@@ -133,7 +142,7 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             return View(feedback);
         }
 
-        // POST: FEEDBACKS/Delete/5
+        // Deletes the record after confirmation.
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int? id)
@@ -141,13 +150,16 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             var feedback = await _context.Feedbacks.FindAsync(id);
             if (feedback != null)
             {
+                // Remove the record.
                 _context.Feedbacks.Remove(feedback);
             }
 
+            // Persist changes to the database.
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
+        // Helper: checks whether the record exists.
         private bool FeedbackExists(int? id)
         {
             return _context.Feedbacks.Any(e => e.Id == id);

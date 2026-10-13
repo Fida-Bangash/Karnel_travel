@@ -1,11 +1,15 @@
 @model Karnel_Travel.Models.Booking
 @{
+    // Page title and view flags
     ViewData["Title"] = "Booking " + Model.BookingCode;
-    var canCancel = Model.HoldsInventory && Model.StartDate.Date > DateTime.Today;
+    var canCancel = Model.CanUserCancel;
+    var review = ViewBag.Review as Feedback;
 }
 
+@* Load page styles *@
 @section Styles { <partial name="_Styles" /> }
 
+<!-- Page header -->
 <div class="vip-page py-4">
     <div class="vip-head">
         <span class="vip-eyebrow">Booking details</span>
@@ -15,6 +19,7 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
 
+            <!-- Flash messages -->
             @if (TempData["Success"] is string ok)
             {
                 <div class="vip-alert success"><i class="fa fa-check-circle mt-1"></i><div>@ok</div></div>
@@ -24,13 +29,16 @@
                 <div class="vip-alert error"><i class="fa fa-exclamation-circle mt-1"></i><div>@err</div></div>
             }
 
+            <!-- Booking ticket -->
             <partial name="_Ticket" model="Model" />
 
+            <!-- Status timeline card -->
             <div class="vip-card mt-4">
                 <div class="vip-card-body">
                     <h4 class="vip-card-title"><i class="fa fa-route"></i> Status</h4>
                     <partial name="_Timeline" model="Model" />
 
+                    <!-- Admin message -->
                     @if (!string.IsNullOrWhiteSpace(Model.AdminNote))
                     {
                         <div class="vip-summary mt-4">
@@ -41,8 +49,40 @@
                 </div>
             </div>
 
+            <!-- Existing review card -->
+            @if (review != null)
+            {
+                <div class="vip-card mt-4">
+                    <div class="vip-card-body">
+                        <h4 class="vip-card-title"><i class="fa fa-star"></i> Your review</h4>
+                        <div class="rv-static mb-2" aria-label="@review.Rating out of 5">
+                            @for (var i = 1; i <= 5; i++) { <span class="@(i <= review.Rating ? "" : "off")">★</span> }
+                        </div>
+                        <div>@review.Message</div>
+                        <div class="vip-muted small mt-2">Posted on @review.CreatedOn.ToString("dd MMM yyyy")</div>
+                    </div>
+                </div>
+            }
+            <!-- Prompt to write a review -->
+            else if (Model.CanReviewNow)
+            {
+                <div class="vip-card mt-4">
+                    <div class="vip-card-body text-center">
+                        <h4 class="vip-card-title justify-content-center"><i class="fa fa-star"></i> How was it?</h4>
+                        <p class="vip-muted">Your booking is complete. Share your experience with other travellers.</p>
+                        <a asp-action="Review" asp-route-id="@Model.Id" class="vip-btn vip-btn-gold"><i class="fa fa-star"></i> Write a review</a>
+                    </div>
+                </div>
+            }
+
+            <!-- Action buttons -->
             <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
                 <a asp-action="My" class="vip-btn vip-btn-ghost"><i class="fa fa-arrow-left"></i> My bookings</a>
+                @if (Model.CanPayNow)
+                {
+                    <a asp-action="Payment" asp-route-id="@Model.Id" class="vip-btn vip-btn-gold"><i class="fa fa-credit-card"></i> Pay @BookingUi.Money(Model.TotalPrice)</a>
+                }
+                <!-- Cancel booking form -->
                 @if (canCancel)
                 {
                     <form asp-action="Cancel" asp-route-id="@Model.Id" method="post"
@@ -52,7 +92,7 @@
                 }
                 else if (Model.HoldsInventory)
                 {
-                    <a asp-controller="Home" asp-action="Contact" class="vip-btn vip-btn-ghost"><i class="fa fa-headset"></i> Contact us to change</a>
+                    <a asp-controller="Home" asp-action="Contact" class="vip-btn vip-btn-ghost"><i class="fa fa-headset"></i> Contact us to change or cancel</a>
                 }
             </div>
         </div>

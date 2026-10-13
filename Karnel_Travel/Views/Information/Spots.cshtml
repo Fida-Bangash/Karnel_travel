@@ -1,16 +1,20 @@
 ﻿@model List<Karnel_Travel.Models.TouristSpot>
 
 @{
+    // Set the browser page title
     ViewData["Title"] = "Tourist Spots";
 }
 
 <div class="container py-5">
 
+    <!-- Page heading -->
     <h1 class="mb-2 text-center">Tourist Spots</h1>
     <p class="text-center text-muted mb-5">Beaches, monuments and attractions across the country.</p>
 
+    <!-- Tourist spot cards grid -->
     <div class="row g-4">
 
+        @* Render one card per spot *@
         @foreach (var spot in Model)
         {
             <div class="col-lg-4 col-md-6">
@@ -20,6 +24,7 @@
 
     </div>
 
+    @* Message when no spots exist *@
     @if (!Model.Any())
     {
         <p class="text-center text-muted">No tourist spots added yet.</p>

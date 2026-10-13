@@ -1,13 +1,16 @@
 ﻿@model List<Karnel_Travel.Models.TravelInfo>
 
 @{
+    // Set the browser page title
     ViewData["Title"] = "Travel Information";
 }
 
 @* Small styles for the travel card (same look as the tourist spot card) *@
 <style>
+    /* Card hover lift effect */
     .travel-card { transition: transform .25s ease, box-shadow .25s ease; border-radius: 6px; overflow: hidden; }
     .travel-card:hover { transform: translateY(-5px); box-shadow: 0 .75rem 1.5rem rgba(0, 0, 0, .12) !important; }
+    /* Limit description to three lines */
     .travel-card-desc {
         display: -webkit-box;
         -webkit-line-clamp: 3;
@@ -18,15 +21,19 @@
 
 <div class="container py-5">
 
+    <!-- Page heading -->
     <h1 class="mb-2 text-center">Travel Information</h1>
     <p class="text-center text-muted mb-5">Transport options, routes and fares between cities.</p>
 
+    <!-- Travel cards grid -->
     <div class="row g-4">
 
+        @* Render one card per travel option *@
         @foreach (var travel in Model)
         {
             // Choose an icon from the transport mode name
             var mode = (travel.TransportMode ?? "").ToLower();
+            // Pick the icon by mode
             var icon = mode.Contains("bus") ? "fa-bus"
                      : mode.Contains("train") ? "fa-train"
                      : (mode.Contains("flight") || mode.Contains("air")) ? "fa-plane"
@@ -47,6 +54,7 @@
                         <span class="fw-bold text-uppercase">@travel.TransportMode</span>
                     </div>
 
+                    <!-- Card body -->
                     <div class="card-body d-flex flex-column">
 
                         <!-- Route on one line -->
@@ -62,6 +70,7 @@
                         </p>
 
                         <!-- Fare + booking button -->
+                        <!-- Fare and booking button -->
                         <div class="d-flex align-items-center justify-content-between border-top pt-3 mt-2">
                             <div>
                                 <small class="text-muted d-block">Fare</small>
@@ -84,6 +93,7 @@
 
     </div>
 
+    @* Message when no options exist *@
     @if (!Model.Any())
     {
         <p class="text-center text-muted">No travel options added yet.</p>

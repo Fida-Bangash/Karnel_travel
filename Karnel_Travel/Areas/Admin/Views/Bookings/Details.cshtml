@@ -1,21 +1,28 @@
+@* Model bound to this view. *@
 @model Karnel_Travel.Models.Booking
 @using Karnel_Travel.Data
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Booking " + Model.BookingCode;
     var b = Model;
+    // Prefilled mailto link for emailing the customer.
     var mailto = "mailto:" + b.CustomerEmail + "?subject=" + Uri.EscapeDataString("Your Karnel Travel booking " + b.BookingCode);
+    // Which status changes are allowed for the current state.
     var canConfirm = BookingService.CanMove(b.Status, BookingStatus.Confirmed);
     var canReject = BookingService.CanMove(b.Status, BookingStatus.Rejected);
     var canComplete = BookingService.CanMove(b.Status, BookingStatus.Completed);
     var canCancel = BookingService.CanMove(b.Status, BookingStatus.Cancelled);
+    // True when at least one action is available.
     var hasActions = canConfirm || canReject || canComplete || canCancel;
 }
 
+@* Booking page styles. *@
 <link rel="stylesheet" href="~/admin/css/admin-bookings.css" asp-append-version="true" />
 
 <div class="bk-gold">
 
+    @* Page header: title and action buttons. *@
     <div class="page-header">
         <div>
             <div class="bk-detail-code">@b.BookingCode</div>
@@ -24,23 +31,30 @@
                 &nbsp;Requested on @b.CreatedOn.ToString("dd MMMM yyyy, h:mm tt")
             </p>
         </div>
+        @* Header action buttons. *@
         <div class="d-flex gap-2 flex-wrap">
             <a asp-action="Index" class="btn-crud btn-crud-light"><i class="bi bi-arrow-left"></i> Back to List</a>
             <a href="@mailto" class="btn-crud btn-crud-dark"><i class="bi bi-reply"></i> Email Customer</a>
         </div>
     </div>
 
+    @* Success flash message. *@
     @if (TempData["Success"] is string ok) { <div class="bk-flash ok"><i class="bi bi-check-circle me-2"></i>@ok</div> }
+    @* Error flash message. *@
     @if (TempData["Error"] is string err) { <div class="bk-flash err"><i class="bi bi-exclamation-circle me-2"></i>@err</div> }
 
+    @* Two-column page layout. *@
     <div class="row g-4">
 
         <!-- Left: booking info -->
         <div class="col-lg-8">
+            @* Card: @BookingUi.TypeLabel(b.ItemType). *@
             <div class="crud-card mb-4">
                 <div class="crud-card-title"><i class="bi @BookingUi.TypeIconBi(b.ItemType)"></i> @BookingUi.TypeLabel(b.ItemType)</div>
+                @* Key-value details. *@
                 <dl class="bk-kv">
                     <div><dt>Item</dt><dd>@b.ItemName</dd></div>
+                    @* Optional rows appear only when data exists. *@
                     @if (!string.IsNullOrWhiteSpace(b.ItemLocation))
                     {
                         <div><dt>Location</dt><dd>@b.ItemLocation</dd></div>
@@ -52,6 +66,18 @@
                     {
                         <div><dt>Discount</dt><dd>@b.DiscountPercent%</dd></div>
                     }
+                    @if (b.NeedsPayment)
+                    {
+                        <div><dt>Payment</dt><dd><span class="badge @(b.PaymentStatus == PaymentStatus.Paid ? "bg-success" : b.PaymentStatus == PaymentStatus.Refunded ? "bg-info text-dark" : "bg-warning text-dark")">@BookingUi.PaymentLabel(b.PaymentStatus)</span>@(string.IsNullOrWhiteSpace(b.PaymentMethod) ? "" : " " + BookingUi.PaymentSummary(b))</dd></div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(b.PaymentReference))
+                    {
+                        <div><dt>Transaction ID</dt><dd style="font-family:monospace">@b.PaymentReference</dd></div>
+                    }
+                    @if (b.PaidOn.HasValue)
+                    {
+                        <div><dt>Paid on</dt><dd>@b.PaidOn.Value.ToString("dd MMM yyyy, h:mm tt")</dd></div>
+                    }
                     @if (b.UpdatedOn.HasValue)
                     {
                         <div><dt>Last updated</dt><dd>@b.UpdatedOn.Value.ToString("dd MMM yyyy, h:mm tt")</dd></div>
@@ -59,16 +85,20 @@
                 </dl>
             </div>
 
+            @* Customer's special requests. *@
             @if (!string.IsNullOrWhiteSpace(b.Notes))
             {
+                @* Card: Customer's special requests. *@
                 <div class="crud-card mb-4">
                     <div class="crud-card-title"><i class="bi bi-chat-left-text"></i> Customer's special requests</div>
                     <div class="message-body">@b.Notes</div>
                 </div>
             }
 
+            @* Admin note visible to the customer. *@
             @if (!string.IsNullOrWhiteSpace(b.AdminNote))
             {
+                @* Card: Your note (visible to the customer). *@
                 <div class="crud-card">
                     <div class="crud-card-title"><i class="bi bi-sticky"></i> Your note (visible to the customer)</div>
                     <div class="message-body">@b.AdminNote</div>
@@ -78,14 +108,17 @@
 
         <!-- Right: total, customer, actions -->
         <div class="col-lg-4">
+            @* Total amount summary. *@
             <div class="bk-total-box mb-4">
                 <small>@(b.ItemType == BookingType.Restaurant ? "Estimated bill" : "Total amount")</small>
                 <strong>@(b.TotalPrice > 0 ? BookingUi.Money(b.TotalPrice) : "On request")</strong>
-                <small style="text-transform:none;letter-spacing:0;font-weight:600;color:rgba(255,255,255,.7)">Pay on arrival</small>
+                <small style="text-transform:none;letter-spacing:0;font-weight:600;color:rgba(255,255,255,.7)">@(b.PaymentStatus == PaymentStatus.Paid ? "Paid online (demo) via " + BookingUi.PaymentSummary(b) : b.PaymentStatus == PaymentStatus.Refunded ? "Refunded (demo)" : "Pay on arrival")</small>
             </div>
 
+            @* Card: Customer. *@
             <div class="crud-card mb-4">
                 <div class="crud-card-title"><i class="bi bi-person"></i> Customer</div>
+                @* Key-value details. *@
                 <dl class="bk-kv" style="grid-template-columns: 1fr">
                     <div><dt>Name</dt><dd>@b.CustomerName</dd></div>
                     <div><dt>Email</dt><dd><a href="@mailto">@b.CustomerEmail</a></dd></div>
@@ -94,14 +127,17 @@
                 </dl>
             </div>
 
+            @* Card: Actions. *@
             <div class="crud-card">
                 <div class="crud-card-title"><i class="bi bi-lightning-charge"></i> Actions</div>
+                @* No actions once the booking is closed. *@
                 @if (!hasActions)
                 {
                     <p class="text-muted mb-0">This booking is <strong>@BookingUi.StatusLabel(b.Status).ToLower()</strong> and can no longer be changed.</p>
                 }
                 else
                 {
+                    @* Status change form; each button posts its target status. *@
                     <form asp-action="SetStatus" method="post">
                         <input type="hidden" name="id" value="@b.Id" />
                         <input type="hidden" name="returnTo" value="details" />
@@ -109,18 +145,22 @@
                         <textarea id="adminNote" name="adminNote" class="bk-note" maxlength="500" placeholder="e.g. Room 204 reserved, or reason for rejection...">@b.AdminNote</textarea>
 
                         <div class="bk-action-btns">
+                            @* Confirm (pending bookings). *@
                             @if (canConfirm)
                             {
                                 <button type="submit" name="status" value="Confirmed" class="btn-crud btn-crud-gold"><i class="bi bi-check-lg"></i> Confirm booking</button>
                             }
+                            @* Complete (confirmed bookings). *@
                             @if (canComplete)
                             {
                                 <button type="submit" name="status" value="Completed" class="btn-crud btn-crud-dark"><i class="bi bi-flag"></i> Mark as completed</button>
                             }
+                            @* Reject (pending bookings). *@
                             @if (canReject)
                             {
                                 <button type="submit" name="status" value="Rejected" class="btn-crud btn-crud-danger" onclick="return confirm('Reject this booking?');"><i class="bi bi-x-lg"></i> Reject</button>
                             }
+                            @* Cancel (pending or confirmed bookings). *@
                             @if (canCancel)
                             {
                                 <button type="submit" name="status" value="Cancelled" class="btn-crud btn-crud-light" onclick="return confirm('Cancel this booking? The rooms/tables will be released.');"><i class="bi bi-slash-circle"></i> Cancel booking</button>

@@ -1,21 +1,27 @@
 @{
+    // Set the browser page title
     ViewData["Title"] = "Home";
 }
 
+@* Hero banner section *@
 @section Hero {
+<!-- Hero header container -->
 <div class="container-fluid bg-primary py-5 mb-5 hero-header">
             <div class="container py-5">
                 <div class="row justify-content-center py-5">
                     <div class="col-lg-10 pt-lg-5 mt-lg-5 text-center">
                         <h1 class="display-3 text-white mb-3 animated slideInDown">Enjoy Your Vacation With Us</h1>
                         <p class="fs-4 text-white mb-4 animated slideInDown">Explore tourist spots, hotels, resorts and restaurants across the country.</p>
+<!-- Keyword search box -->
 <div class="position-relative w-75 mx-auto animated slideInDown">
+    <!-- Search form (GET request) -->
     <form asp-controller="Search" asp-action="Index" method="get">
         <input name="keyword"
                class="form-control border-0 rounded-pill w-100 py-3 ps-4 pe-5"
                type="text"
                placeholder="Eg: Beach, Murree, Hotel" />
 
+        <!-- Search submit button -->
         <button type="submit"
                 class="btn btn-primary rounded-pill py-2 px-4 position-absolute top-0 end-0 me-2"
                 style="margin-top: 7px;">
@@ -35,15 +41,18 @@
         <div class="container">
             <div class="row g-5">
                 <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s" style="min-height: 400px;">
+                    <!-- About image -->
                     <div class="position-relative h-100">
                         <img class="img-fluid position-absolute w-100 h-100" src="~/img/about.jpg" alt="" style="object-fit: cover;">
                     </div>
                 </div>
+                <!-- About text column -->
                 <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.3s">
                     <h6 class="section-title bg-white text-start text-primary pe-3">About Us</h6>
                     <h1 class="mb-4">Welcome to <span class="text-primary">Karnel Travel Guide</span></h1>
                     <p class="mb-4">Karnel Travels is a tours and travel company that provides transportation between tourist spots and cities across the country, along with complete information about hotels, resorts and restaurants.</p>
                     <p class="mb-4">Through this website you can explore tourist spots, compare hotels and resorts by price and quality, check travel options, and contact us to place your tour or transport order.</p>
+                    <!-- Feature checklist grid -->
                     <div class="row gy-2 gx-4 mb-4">
                         <div class="col-sm-6">
                             <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Transport to Tourist Spots</p>
@@ -64,6 +73,7 @@
                             <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Customer Support</p>
                         </div>
                     </div>
+                    <!-- Link to information page -->
                     <a class="btn btn-primary py-3 px-5 mt-2" asp-controller="Information" asp-action="Index">Explore Information</a>
                 </div>
             </div>
@@ -75,11 +85,14 @@
       <!-- Service Start -->
     <div class="container-fluid py-5">
         <div class="container">
+            <!-- Section heading -->
             <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
                 <h6 class="section-title bg-white text-center text-primary px-3">Services</h6>
                 <h1 class="mb-5">Our Services</h1>
             </div>
+            <!-- Service cards grid -->
             <div class="row g-4">
+                <!-- Service card: tourist spots -->
                 <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">
                     <div class="service-item rounded pt-3">
                         <div class="p-4">
@@ -89,6 +102,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Service card: travel information -->
                 <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.3s">
                     <div class="service-item rounded pt-3">
                         <div class="p-4">
@@ -98,6 +112,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Service card: hotels -->
                 <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.5s">
                     <div class="service-item rounded pt-3">
                         <div class="p-4">
@@ -107,6 +122,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Service card: restaurants -->
                 <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.7s">
                     <div class="service-item rounded pt-3">
                         <div class="p-4">
@@ -116,6 +132,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Service card: resorts -->
                 <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">
                     <div class="service-item rounded pt-3">
                         <div class="p-4">
@@ -125,6 +142,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Service card: tour packages -->
                 <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.3s">
                     <div class="service-item rounded pt-3">
                         <div class="p-4">
@@ -134,6 +152,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Service card: search -->
                 <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.5s">
                     <div class="service-item rounded pt-3">
                         <div class="p-4">
@@ -143,6 +162,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Service card: customer support -->
                 <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.7s">
                     <div class="service-item rounded pt-3">
                         <div class="p-4">
@@ -158,19 +178,23 @@
     <!-- Service End -->
 
 
+        @* Load popular spots from ViewBag *@
         @{
         
+        // Popular spots, empty list if missing
         var popularSpots = ViewBag.PopularSpots as List<TouristSpot> ?? new List<TouristSpot>();
     }
 
     <!-- Destination Start -->
     <div class="container-fluid py-5 destination">
         <div class="container">
+            <!-- Section heading -->
             <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
                 <h6 class="section-title bg-white text-center text-primary px-3">Destination</h6>
                 <h1 class="mb-5">Popular Destination</h1>
             </div>
 
+            <!-- Popular destination cards -->
             <div class="row g-4">
                 @foreach (var s in popularSpots)
                 {
@@ -180,14 +204,60 @@
                 }
             </div>
 
+            @* Message when no spots exist *@
             @if (!popularSpots.Any())
             {
                 <p class="text-center text-muted">No destinations added yet.</p>
             }
 
+            <!-- Link to all destinations -->
             <div class="text-center mt-5">
                 <a class="btn btn-primary py-3 px-5" asp-controller="Home" asp-action="Destination">View All Destinations</a>
             </div>
         </div>
     </div>
     <!-- Destination End -->
+
+    @{
+        // Reviews, count and average from ViewBag
+        var reviews = ViewBag.Reviews as List<Feedback> ?? new List<Feedback>();
+        int reviewCount = ViewBag.ReviewCount is int rc ? rc : 0;
+        double reviewAvg = ViewBag.ReviewAverage is double ra ? ra : 0;
+    }
+
+    <!-- Traveller Reviews Start -->
+    <div class="container-fluid py-5">
+        <div class="container">
+            <!-- Section heading and rating summary -->
+            <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                <h6 class="section-title bg-white text-center text-primary px-3">Reviews</h6>
+                <h1 class="mb-3">What Our Travellers Say</h1>
+                @* Show average rating if reviews exist *@
+                @if (reviewCount > 0)
+                {
+                    <p class="text-muted mb-5"><span style="color:#f5b301">★</span> <strong>@reviewAvg.ToString("0.0")</strong> average from @reviewCount review@(reviewCount == 1 ? "" : "s")</p>
+                }
+                else
+                {
+                    <p class="text-muted mb-5">Reviews appear here after customers complete their bookings.</p>
+                }
+            </div>
+
+            <!-- Review cards grid -->
+            <div class="row g-4">
+                @foreach (var r in reviews)
+                {
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s"><partial name="_ReviewCard" model="r" /></div>
+                }
+            </div>
+
+            @* Show link when more reviews exist *@
+            @if (reviewCount > reviews.Count)
+            {
+                <div class="text-center mt-5">
+                    <a class="btn btn-primary py-3 px-5" asp-controller="Home" asp-action="Reviews">See All Reviews</a>
+                </div>
+            }
+        </div>
+    </div>
+    <!-- Traveller Reviews End -->

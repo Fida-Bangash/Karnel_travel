@@ -1,14 +1,18 @@
 @model List<Karnel_Travel.Models.TouristSpot>
 @{
+    // Set the browser page title
     ViewData["Title"] = "Destination";
 }
 
+@* Hero banner section *@
 @section Hero {
+<!-- Hero header container -->
 <div class="container-fluid bg-primary py-5 mb-5 hero-header">
             <div class="container py-5">
                 <div class="row justify-content-center py-5">
                     <div class="col-lg-10 pt-lg-5 mt-lg-5 text-center">
                         <h1 class="display-3 text-white animated slideInDown">Destination</h1>
+                        <!-- Breadcrumb navigation -->
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb justify-content-center">
                                 <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
@@ -26,6 +30,7 @@
 <div class="container-fluid py-5 destination">
     <div class="container">
 
+        <!-- Section heading -->
         <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
             <h6 class="section-title bg-white text-center text-primary px-3">
                 Destination
@@ -33,10 +38,13 @@
             <h1 class="mb-5">Popular Destination</h1>
         </div>
 
+        <!-- Destination cards grid -->
         <div class="row g-4">
 
+            @* Show cards only if spots exist *@
             @if (Model != null && Model.Any())
             {
+                @* Loop over every tourist spot *@
                 @foreach (var s in Model)
                 {
                     <div class="col-lg-4 col-md-6 wow zoomIn">
@@ -44,6 +52,7 @@
                     </div>
                 }
             }
+            @* Fallback when there are no spots *@
             else
             {
                 <div class="col-12 text-center">

@@ -7,13 +7,17 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Karnel_Travel.Areas.Admin.Controllers
 {
+    // Admin area controller; access limited to the Admin role.
     [Area("Admin")]
     [Authorize(Roles = "Admin")]
     public class TourPackagesController : Controller
     {
+        // Database context.
         private readonly Karnel_TravelContext _context;
+        // Provides the web root path for image uploads.
         private readonly IWebHostEnvironment _env;
 
+        // Constructor: dependencies are injected by ASP.NET.
         public TourPackagesController(
         Karnel_TravelContext context,
         IWebHostEnvironment env)
@@ -22,15 +26,16 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             _env = env;
         }
 
-        // GET: TOURPACKAGES
+        // Lists records.
         public async Task<IActionResult> Index()
         {
             return View(await _context.TourPackages.ToListAsync());
         }
 
-        // GET: TOURPACKAGES/Details/5
+        // Shows a single record.
         public async Task<IActionResult> Details(int? id)
         {
+            // Reject requests without an id.
             if (id == null)
             {
                 return NotFound();
@@ -38,6 +43,7 @@ namespace Karnel_Travel.Areas.Admin.Controllers
 
             var tourpackage = await _context.TourPackages
                 .FirstOrDefaultAsync(m => m.Id == id);
+            // Return 404 when the record does not exist.
             if (tourpackage == null)
             {
                 return NotFound();
@@ -46,46 +52,51 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             return View(tourpackage);
         }
 
-        // GET: TOURPACKAGES/Create
+        // Displays the create form.
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: TOURPACKAGES/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // Validates input, uploads the image and saves the new record.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(TourPackage tourpackage, IFormFile? imageFile)
         {
+            // Proceed only when validation passes.
             if (ModelState.IsValid)
             {
-                // Image save karo (type aur size check ke saath)
+                // Validate and save the uploaded image.
                 var (url, error) = await ImageUploader.SaveAsync(imageFile, _env.WebRootPath);
+                // Redisplay the form with the upload error.
                 if (error != null)
                 {
                     ModelState.AddModelError("", error);
                     return View(tourpackage);
                 }
+                // Use the new image only when one was uploaded.
                 if (url != null) tourpackage.ImagePath = url;
 
+                // Stage the new record.
                 _context.Add(tourpackage);
+                // Persist changes to the database.
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(tourpackage);
         }
 
-        // GET: TOURPACKAGES/Edit/5
+        // Displays the edit form.
         public async Task<IActionResult> Edit(int? id)
         {
+            // Reject requests without an id.
             if (id == null)
             {
                 return NotFound();
             }
 
             var tourpackage = await _context.TourPackages.FindAsync(id);
+            // Return 404 when the record does not exist.
             if (tourpackage == null)
             {
                 return NotFound();
@@ -93,34 +104,37 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             return View(tourpackage);
         }
 
-        // POST: TOURPACKAGES/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // Saves the edited record.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int? id,
     [Bind("Id,Title,Details,Price,DiscountPercent,ValidTill,ImagePath")] TourPackage tourpackage,
     IFormFile? imageFile)
         {
+            // Reject a mismatched id.
             if (id != tourpackage.Id)
             {
                 return NotFound();
             }
 
+            // Proceed only when validation passes.
             if (ModelState.IsValid)
             {
-                // Nayi image di ho to replace karo, warna purani ImagePath hidden field se aa jati hai
+                // Validate and save the uploaded image.
                 var (url, error) = await ImageUploader.SaveAsync(imageFile, _env.WebRootPath);
+                // Redisplay the form with the upload error.
                 if (error != null)
                 {
                     ModelState.AddModelError("", error);
                     return View(tourpackage);
                 }
+                // Use the new image only when one was uploaded.
                 if (url != null) tourpackage.ImagePath = url;
 
                 try
                 {
                     _context.Update(tourpackage);
+                    // Persist changes to the database.
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -136,9 +150,10 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             return View(tourpackage);
         }
 
-        // GET: TOURPACKAGES/Delete/5
+        // Shows the delete confirmation page.
         public async Task<IActionResult> Delete(int? id)
         {
+            // Reject requests without an id.
             if (id == null)
             {
                 return NotFound();
@@ -146,6 +161,7 @@ namespace Karnel_Travel.Areas.Admin.Controllers
 
             var tourpackage = await _context.TourPackages
                 .FirstOrDefaultAsync(m => m.Id == id);
+            // Return 404 when the record does not exist.
             if (tourpackage == null)
             {
                 return NotFound();
@@ -154,7 +170,7 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             return View(tourpackage);
         }
 
-        // POST: TOURPACKAGES/Delete/5
+        // Deletes the record after confirmation.
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int? id)
@@ -162,13 +178,16 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             var tourpackage = await _context.TourPackages.FindAsync(id);
             if (tourpackage != null)
             {
+                // Remove the record.
                 _context.TourPackages.Remove(tourpackage);
             }
 
+            // Persist changes to the database.
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
+        // Helper: checks whether the record exists.
         private bool TourPackageExists(int? id)
         {
             return _context.TourPackages.Any(e => e.Id == id);

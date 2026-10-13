@@ -8,13 +8,17 @@ using Microsoft.AspNetCore.Http;
 
 namespace Karnel_Travel.Areas.Admin.Controllers
 {
+    // Admin area controller; access limited to the Admin role.
     [Area("Admin")]
     [Authorize(Roles = "Admin")]
     public class HotelsController : Controller
     {
+        // Database context.
         private readonly Karnel_TravelContext _context;
+        // Provides the web root path for image uploads.
         private readonly IWebHostEnvironment _env;
 
+          // Constructor: dependencies are injected by ASP.NET.
           public HotelsController(
          Karnel_TravelContext context,
          IWebHostEnvironment env)
@@ -23,15 +27,16 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             _env = env;
         }
 
-        // GET: HOTELS
+        // Lists records.
         public async Task<IActionResult> Index()
         {
             return View(await _context.Hotels.ToListAsync());
         }
 
-        // GET: HOTELS/Details/5
+        // Shows a single record.
         public async Task<IActionResult> Details(int? id)
         {
+            // Reject requests without an id.
             if (id == null)
             {
                 return NotFound();
@@ -39,6 +44,7 @@ namespace Karnel_Travel.Areas.Admin.Controllers
 
             var hotel = await _context.Hotels
                 .FirstOrDefaultAsync(m => m.Id == id);
+            // Return 404 when the record does not exist.
             if (hotel == null)
             {
                 return NotFound();
@@ -47,35 +53,38 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             return View(hotel);
         }
 
-        // GET: HOTELS/Create
+        // Displays the create form.
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: HOTELS/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-
+        // Validates input, uploads the image and saves the new record.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Hotel hotel, IFormFile? imageFile)
         {
+            // Proceed only when validation passes.
             if (ModelState.IsValid)
             {
+                // Validate and save the uploaded image.
                 var (url, error) = await ImageUploader.SaveAsync(
                     imageFile, _env.WebRootPath);
 
+                // Redisplay the form with the upload error.
                 if (error != null)
                 {
                     ModelState.AddModelError("", error);
                     return View(hotel);
                 }
 
+                // Use the new image only when one was uploaded.
                 if (url != null)
                     hotel.ImagePath = url;
 
+                // Stage the new record.
                 _context.Add(hotel);
+                // Persist changes to the database.
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
@@ -84,15 +93,17 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             return View(hotel);
         }
 
-        // GET: HOTELS/Edit/5
+        // Displays the edit form.
         public async Task<IActionResult> Edit(int? id)
         {
+            // Reject requests without an id.
             if (id == null)
             {
                 return NotFound();
             }
 
             var hotel = await _context.Hotels.FindAsync(id);
+            // Return 404 when the record does not exist.
             if (hotel == null)
             {
                 return NotFound();
@@ -100,37 +111,37 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             return View(hotel);
         }
 
-        // POST: HOTELS/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-
-
+        // Saves the edited record.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int? id, Hotel hotel, IFormFile? imageFile)
         {
+            // Reject a missing or mismatched id.
             if (id == null || id != hotel.Id)
                 return NotFound();
 
-            // Database se existing hotel load karo
+            // Load the existing record to update.
             var existingHotel = await _context.Hotels.FindAsync(id);
 
+            // Return 404 when the record does not exist.
             if (existingHotel == null)
                 return NotFound();
 
+            // Proceed only when validation passes.
             if (ModelState.IsValid)
             {
-                // ImageUploader se nayi image validate aur save karo
+                // Validate and save the uploaded image.
                 var (url, error) = await ImageUploader.SaveAsync(
                     imageFile, _env.WebRootPath);
 
+                // Redisplay the form with the upload error.
                 if (error != null)
                 {
                     ModelState.AddModelError("imageFile", error);
                     return View(hotel);
                 }
 
-                // Existing hotel ki fields update karo
+                // Copy the edited values onto the tracked entity.
                 existingHotel.Name = hotel.Name;
                 existingHotel.Location = hotel.Location;
                 existingHotel.Price = hotel.Price;
@@ -139,12 +150,14 @@ namespace Karnel_Travel.Areas.Admin.Controllers
                 existingHotel.IsAvailable = hotel.IsAvailable;
                 existingHotel.Description = hotel.Description;
 
-                // Sirf nayi image select hui ho to ImagePath change karo
+                // Use the new image only when one was uploaded.
                 if (url != null)
                 {
+                    // Copy the edited values onto the tracked entity.
                     existingHotel.ImagePath = url;
                 }
 
+                // Persist changes to the database.
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
@@ -153,9 +166,10 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             return View(hotel);
         }
 
-        // GET: HOTELS/Delete/5
+        // Shows the delete confirmation page.
         public async Task<IActionResult> Delete(int? id)
         {
+            // Reject requests without an id.
             if (id == null)
             {
                 return NotFound();
@@ -163,6 +177,7 @@ namespace Karnel_Travel.Areas.Admin.Controllers
 
             var hotel = await _context.Hotels
                 .FirstOrDefaultAsync(m => m.Id == id);
+            // Return 404 when the record does not exist.
             if (hotel == null)
             {
                 return NotFound();
@@ -171,7 +186,7 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             return View(hotel);
         }
 
-        // POST: HOTELS/Delete/5
+        // Deletes the record after confirmation.
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int? id)
@@ -179,13 +194,16 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             var hotel = await _context.Hotels.FindAsync(id);
             if (hotel != null)
             {
+                // Remove the record.
                 _context.Hotels.Remove(hotel);
             }
 
+            // Persist changes to the database.
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
+        // Helper: checks whether the record exists.
         private bool HotelExists(int? id)
         {
             return _context.Hotels.Any(e => e.Id == id);

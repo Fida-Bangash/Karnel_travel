@@ -1,11 +1,15 @@
-﻿@model Karnel_Travel.Models.SearchViewModel
+﻿@* Model: search results data *@
+@model Karnel_Travel.Models.SearchViewModel
 
 @{
+    // Set the page title
     ViewData["Title"] = "Search";
 }
 
+<!-- Page container -->
 <div class="container py-5">
 
+    <!-- Page heading -->
     <div class="text-center mb-4">
         <h1>Search Travel Information</h1>
         <p class="text-muted">
@@ -13,6 +17,7 @@
         </p>
     </div>
 
+    <!-- Keyword search form -->
     <form asp-controller="Search"
           asp-action="Index"
           method="get"
@@ -31,6 +36,7 @@
         </div>
     </form>
 
+    <!-- Link to advanced search -->
     <div class="text-end mb-5">
         <a asp-controller="Search"
            asp-action="Advanced"
@@ -39,6 +45,7 @@
         </a>
     </div>
 
+    @* Show results only after a search *@
     @if (!string.IsNullOrWhiteSpace(Model.Keyword))
     {
         // Hotels, restaurants aur resorts ko ek hi card format me tayyar karo
@@ -56,6 +63,7 @@
             "Rs " + r.Price.ToString("0.##"), "", "Resort:" + r.Id, "Book Now", r.IsAvailable, r.Rating, r.Quantity + " units available",
             r.IsAvailable ? "Available" : "Not Available", r.IsAvailable ? "bg-primary" : "bg-danger")).ToList();
 
+        // Result sections: title, icon, items
         var sections = new[]
         {
             (Title: "Hotels",      Icon: "fa-hotel",    Items: hotelCards,      Empty: "hotels"),
@@ -63,8 +71,10 @@
             (Title: "Resorts",     Icon: "fa-umbrella-beach", Items: resortCards, Empty: "resorts")
         };
 
+        // Total number of results
         var total = Model.Spots.Count + hotelCards.Count + restaurantCards.Count + resortCards.Count;
 
+        <!-- Results heading and count -->
         <div class="text-center mb-5">
             <h3 class="mb-1">Search Results for “@Model.Keyword”</h3>
             <p class="text-muted mb-0">@total @(total == 1 ? "result" : "results") found</p>
@@ -103,8 +113,10 @@
                 <span class="badge bg-primary rounded-pill ms-3">@Model.Spots.Count</span>
             </div>
 
+            @* Spot cards or empty note *@
             @if (Model.Spots.Any())
             {
+                <!-- Spot card grid -->
                 <div class="row g-4 mb-4">
                     @foreach (var s in Model.Spots)
                     {
@@ -116,6 +128,7 @@
             }
             else
             {
+                <!-- No spots message -->
                 <div class="border rounded text-center text-muted py-4 mb-4 bg-light">
                     <i class="fa fa-search me-2"></i>No tourist spots found for “@Model.Keyword”
                 </div>
@@ -124,6 +137,7 @@
             <!-- Hotels, Restaurants, Resorts -->
             @foreach (var sec in sections)
             {
+                <!-- Section heading with count -->
                 <div class="d-flex align-items-center mb-3 mt-4">
                     <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white me-3"
                           style="width:42px; height:42px;"><i class="fa @sec.Icon"></i></span>
@@ -131,11 +145,13 @@
                     <span class="badge bg-primary rounded-pill ms-3">@sec.Items.Count</span>
                 </div>
 
+                @* Cards for this section *@
                 @if (sec.Items.Any())
                 {
                     <div class="row g-4 mb-4">
                         @foreach (var c in sec.Items)
                         {
+                            // Fall back to default image
                             var img = string.IsNullOrWhiteSpace(c.Item3) ? c.Item4 : c.Item3;
 
                             <div class="col-lg-4 col-md-6">
@@ -149,6 +165,7 @@
                                         <span class="badge @c.Item15 position-absolute top-0 start-0 m-3 px-3 py-2">@c.Item14</span>
                                     </div>
 
+                                    <!-- Card body -->
                                     <div class="card-body d-flex flex-column">
 
                                         <h5 class="mb-1">@c.Item1</h5>
@@ -175,6 +192,7 @@
                                                 <small class="text-muted">@c.Item8</small>
                                             </div>
 
+                                            @* Booking button when available *@
                                             @if (c.Item11)
                                             {
                                                 <a asp-controller="Booking" asp-action="Create"

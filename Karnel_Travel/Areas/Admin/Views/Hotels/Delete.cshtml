@@ -1,5 +1,7 @@
+@* Model bound to this view. *@
 @model Karnel_Travel.Models.Hotel
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Delete Hotel";
 }
@@ -12,8 +14,10 @@
     </div>
 </div>
 
+@* Delete confirmation layout. *@
 <div class="row">
     <div class="col-lg-7 col-xl-6">
+        @* Delete confirmation card. *@
         <div class="crud-card delete-card">
 
             <span class="delete-icon"><i class="bi bi-exclamation-triangle"></i></span>
@@ -29,7 +33,9 @@
                 </div>
             </div>
 
+            @* Posts to DeleteConfirmed after the admin confirms. *@
             <form asp-action="Delete" class="d-flex gap-2 flex-wrap">
+                @* Keeps the record id on submit. *@
                 <input type="hidden" asp-for="Id" />
                 <button type="submit" class="btn-crud btn-crud-danger"><i class="bi bi-trash"></i> Yes, Delete</button>
                 <a asp-action="Index" class="btn-crud btn-crud-light">Cancel</a>

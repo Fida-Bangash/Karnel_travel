@@ -5,24 +5,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Karnel_Travel.Areas.Admin.Controllers
 {
-    // Admin Dashboard: sirf "Admin" role wale users hi is page tak pahunch sakte hain
+    // Admin area controller; access limited to the Admin role.
     [Area("Admin")]
     [Authorize(Roles = "Admin")]
     public class DashboardController : Controller
     {
-        // Database ka context (tables tak pahunchne ke liye)
+        // Database context.
         private readonly Karnel_TravelContext _db;
 
-        // Constructor: ASP.NET khud database context de deta hai (dependency injection)
+        // Constructor: dependencies are injected by ASP.NET.
         public DashboardController(Karnel_TravelContext db)
         {
             _db = db;
         }
 
-        // Dashboard page: har module ki total ginti aur taaza messages/feedback dikhata hai
+        // Loads dashboard statistics and recent activity.
         public async Task<IActionResult> Index()
         {
-            // Har table me kitne records hain (dashboard ke cards ke liye)
+            // Record counts for the summary cards.
             ViewBag.Spots = await _db.TouristSpots.CountAsync();
             ViewBag.TravelInfos = await _db.TravelInfos.CountAsync();
             ViewBag.Hotels = await _db.Hotels.CountAsync();
@@ -32,27 +32,27 @@ namespace Karnel_Travel.Areas.Admin.Controllers
             ViewBag.Messages = await _db.ContactMessages.CountAsync();
             ViewBag.Feedback = await _db.Feedbacks.CountAsync();
 
-            // Bookings: total, pending (admin ke action ka intezar), aur aaj/aage ki revenue
+            // Booking totals: all, pending, and revenue from confirmed/completed bookings.
             ViewBag.Bookings = await _db.Bookings.CountAsync();
             ViewBag.PendingBookings = await _db.Bookings.CountAsync(b => b.Status == Karnel_Travel.Models.BookingStatus.Pending);
             ViewBag.BookingRevenue = await _db.Bookings
                 .Where(b => b.Status == Karnel_Travel.Models.BookingStatus.Confirmed || b.Status == Karnel_Travel.Models.BookingStatus.Completed)
                 .SumAsync(b => b.TotalPrice);
 
-            // Sab se nayi 5 bookings
+            // Latest 5 bookings.
             ViewBag.RecentBookings = await _db.Bookings
                 .AsNoTracking()
                 .OrderByDescending(b => b.CreatedOn)
                 .Take(5)
                 .ToListAsync();
 
-            // Sab se naye 5 contact messages
+            // Latest 5 contact messages.
             ViewBag.RecentMessages = await _db.ContactMessages
                 .OrderByDescending(m => m.CreatedOn)
                 .Take(5)
                 .ToListAsync();
 
-            // Sab se naye 5 feedbacks
+            // Latest 5 feedback entries.
             ViewBag.RecentFeedback = await _db.Feedbacks
                 .OrderByDescending(f => f.CreatedOn)
                 .Take(5)

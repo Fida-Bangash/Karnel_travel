@@ -2,21 +2,25 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Karnel_Travel.Data;
 
+// Seeds roles and the default admin account at startup.
 public static class DbSeeder
 {
+    // Role names used across the app.
     public const string AdminRole = "Admin";
     public const string UserRole = "User";
 
-    // Admin ki login details (chahein to yahan badal lein)
+    // Default admin login. Change the password before going live and move it to configuration.
     private const string AdminEmail = "admin@karneltravel.com";
     private const string AdminPassword = "Admin@123";
 
+    // Creates roles, the admin user and default roles. Safe to run repeatedly.
     public static async Task SeedAsync(IServiceProvider services)
     {
+        // Resolve the Identity services.
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
-        // 1. Roles banao (agar pehle se nahi hain)
+        // Create the roles if they do not exist.
         foreach (var role in new[] { AdminRole, UserRole })
         {
             if (!await roleManager.RoleExistsAsync(role))
@@ -25,7 +29,7 @@ public static class DbSeeder
             }
         }
 
-        // 2. Admin user banao (agar pehle se nahi hai)
+        // Create the admin user if it is missing.
         var admin = await userManager.FindByEmailAsync(AdminEmail);
         if (admin == null)
         {
@@ -37,6 +41,7 @@ public static class DbSeeder
                 FullName = "Administrator"
             };
 
+            // Create the account; fail fast if it cannot be created.
             var result = await userManager.CreateAsync(admin, AdminPassword);
             if (!result.Succeeded)
             {
@@ -45,12 +50,13 @@ public static class DbSeeder
             }
         }
 
+        // Make sure the admin has the Admin role.
         if (!await userManager.IsInRoleAsync(admin, AdminRole))
         {
             await userManager.AddToRoleAsync(admin, AdminRole);
         }
 
-        // 3. Purane users jinke paas koi role nahi, unhein "User" role do
+        // Give the User role to existing accounts that have no role.
         foreach (var user in userManager.Users.ToList())
         {
             if ((await userManager.GetRolesAsync(user)).Count == 0)

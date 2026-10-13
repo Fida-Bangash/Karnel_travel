@@ -1,5 +1,7 @@
+@* Model bound to this view. *@
 @model Karnel_Travel.Models.TravelInfo
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Travel Info Details";
 }
@@ -10,6 +12,7 @@
         <h1 class="page-title">@Model.FromCity &rarr; @Model.ToCity</h1>
         <p class="page-subtitle"><span class="mode-pill">@Model.TransportMode</span></p>
     </div>
+    @* Header action buttons. *@
     <div class="d-flex gap-2 flex-wrap">
         <a asp-action="Index" class="btn-crud btn-crud-light"><i class="bi bi-arrow-left"></i> Back to List</a>
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-crud btn-crud-primary"><i class="bi bi-pencil-square"></i> Edit</a>
@@ -17,28 +20,35 @@
     </div>
 </div>
 
+@* Two-column page layout. *@
 <div class="row g-4">
     <!-- Information -->
     <div class="col-lg-8">
+        @* Card: Information. *@
         <div class="crud-card">
             <div class="crud-card-title"><i class="bi bi-info-circle"></i> Information</div>
 
+            @* Detail: Transport. *@
             <div class="detail-row">
                 <div class="k">Transport</div>
                 <div class="v">@Model.TransportMode</div>
             </div>
+            @* Detail: From. *@
             <div class="detail-row">
                 <div class="k">From</div>
                 <div class="v">@Model.FromCity</div>
             </div>
+            @* Detail: To. *@
             <div class="detail-row">
                 <div class="k">To</div>
                 <div class="v">@Model.ToCity</div>
             </div>
+            @* Detail: Fare. *@
             <div class="detail-row">
                 <div class="k">Fare</div>
                 <div class="v">Rs @Model.Fare.ToString("0.##")</div>
             </div>
+            @* Detail: Details. *@
             <div class="detail-row">
                 <div class="k">Details</div>
                 <div class="v">@(string.IsNullOrWhiteSpace(Model.Details) ? "No details added." : Model.Details)</div>

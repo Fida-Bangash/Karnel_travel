@@ -1,5 +1,7 @@
+@* Model bound to this view. *@
 @model IEnumerable<Karnel_Travel.Models.ContactMessage>
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Messages";
 }
@@ -15,6 +17,7 @@
     </a>
 </div>
 
+@* List card: toolbar and data table. *@
 <div class="table-card-custom">
 
     <!-- Search box + filter chips -->
@@ -30,6 +33,7 @@
         </div>
     </div>
 
+    @* Empty state when there are no records. *@
     @if (!Model.Any())
     {
         <div class="crud-empty">
@@ -41,8 +45,10 @@
     }
     else
     {
+        @* Data table. *@
         <div class="table-responsive">
             <table class="table-custom" id="listTable">
+                @* Table header. *@
                 <thead>
                     <tr>
                         <th>Sender</th>
@@ -52,9 +58,12 @@
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
+                @* Table body. *@
                 <tbody>
+                    @* Render each record as a table row. *@
                     @foreach (var item in Model.OrderByDescending(x => x.CreatedOn))
                     {
+                        @* Split an optional "[Tag]" prefix from the subject. *@
                         var subj = item.Subject ?? "";
                         string tag = "";
                         string rest = subj;
@@ -63,6 +72,7 @@
                             tag = subj.Substring(1, subj.IndexOf(']') - 1);
                             rest = subj.Substring(subj.IndexOf(']') + 1).Trim();
                         }
+                        @* Row with search and filter metadata. *@
                         <tr data-search="@((item.Name + " " + item.Email + " " + item.Subject).ToLower())"
                             data-filter="@(item.IsRead ? "read" : "unread")"
                             class="@(!item.IsRead ? "row-unread" : "")">
@@ -70,6 +80,7 @@
                             <td>@if (tag != "") { <span class="request-tag">@tag</span> }<span class="cell-truncate d-inline-block align-middle" style="color:var(--text-main)" title="@subj">@(rest == "" ? "(no subject)" : rest)</span></td>
                             <td><div>@item.CreatedOn.ToString("dd MMM yyyy")</div><div class="table-user-sub">@item.CreatedOn.ToString("hh:mm tt")</div></td>
                             <td>@if (item.IsRead) { <span class="badge-table success">Read</span> } else { <span class="badge-table pending">New</span> }</td>
+                            @* Row actions. *@
                             <td class="text-end">
                                 <a asp-action="Details" asp-route-id="@item.Id" class="icon-btn" title="View"><i class="bi bi-eye"></i></a>
                                 <a asp-action="Edit" asp-route-id="@item.Id" class="icon-btn" title="Edit"><i class="bi bi-pencil-square"></i></a>
@@ -90,6 +101,7 @@
     }
 </div>
 
+@* Page-specific scripts. *@
 @section Scripts {
     <script src="~/admin/js/crud-list.js"></script>
 }

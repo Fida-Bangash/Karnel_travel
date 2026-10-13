@@ -1,5 +1,7 @@
+@* Model bound to this view. *@
 @model Karnel_Travel.Models.Feedback
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Feedback Details";
     var mailto = "mailto:" + Model.Email + "?subject=" + Uri.EscapeDataString("Thanks for your feedback");
@@ -11,6 +13,7 @@
         <h1 class="page-title">Feedback from @Model.Name</h1>
         <p class="page-subtitle">Received on @Model.CreatedOn.ToString("dd MMMM yyyy, hh:mm tt")</p>
     </div>
+    @* Header action buttons. *@
     <div class="d-flex gap-2 flex-wrap">
         <a asp-action="Index" class="btn-crud btn-crud-light"><i class="bi bi-arrow-left"></i> Back to List</a>
         <a href="@mailto" class="btn-crud btn-crud-dark"><i class="bi bi-reply"></i> Reply by Email</a>
@@ -19,17 +22,24 @@
     </div>
 </div>
 
+@* Two-column page layout. *@
 <div class="row g-4">
     <!-- Feedback text -->
     <div class="col-lg-8">
+        @* Card: Feedback. *@
         <div class="crud-card">
             <div class="crud-card-title"><i class="bi bi-chat-quote"></i> Feedback</div>
+            @if (Model.Rating > 0)
+            {
+                <div class="mb-3" style="color:#f5b301;font-size:1.4rem;letter-spacing:.1em">@(new string('★', Model.Rating))<span style="color:#d5d9de">@(new string('★', 5 - Model.Rating))</span></div>
+            }
             <div class="message-body">@Model.Message</div>
         </div>
     </div>
 
     <!-- Visitor information -->
     <div class="col-lg-4">
+        @* Card: Visitor. *@
         <div class="crud-card">
             <div class="crud-card-title"><i class="bi bi-person"></i> Visitor</div>
 
@@ -38,11 +48,19 @@
                 <div class="fw-bold">@Model.Name</div>
             </div>
 
+            @* Submit and cancel buttons. *@
             <div class="d-grid gap-2">
                 <div class="stat-chip">
                     <i class="bi bi-envelope"></i>
                     <div><div class="lbl">Email</div><div class="val"><a href="@mailto" class="text-decoration-none" style="color:inherit">@Model.Email</a></div></div>
                 </div>
+                @if (!string.IsNullOrWhiteSpace(Model.ItemName))
+                {
+                    <div class="stat-chip">
+                        <i class="bi bi-bag-check"></i>
+                        <div><div class="lbl">Reviewed booking</div><div class="val">@Model.ItemName (@Model.ItemType)</div></div>
+                    </div>
+                }
                 <div class="stat-chip">
                     <i class="bi bi-calendar-event"></i>
                     <div><div class="lbl">Received</div><div class="val">@Model.CreatedOn.ToString("dd MMM yyyy")</div></div>

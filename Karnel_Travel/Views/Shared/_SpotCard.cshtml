@@ -6,6 +6,7 @@
    Shows:   image, category badge, name, location, short description,
             and a "Plan This Trip" button (opens Contact with the spot name filled in).
    ===================================================================== *@
+@* Model: one tourist spot *@
 @model Karnel_Travel.Models.TouristSpot
 
 @{
@@ -18,12 +19,14 @@
     <!-- Image + category badge -->
     <div class="position-relative overflow-hidden">
         <img src="@Url.Content(img)" class="card-img-top spot-card-img" alt="@Model.Name" />
+        @* Show badge only with a category *@
         @if (!string.IsNullOrWhiteSpace(Model.Category))
         {
             <span class="badge bg-primary position-absolute top-0 start-0 m-3 px-3 py-2">@Model.Category</span>
         }
     </div>
 
+    <!-- Card body -->
     <div class="card-body d-flex flex-column">
         <!-- Name -->
         <h5 class="mb-1">@Model.Name</h5>

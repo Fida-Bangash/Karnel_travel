@@ -1,5 +1,7 @@
+@* Model bound to this view. *@
 @model IEnumerable<Karnel_Travel.Models.TourPackage>
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Packages";
 }
@@ -15,6 +17,7 @@
     </a>
 </div>
 
+@* List card: toolbar and data table. *@
 <div class="table-card-custom">
 
     <!-- Search box + filter chips -->
@@ -30,6 +33,7 @@
         </div>
     </div>
 
+    @* Empty state when there are no records. *@
     @if (!Model.Any())
     {
         <div class="crud-empty">
@@ -41,8 +45,10 @@
     }
     else
     {
+        @* Data table. *@
         <div class="table-responsive">
             <table class="table-custom" id="listTable">
+                @* Table header. *@
                 <thead>
                     <tr>
                         <th>Package</th>
@@ -54,10 +60,13 @@
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
+                @* Table body. *@
                 <tbody>
+                    @* Render each record as a table row. *@
                     @foreach (var item in Model)
                     {
                         var expired = item.ValidTill.HasValue && item.ValidTill.Value.Date < DateTime.Today;
+                        @* Row with search and filter metadata. *@
                         <tr data-search="@((item.Title + " " + (item.Details ?? "")).ToLower())"
                             data-filter="@(expired ? "expired" : "active")">
                             <td><div class="table-user-cell">@if (!string.IsNullOrEmpty(item.ImagePath)) { <img src="@item.ImagePath" class="crud-thumb" alt="@item.Title" /> } else { <span class="crud-thumb-empty"><i class="bi bi-tag"></i></span> }<div><div class="table-user-name">@item.Title</div></div></div></td>
@@ -66,6 +75,7 @@
                             <td><span class="discount-badge">@item.DiscountPercent% OFF</span></td>
                             <td>@if (item.ValidTill.HasValue) { <div>@item.ValidTill.Value.ToString("dd MMM yyyy")</div> } else { <div class="table-user-sub">No expiry</div> }</td>
                             <td>@if (expired) { <span class="badge-table failed">Expired</span> } else { <span class="badge-table success">Active</span> }</td>
+                            @* Row actions. *@
                             <td class="text-end">
                                 <a asp-action="Details" asp-route-id="@item.Id" class="icon-btn" title="View"><i class="bi bi-eye"></i></a>
                                 <a asp-action="Edit" asp-route-id="@item.Id" class="icon-btn" title="Edit"><i class="bi bi-pencil-square"></i></a>
@@ -86,6 +96,7 @@
     }
 </div>
 
+@* Page-specific scripts. *@
 @section Scripts {
     <script src="~/admin/js/crud-list.js"></script>
 }

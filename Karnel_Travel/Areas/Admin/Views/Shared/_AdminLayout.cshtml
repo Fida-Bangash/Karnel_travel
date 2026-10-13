@@ -1,19 +1,25 @@
+@* Namespace for EF Core async extensions. *@
 @using Microsoft.EntityFrameworkCore
+@* Database context used for the sidebar badge. *@
 @inject Karnel_Travel.Data.Karnel_TravelContext BookingDb
+@* Layout helpers: pending-bookings count and active-menu detection. *@
 @{
-    // Sidebar ke "Bookings" badge ke liye: kitni bookings admin ke action ka intezar kar rahi hain
+    // Pending bookings count, shown as a badge in the sidebar and navbar.
     var pendingBookings = await BookingDb.Bookings.CountAsync(x => x.Status == Karnel_Travel.Models.BookingStatus.Pending);
 
+    // Helper: returns "active" when the current action matches.
     string Active(string action) =>
         string.Equals(ViewContext.RouteData.Values["action"]?.ToString(), action, StringComparison.OrdinalIgnoreCase) ? "active" : "";
 
   
+    // Helper: returns "active" when the current controller matches.
     string ActiveCtrl(string controller) =>
         string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), controller, StringComparison.OrdinalIgnoreCase) ? "active" : "";
 }
 <!DOCTYPE html>
 <html lang="en">
 
+@* Document head: meta tags, icon and stylesheets. *@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -38,6 +44,7 @@
   <link rel="stylesheet" href="~/admin/css/admin-crud.css">
 </head>
 
+@* Page body: sidebar, main content and scripts. *@
 <body>
 
   <!-- ==========================================
@@ -110,6 +117,7 @@
                     <li class="sidebar-menu-item">
                         <a asp-area="Admin" asp-controller="Bookings" asp-action="Index" class="sidebar-menu-link @ActiveCtrl("Bookings")" title="Bookings">
                             <i class="bi bi-journal-bookmark"></i><span>Bookings</span>
+                            @* Show the badge only when bookings are pending. *@
                             @if (pendingBookings > 0)
                             {
                                 <span class="badge rounded-pill ms-auto" style="background:var(--brand-lime);color:var(--brand-forest-dark);font-weight:800">@pendingBookings</span>
@@ -173,13 +181,14 @@
           <i class="bi bi-list"></i>
         </button>
 
-        <!-- Quick Add: nayi cheez jaldi banane ke shortcuts -->
+        <!-- Quick Add: shortcuts for creating new items -->
         <div class="dropdown ms-2">
           <button class="btn-quick-action dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
             id="quick-actions-dropdown">
             <i class="bi bi-plus-lg"></i>
             <span>Create</span>
           </button>
+          @* Quick-add links for each module. *@
           <ul class="dropdown-menu dropdown-menu-quick-action" aria-labelledby="quick-actions-dropdown">
             <li class="dropdown-header">Quick Add</li>
             <li><a class="dropdown-item" asp-area="Admin" asp-controller="TouristSpots" asp-action="Create"><i class="bi bi-geo-alt"></i> Tourist Spot</a></li>
@@ -203,6 +212,7 @@
         <a asp-area="Admin" asp-controller="Bookings" asp-action="Index"
            class="navbar-action-btn me-1 position-relative" title="Bookings" aria-label="Bookings">
           <i class="bi bi-journal-bookmark"></i>
+          @* Show the badge only when bookings are pending. *@
           @if (pendingBookings > 0)
           {
               <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background:var(--brand-lime);color:var(--brand-forest-dark);font-size:.65rem">@pendingBookings</span>
@@ -236,6 +246,7 @@
             </li>
             <li><hr class="dropdown-divider"></li>
             <li>
+              @* Logout is a POST request for CSRF safety. *@
               <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post">
                 <button type="submit" class="dropdown-item text-danger">
                   <i class="bi bi-box-arrow-right"></i> Logout
@@ -248,6 +259,7 @@
     </header>
     <!-- END: Top Navbar Component -->
 
+    @* Page content is rendered here. *@
     @RenderBody()
 
         <!-- START: Footer Component -->
@@ -282,7 +294,9 @@
 
   <!-- Local dashboard interactions controller -->
   <script src="~/admin/js/dashboard.js"></script>
+    @* jQuery. *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+  @* Optional per-page scripts section. *@
   @await RenderSectionAsync("Scripts", required: false)
 </body>
 

@@ -1,5 +1,7 @@
+@* Model bound to this view. *@
 @model IEnumerable<Karnel_Travel.Models.TouristSpot>
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Tourist Spots";
 
@@ -19,6 +21,7 @@
     </a>
 </div>
 
+@* List card: toolbar and data table. *@
 <div class="table-card-custom">
 
     <!-- Search box + category filter chips -->
@@ -36,6 +39,7 @@
         </div>
     </div>
 
+    @* Empty state when there are no records. *@
     @if (!Model.Any())
     {
         <div class="crud-empty">
@@ -47,8 +51,10 @@
     }
     else
     {
+        @* Data table. *@
         <div class="table-responsive">
             <table class="table-custom" id="spotTable">
+                @* Table header. *@
                 <thead>
                     <tr>
                         <th>Spot</th>
@@ -57,9 +63,12 @@
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
+                @* Table body. *@
                 <tbody>
+                    @* Render each record as a table row. *@
                     @foreach (var item in Model)
                     {
+                        @* Row with search and filter metadata. *@
                         <tr data-search="@((item.Name + " " + item.Location + " " + item.Category).ToLower())"
                             data-cat="@item.Category.ToLower()">
                             <td>
@@ -80,6 +89,7 @@
                             </td>
                             <td><span class="tag-pill">@item.Category</span></td>
                             <td><div class="cell-truncate" title="@item.Description">@(string.IsNullOrWhiteSpace(item.Description) ? "—" : item.Description)</div></td>
+                            @* Row actions. *@
                             <td class="text-end">
                                 <a asp-action="Details" asp-route-id="@item.Id" class="icon-btn" title="View"><i class="bi bi-eye"></i></a>
                                 <a asp-action="Edit" asp-route-id="@item.Id" class="icon-btn" title="Edit"><i class="bi bi-pencil-square"></i></a>
@@ -100,16 +110,21 @@
     }
 </div>
 
+@* Page-specific scripts. *@
 @section Scripts {
+    @* Inline page script. *@
     <script>
         // Live filter: text search + category chips (runs in the browser, no reload)
         (function () {
+            // Cache the table rows and controls.
             var rows = document.querySelectorAll('#spotTable tbody tr');
             var search = document.getElementById('spotSearch');
             var chips = document.querySelectorAll('#spotChips .crud-chip');
             var noMatch = document.getElementById('noMatch');
+            // Currently selected category.
             var activeCat = '';
 
+            // Show only rows matching both the search text and the category.
             function apply() {
                 var q = (search.value || '').trim().toLowerCase();
                 var shown = 0;
@@ -121,7 +136,9 @@
                 if (noMatch) noMatch.style.display = shown === 0 ? '' : 'none';
             }
 
+            // Filter while typing.
             if (search) search.addEventListener('input', apply);
+            // Switch category when a chip is clicked.
             chips.forEach(function (c) {
                 c.addEventListener('click', function () {
                     chips.forEach(function (x) { x.classList.remove('active'); });

@@ -1,5 +1,6 @@
 @{
    
+    // Mark the active nav link
     string Active(string controller, string? action = null)
     {
         var c = ViewContext.RouteData.Values["controller"]?.ToString();
@@ -9,6 +10,7 @@
         return ok ? "active" : "";
     }
 
+    // Flags to hide navbar or footer
     var hideNavbar = ViewData["HideNavbar"] is true;
     var hideFooter = ViewData["HideFooter"] is true;
 
@@ -16,6 +18,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!-- Page head: meta and styles -->
 <head>
     <meta charset="utf-8">
     <title>@ViewData["Title"] - Karnel Travel</title>
@@ -44,6 +47,7 @@
     <!-- Template Stylesheet -->
     <link href="~/css/style.css" asp-append-version="true" rel="stylesheet">
 
+    @* Optional per-page styles *@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 
@@ -62,16 +66,20 @@
        white background + dark links, taake links page ke white background me gum na ho. *@
     @{ var hasHero = IsSectionDefined("Hero"); }
     <div class="container-fluid p-0 @(hasHero ? "position-relative" : "navbar-solid-wrap")">
+        @* Render navbar unless hidden *@
         @if (!hideNavbar)
         {
         <nav class="navbar navbar-expand-lg navbar-light px-4 px-lg-5 py-3 py-lg-0 @(hasHero ? "" : "navbar-solid")">
+            <!-- Brand logo link -->
             <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand p-0">
                <h1 class="text-primary m-0"><i class="fa fa-map-marker-alt me-3"></i>Karnel Travel</h1>
                 <!-- <img src="~/img/logo.png" alt="Logo"> -->
             </a>
+            <!-- Mobile menu toggle -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                 <span class="fa fa-bars"></span>
             </button>
+            <!-- Navigation links -->
             <div class="collapse navbar-collapse" id="navbarCollapse">
                     <div class="navbar-nav ms-auto py-0">
                         <a asp-area="" asp-controller="Home" asp-action="Index" class="nav-item nav-link @Active("Home", "Index")">Home</a>
@@ -92,15 +100,18 @@
                         <a asp-area="" asp-controller="Home" asp-action="Contact" class="nav-item nav-link @Active("Home", "Contact")">Contact Us</a>
                     </div>
 
+                <!-- Login or user menu -->
                 <partial name="_LoginPartial" />
 
             </div>
         </nav>
         }
+        @* Optional hero section from page *@
         @await RenderSectionAsync("Hero", required: false)
     </div>
     <!-- Navbar & Hero End -->
 
+    @* Page body with or without container *@
     @if (IsSectionDefined("Hero"))
     {
         @RenderBody()
@@ -118,12 +129,14 @@
     <div class="container-fluid bg-dark text-light footer pt-4 mt-4 wow fadeIn" data-wow-delay="0.1s">
         <div class="container py-4">
             <div class="row g-4">
+                <!-- Company links -->
                 <div class="col-lg-3 col-md-6">
                     <h4 class="text-white mb-3">Company</h4>
                     <a class="btn btn-link" asp-area="" asp-controller="Home" asp-action="About">About Us</a>
                     <a class="btn btn-link" asp-area="" asp-controller="Home" asp-action="Contact">Contact Us</a>
                     <a class="btn btn-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
                 </div>
+                <!-- Contact details -->
                 <div class="col-lg-3 col-md-6">
                     <h4 class="text-white mb-3">Contact</h4>
                     <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>Karnel Travels, Karachi, Pakistan</p>
@@ -136,10 +149,12 @@
                         <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-linkedin-in"></i></a>
                     </div> *@
                 </div>
+                <!-- Footer photo gallery -->
                 <div class="col-lg-3 col-md-6">
                     <h4 class="text-white mb-3">Gallery</h4>
                      @await Component.InvokeAsync("FooterGallery")
                 </div>
+                 <!-- Explore links -->
                  <div class="col-lg-3 col-md-6">
                     <h4 class="text-white mb-3">Explore</h4>
                     <a class="btn btn-link" asp-area="" asp-controller="Search" asp-action="Index">Search</a>
@@ -150,6 +165,7 @@
                 </div>
             </div>
         </div>
+        <!-- Copyright bar -->
         <div class="container">
             <div class="copyright">
                 <div class="row">
@@ -161,6 +177,7 @@
                         Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a>
                     </div>
                     <div class="col-md-6 text-center text-md-end">
+                         <!-- Footer quick links -->
                          <div class="footer-menu">
                             <a asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                             <a asp-area="" asp-controller="Search" asp-action="Index">Search</a>
@@ -190,6 +207,7 @@
     <!-- Template Javascript -->
     <script src="~/js/main.js" asp-append-version="true"></script>
 
+    @* Optional per-page scripts *@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

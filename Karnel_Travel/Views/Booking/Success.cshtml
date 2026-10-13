@@ -1,21 +1,56 @@
 @model Karnel_Travel.Models.Booking
 @{
+    // Page title
     ViewData["Title"] = "Booking Request Received";
 }
 
+@* Load page styles *@
 @section Styles { <partial name="_Styles" /> }
 
+@{
+    // Whether payment is complete
+    var paid = Model.PaymentStatus == PaymentStatus.Paid;
+}
+
+<!-- Thank-you header -->
 <div class="vip-page py-4">
     <div class="vip-head">
-        <span class="vip-eyebrow">Request received</span>
+        @if (paid)
+        {
+            <div class="pay-receipt"><div class="tick"><i class="fa fa-check"></i></div></div>
+        }
+        <span class="vip-eyebrow">@(paid ? "Payment successful" : "Request received")</span>
         <h1 class="vip-title">Thank you, <span>@Model.CustomerName.Split(' ')[0]</span></h1>
-        <p class="vip-sub">Your booking request has been sent to our team. We will review it and confirm shortly. Keep your booking code safe.</p>
+        @if (paid)
+        {
+            <p class="vip-sub">We received <strong class="vip-gold">@BookingUi.Money(Model.TotalPrice)</strong> via @BookingUi.PaymentSummary(Model). Our team will confirm your booking shortly. Keep your booking code safe.</p>
+        }
+        else
+        {
+            <p class="vip-sub">Your booking request has been sent to our team. We will review it and confirm shortly. Keep your booking code safe.</p>
+        }
     </div>
 
     <div class="row justify-content-center">
         <div class="col-lg-8">
+            <!-- Flash message -->
+            @if (TempData["Success"] is string ok)
+            {
+                <div class="vip-alert success"><i class="fa fa-check-circle mt-1"></i><div>@ok</div></div>
+            }
+
+            <!-- Booking ticket -->
             <partial name="_Ticket" model="Model" />
 
+            <!-- Pay now button -->
+            @if (Model.CanPayNow)
+            {
+                <div class="text-center mt-4">
+                    <a asp-action="Payment" asp-route-id="@Model.Id" class="vip-btn vip-btn-gold"><i class="fa fa-credit-card"></i> Pay @BookingUi.Money(Model.TotalPrice) now</a>
+                </div>
+            }
+
+            <!-- Next steps timeline -->
             <div class="vip-card mt-4">
                 <div class="vip-card-body">
                     <h4 class="vip-card-title"><i class="fa fa-route"></i> What happens next</h4>
@@ -27,6 +62,7 @@
                 </div>
             </div>
 
+            <!-- Navigation buttons -->
             <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
                 <a asp-action="Details" asp-route-id="@Model.Id" class="vip-btn vip-btn-gold"><i class="fa fa-ticket-alt"></i> View booking</a>
                 <a asp-action="My" class="vip-btn vip-btn-ghost"><i class="fa fa-list"></i> My bookings</a>

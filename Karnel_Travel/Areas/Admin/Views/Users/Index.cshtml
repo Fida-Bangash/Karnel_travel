@@ -1,14 +1,17 @@
+@* Model bound to this view. *@
 @model Karnel_Travel.Areas.Admin.Controllers.UsersIndexViewModel
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Users";
 
-    // Pagination links me search/filter barkarar rakhne ke liye
+    // Range shown in the pagination summary.
     var firstItem = Model.TotalItems == 0 ? 0 : (Model.Page - 1) * Model.PageSize + 1;
     var lastItem = Math.Min(Model.Page * Model.PageSize, Model.TotalItems);
 }
 
 
+@* Page-specific styles. *@
 <style>
     /* Confirm popup for Activate / Deactivate (matches admin theme) */
     .confirm-modal .modal-content {
@@ -53,6 +56,7 @@
 <div class="row g-4 mb-4">
     <div class="col-md-4">
         <div class="card card-stat">
+            @* Card header: title and link. *@
             <div class="card-header">
                 <span class="stat-label">Total Users</span>
                 <i class="bi bi-people text-primary fs-4"></i>
@@ -64,6 +68,7 @@
     </div>
     <div class="col-md-4">
         <div class="card card-stat">
+            @* Card header: title and link. *@
             <div class="card-header">
                 <span class="stat-label">Active Users</span>
                 <i class="bi bi-person-check text-success fs-4"></i>
@@ -75,6 +80,7 @@
     </div>
     <div class="col-md-4">
         <div class="card card-stat">
+            @* Card header: title and link. *@
             <div class="card-header">
                 <span class="stat-label">Deactive Users</span>
                 <i class="bi bi-person-x text-danger fs-4"></i>
@@ -86,6 +92,7 @@
     </div>
 </div>
 
+@* Success flash message. *@
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -93,6 +100,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
+@* Error flash message. *@
 @if (TempData["Error"] != null)
 {
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -101,6 +109,7 @@
     </div>
 }
 
+@* List card: toolbar and data table. *@
 <div class="table-card-custom">
 
     <!-- Search box + status filter -->
@@ -117,6 +126,7 @@
         <input type="hidden" name="status" value="@Model.Status" />
     </form>
 
+    @* Empty state when there are no records. *@
     @if (!Model.Users.Any())
     {
         <div class="crud-empty">
@@ -127,8 +137,10 @@
     }
     else
     {
+        @* Data table. *@
         <div class="table-responsive">
             <table class="table-custom">
+                @* Table header. *@
                 <thead>
                     <tr>
                         <th>User</th>
@@ -138,13 +150,16 @@
                         <th class="text-end">Action</th>
                     </tr>
                 </thead>
+                @* Table body. *@
                 <tbody>
+                    @* Render a row for each user. *@
                     @foreach (var u in Model.Users)
                     {
                         var display = string.IsNullOrWhiteSpace(u.FullName) ? u.Email : u.FullName;
                         <tr>
                             <td>
                                 <div class="table-user-cell">
+                                    @* Avatar showing the first initial. *@
                                     <span class="avatar-initial">@(display.Trim().Substring(0, 1).ToUpper())</span>
                                     <div>
                                         <div class="table-user-name">@display</div>
@@ -158,18 +173,22 @@
                                 @if (u.IsActive) { <span class="badge-table success">Active</span> }
                                 else { <span class="badge-table failed">Deactive</span> }
                             </td>
+                            @* Row actions. *@
                             <td class="text-end">
+                                @* Admin accounts cannot be activated or deactivated. *@
                                 @if (u.Role == "Admin")
                                 {
                                     <span class="table-user-sub">-</span>
                                 }
                                 else
                                 {
+                                    @* Toggle form, submitted after the confirm popup. *@
                                     <form asp-action="ToggleStatus" method="post" class="d-inline js-toggle-form">
                                         <input type="hidden" name="id" value="@u.Id" />
                                         <input type="hidden" name="q" value="@Model.Query" />
                                         <input type="hidden" name="status" value="@Model.Status" />
                                         <input type="hidden" name="page" value="@Model.Page" />
+                                        @* Show Deactivate for active users, Activate otherwise. *@
                                         @if (u.IsActive)
                                         {
                                             <button type="button" class="btn-crud btn-crud-light js-toggle-btn" style="padding:.35rem .8rem;font-size:.8rem"
@@ -201,17 +220,21 @@
             {
                 var start = Math.Max(1, Model.Page - 2);
                 var end = Math.Min(Model.TotalPages, Model.Page + 2);
+                @* Pagination links. *@
                 <nav aria-label="Users pages">
                     <ul class="pagination mb-0">
+                        @* Previous page link. *@
                         <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
                             <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page - 1)" asp-route-q="@Model.Query" asp-route-status="@Model.Status">Previous</a>
                         </li>
+                        @* Numbered page links. *@
                         @for (var p = start; p <= end; p++)
                         {
                             <li class="page-item @(p == Model.Page ? "active" : "")">
                                 <a class="page-link" asp-action="Index" asp-route-page="@p" asp-route-q="@Model.Query" asp-route-status="@Model.Status">@p</a>
                             </li>
                         }
+                        @* Next page link. *@
                         <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
                             <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page + 1)" asp-route-q="@Model.Query" asp-route-status="@Model.Status">Next</a>
                         </li>
@@ -246,43 +269,55 @@
     </div>
 </div>
 
+@* Page-specific scripts. *@
 @section Scripts {
+    @* Inline page script. *@
     <script>
         // Opens the confirm popup and submits the matching row form when the admin confirms
         (function () {
+            // Modal and button references.
             var modalEl = document.getElementById('confirmModal');
             var modal = new bootstrap.Modal(modalEl);
             var okBtn = document.getElementById('confirmOk');
+            // Form waiting for confirmation.
             var pendingForm = null;
 
+            // Attach a click handler to every toggle button.
             document.querySelectorAll('.js-toggle-btn').forEach(function (btn) {
                 btn.addEventListener('click', function () {
+                    // Decide the action and remember the row form.
                     var deactivate = btn.dataset.mode === 'deactivate';
                     var name = btn.dataset.name;
                     pendingForm = btn.closest('form');
 
+                    // Style the popup for the chosen action.
                     document.getElementById('confirmIcon').className =
                         'confirm-icon ' + (deactivate ? 'is-danger' : 'is-success');
                     document.getElementById('confirmIconGlyph').className =
                         'bi ' + (deactivate ? 'bi-person-x' : 'bi-person-check');
+                    // Set the popup title and message.
                     document.getElementById('confirmTitle').textContent =
                         deactivate ? 'Deactivate this user?' : 'Activate this user?';
                     document.getElementById('confirmText').textContent = deactivate
                         ? 'This user will be signed out and will not be able to log in until you activate the account again.'
                         : 'This user will be able to log in to the website again.';
+                    // Show the selected user in the popup.
                     document.getElementById('confirmAvatar').textContent = name.trim().charAt(0).toUpperCase();
                     document.getElementById('confirmName').textContent = name;
                     document.getElementById('confirmEmail').textContent = btn.dataset.email;
 
+                    // Style and label the confirm button.
                     okBtn.className = 'btn-crud ' + (deactivate ? 'btn-crud-danger' : 'btn-crud-primary');
                     okBtn.innerHTML = deactivate
                         ? '<i class="bi bi-person-x"></i> Deactivate'
                         : '<i class="bi bi-person-check"></i> Activate';
 
+                    // Open the popup.
                     modal.show();
                 });
             });
 
+            // Submit the stored form on confirm.
             okBtn.addEventListener('click', function () {
                 if (pendingForm) pendingForm.submit();
             });

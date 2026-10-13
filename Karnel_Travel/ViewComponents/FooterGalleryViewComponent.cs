@@ -5,20 +5,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Karnel_Travel.ViewComponents
 {
-    // Website ke footer ki Gallery: sab se naye 6 tourist spots ki images database se dikhata hai
+    // Footer gallery: shows images of the 6 newest tourist spots from the database.
     public class FooterGalleryViewComponent : ViewComponent
     {
+        // Database context.
         private readonly Karnel_TravelContext _db;
 
-        // Constructor: ASP.NET khud database context de deta hai (dependency injection)
+        // Constructor: the database context is injected by ASP.NET.
         public FooterGalleryViewComponent(Karnel_TravelContext db)
         {
             _db = db;
         }
 
+        // Loads the gallery data and renders the component view.
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            // Sirf wo spots jin ki image upload hui hai, sab se naye pehle
+            // Only spots that have an image, newest first (read-only query).
             var spots = await _db.TouristSpots
                 .AsNoTracking()
                 .Where(s => s.ImagePath != null && s.ImagePath != "")
@@ -26,6 +28,7 @@ namespace Karnel_Travel.ViewComponents
                 .Take(6)
                 .ToListAsync();
 
+            // Pass the spots to the component view.
             return View(spots);
         }
     }

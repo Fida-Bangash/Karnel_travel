@@ -1,7 +1,8 @@
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Dashboard";
 
-    // Controller se aaya hua data (cast karke safe banaya, null nahi hoga)
+    // Controller data, cast safely with empty fallbacks.
     var messages = ViewBag.RecentMessages as List<Karnel_Travel.Models.ContactMessage>
                    ?? new List<Karnel_Travel.Models.ContactMessage>();
     var feedbacks = ViewBag.RecentFeedback as List<Karnel_Travel.Models.Feedback>
@@ -9,9 +10,10 @@
 
     var recentBookings = ViewBag.RecentBookings as List<Karnel_Travel.Models.Booking>
                          ?? new List<Karnel_Travel.Models.Booking>();
+    // Pending bookings count for the alert card.
     int pendingBookings = (int)ViewBag.PendingBookings;
 
-    // 8 stat cards ki list: naam, count, icon, chhota note, aur admin ka controller
+    // Summary cards: label, count, icon, note and target controller.
     var stats = new[]
     {
         (Label: "Tourist Spots", Value: (int)ViewBag.Spots,       Icon: "bi-geo-alt",       Note: "Total destinations", Ctrl: "TouristSpots"),
@@ -35,7 +37,9 @@
 
 <!-- Bookings overview -->
 <link rel="stylesheet" href="~/admin/css/admin-bookings.css" asp-append-version="true" />
+@* Bookings summary wrapper. *@
 <div class="bk-gold">
+    @* Summary stat cards. *@
     <div class="bk-stats">
         <a class="bk-stat text-decoration-none" asp-area="Admin" asp-controller="Bookings" asp-action="Index"><i class="bi bi-journal-bookmark"></i><div class="bk-stat-label">Total bookings</div><div class="bk-stat-value">@ViewBag.Bookings</div></a>
         <a class="bk-stat @(pendingBookings > 0 ? "alert-pending" : "") text-decoration-none" asp-area="Admin" asp-controller="Bookings" asp-action="Index" asp-route-status="Pending"><i class="bi bi-hourglass-split"></i><div class="bk-stat-label">Pending - needs action</div><div class="bk-stat-value">@pendingBookings</div></a>
@@ -45,10 +49,12 @@
 
 <!-- 8 stat cards -->
 <div class="row g-4">
+    @* Render a card for each stat. *@
     @foreach (var s in stats)
     {
         <div class="col-xl-3 col-md-6">
             <div class="card card-stat">
+                @* Card header: title and link. *@
                 <div class="card-header">
                     <span class="stat-label">@s.Label</span>
                     <i class="bi @s.Icon text-primary fs-4"></i>
@@ -65,18 +71,24 @@
 <div class="row g-4 mt-1 bk-gold">
     <div class="col-12">
         <div class="card">
+            @* Card header: title and link. *@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h2 class="card-title mb-0">Recent Bookings</h2>
                 <a asp-area="Admin" asp-controller="Bookings" asp-action="Index" class="small">View all</a>
             </div>
+            @* Data table. *@
             <div class="table-responsive">
                 <table class="table mb-0">
+                    @* Table header. *@
                     <thead>
                         <tr><th>Code</th><th>Customer</th><th>Item</th><th>When</th><th>Total</th><th>Status</th></tr>
                     </thead>
+                    @* Table body. *@
                     <tbody>
+                        @* One row per recent booking. *@
                         @foreach (var rb in recentBookings)
                         {
+                            @* Table row. *@
                             <tr>
                                 <td><a asp-area="Admin" asp-controller="Bookings" asp-action="Details" asp-route-id="@rb.Id" class="bk-code">@rb.BookingCode</a></td>
                                 <td>@rb.CustomerName</td>
@@ -86,8 +98,10 @@
                                 <td><span class="bk-status @Karnel_Travel.Models.BookingUi.StatusClass(rb.Status)">@Karnel_Travel.Models.BookingUi.StatusLabel(rb.Status)</span></td>
                             </tr>
                         }
+                        @* Empty-state row. *@
                         @if (!recentBookings.Any())
                         {
+                            @* Table row. *@
                             <tr><td colspan="6" class="text-muted text-center">No bookings yet.</td></tr>
                         }
                     </tbody>
@@ -103,12 +117,15 @@
     <!-- Recent Messages -->
     <div class="col-lg-6">
         <div class="card">
+            @* Card header: title and link. *@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h2 class="card-title mb-0">Recent Messages</h2>
                 <a asp-area="Admin" asp-controller="ContactMessages" asp-action="Index" class="small">View all</a>
             </div>
+            @* Data table. *@
             <div class="table-responsive">
                 <table class="table mb-0">
+                    @* Table header. *@
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -116,17 +133,22 @@
                             <th>Date</th>
                         </tr>
                     </thead>
+                    @* Table body. *@
                     <tbody>
+                        @* One row per recent message. *@
                         @foreach (var m in messages)
                         {
+                            @* Table row. *@
                             <tr>
                                 <td>@m.Name</td>
                                 <td>@m.Subject</td>
                                 <td>@m.CreatedOn.ToString("dd MMM yyyy")</td>
                             </tr>
                         }
+                        @* Empty-state row. *@
                         @if (!messages.Any())
                         {
+                            @* Table row. *@
                             <tr><td colspan="3" class="text-muted text-center">No messages yet.</td></tr>
                         }
                     </tbody>
@@ -138,31 +160,41 @@
     <!-- Recent Feedback -->
     <div class="col-lg-6">
         <div class="card">
+            @* Card header: title and link. *@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h2 class="card-title mb-0">Recent Feedback</h2>
                 <a asp-area="Admin" asp-controller="Feedbacks" asp-action="Index" class="small">View all</a>
             </div>
+            @* Data table. *@
             <div class="table-responsive">
                 <table class="table mb-0">
+                    @* Table header. *@
                     <thead>
                         <tr>
                             <th>Name</th>
+                            <th>Rating</th>
                             <th>Feedback</th>
                             <th>Date</th>
                         </tr>
                     </thead>
+                    @* Table body. *@
                     <tbody>
+                        @* One row per recent feedback entry. *@
                         @foreach (var f in feedbacks)
                         {
+                            @* Table row. *@
                             <tr>
                                 <td>@f.Name</td>
+                                <td style="white-space:nowrap">@if (f.Rating > 0) { <span style="color:#f5b301">@(new string('★', f.Rating))</span> } else { <span class="text-muted">—</span> }</td>
                                 <td>@(f.Message.Length > 40 ? f.Message.Substring(0, 40) + "..." : f.Message)</td>
                                 <td>@f.CreatedOn.ToString("dd MMM yyyy")</td>
                             </tr>
                         }
+                        @* Empty-state row. *@
                         @if (!feedbacks.Any())
                         {
-                            <tr><td colspan="3" class="text-muted text-center">No feedback yet.</td></tr>
+                            @* Table row. *@
+                            <tr><td colspan="4" class="text-muted text-center">No feedback yet.</td></tr>
                         }
                     </tbody>
                 </table>

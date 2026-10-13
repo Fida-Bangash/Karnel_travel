@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // -----------------------------------------------------------------
     // 1. Mobile Sidebar Toggle & Backdrop Overlay
     // -----------------------------------------------------------------
+    // Sidebar and its mobile toggle button
     const sidebar = document.querySelector('.sidebar-wrapper');
     const toggleBtn = document.querySelector('.sidebar-toggle-btn');
     
@@ -25,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.body.appendChild(overlay);
 
     if (toggleBtn && sidebar) {
+        // Open or close the sidebar with the overlay
         toggleBtn.addEventListener('click', function (e) {
             e.stopPropagation();
             sidebar.classList.toggle('show');
@@ -44,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // -----------------------------------------------------------------
     const revenueChartEl = document.querySelector('#revenue-chart');
     if (revenueChartEl) {
+        // Bar chart settings: income vs expenses
         const revenueChartOptions = {
             series: [
                 {
@@ -147,6 +150,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         };
 
+        // Create and draw the revenue chart
         const revenueChart = new ApexCharts(revenueChartEl, revenueChartOptions);
         revenueChart.render();
     }
@@ -156,6 +160,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // -----------------------------------------------------------------
     const viewsChartEl = document.querySelector('#views-chart');
     if (viewsChartEl) {
+        // Donut chart settings
         const viewsChartOptions = {
             series: [68, 23, 16], // View Count (68%), Percentage (23%), Sales (16%)
             chart: {
@@ -221,6 +226,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         };
 
+        // Create and draw the donut chart
         const viewsChart = new ApexCharts(viewsChartEl, viewsChartOptions);
         viewsChart.render();
     }
@@ -228,6 +234,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // -----------------------------------------------------------------
     // 4. Sparkline Charts (Net Income & Total Return)
     // -----------------------------------------------------------------
+    // Net income sparkline settings
     const incomeSparkOptions = {
         series: [{
             name: 'Net Income',
@@ -270,6 +277,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
+    // Total return sparkline settings
     const returnSparkOptions = {
         series: [{
             name: 'Total Return',
@@ -312,12 +320,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
+    // Draw the net income sparkline
     const incomeSparkEl = document.querySelector('#income-sparkline');
     if (incomeSparkEl) {
         const incomeSpark = new ApexCharts(incomeSparkEl, incomeSparkOptions);
         incomeSpark.render();
     }
 
+    // Draw the total return sparkline
     const returnSparkEl = document.querySelector('#return-sparkline');
     if (returnSparkEl) {
         const returnSpark = new ApexCharts(returnSparkEl, returnSparkOptions);
@@ -327,6 +337,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // -----------------------------------------------------------------
     // 5. Flatpickr Date Range Picker Initialization
     // -----------------------------------------------------------------
+    // Date picker input and the text that shows the range
     const datePickerTrigger = document.querySelector('#date-picker-trigger');
     const selectedRangeText = document.querySelector('#selected-date-range');
     
@@ -335,6 +346,7 @@ document.addEventListener('DOMContentLoaded', function () {
             mode: 'range',
             dateFormat: 'Y-m-d',
             defaultDate: ['2026-01-12', '2026-01-23'],
+            // Show the chosen range as readable text
             onValueUpdate: function (selectedDates, dateStr, instance) {
                 if (selectedDates.length === 2) {
                     const startStr = instance.formatDate(selectedDates[0], 'F j, Y');
@@ -353,6 +365,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // -----------------------------------------------------------------
     const desktopToggleBtn = document.querySelector('#desktop-sidebar-toggle');
     if (desktopToggleBtn) {
+        // Minimize or expand the sidebar on click
         desktopToggleBtn.addEventListener('click', function () {
             document.body.classList.toggle('sidebar-minimized');
             
@@ -378,6 +391,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // -----------------------------------------------------------------
     const fullscreenBtn = document.querySelector('#btn-fullscreen');
     if (fullscreenBtn) {
+        // Enter or leave fullscreen on click
         fullscreenBtn.addEventListener('click', function () {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().then(() => {
@@ -394,6 +408,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        // Swap the button icon for the fullscreen state
         function updateFullscreenIcon(isFullscreen) {
             const icon = fullscreenBtn.querySelector('i');
             if (icon) {

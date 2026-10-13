@@ -1,5 +1,7 @@
+@* Model bound to this view. *@
 @model IEnumerable<Karnel_Travel.Models.TravelInfo>
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Travel Info";
 }
@@ -15,6 +17,7 @@
     </a>
 </div>
 
+@* List card: toolbar and data table. *@
 <div class="table-card-custom">
 
     <!-- Search box + filter chips -->
@@ -32,6 +35,7 @@
         </div>
     </div>
 
+    @* Empty state when there are no records. *@
     @if (!Model.Any())
     {
         <div class="crud-empty">
@@ -43,8 +47,10 @@
     }
     else
     {
+        @* Data table. *@
         <div class="table-responsive">
             <table class="table-custom" id="listTable">
+                @* Table header. *@
                 <thead>
                     <tr>
                         <th>Route</th>
@@ -54,17 +60,21 @@
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
+                @* Table body. *@
                 <tbody>
+                    @* Render each record as a table row. *@
                     @foreach (var item in Model)
                     {
                         var mode = (item.TransportMode ?? "").ToLower();
                         var mIcon = mode.Contains("bus") ? "bi-bus-front" : mode.Contains("train") ? "bi-train-front" : (mode.Contains("flight") || mode.Contains("air")) ? "bi-airplane" : (mode.Contains("ship") || mode.Contains("boat")) ? "bi-water" : mode.Contains("car") ? "bi-car-front" : "bi-truck";
+                        @* Row with search and filter metadata. *@
                         <tr data-search="@((item.TransportMode + " " + item.FromCity + " " + item.ToCity).ToLower())"
                             data-filter="@((item.TransportMode ?? "").ToLower())">
                             <td><span class="route">@item.FromCity <i class="bi bi-arrow-right route-arrow"></i> @item.ToCity</span></td>
                             <td><span class="mode-pill"><i class="bi @mIcon"></i> @item.TransportMode</span></td>
                             <td><strong>Rs @item.Fare.ToString("0.##")</strong></td>
                             <td><div class="cell-truncate" title="@item.Details">@(string.IsNullOrWhiteSpace(item.Details) ? "—" : item.Details)</div></td>
+                            @* Row actions. *@
                             <td class="text-end">
                                 <a asp-action="Details" asp-route-id="@item.Id" class="icon-btn" title="View"><i class="bi bi-eye"></i></a>
                                 <a asp-action="Edit" asp-route-id="@item.Id" class="icon-btn" title="Edit"><i class="bi bi-pencil-square"></i></a>
@@ -85,6 +95,7 @@
     }
 </div>
 
+@* Page-specific scripts. *@
 @section Scripts {
     <script src="~/admin/js/crud-list.js"></script>
 }

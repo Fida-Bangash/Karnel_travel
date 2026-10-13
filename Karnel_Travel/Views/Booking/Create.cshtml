@@ -1,14 +1,17 @@
 @model Karnel_Travel.Models.BookingFormViewModel
 @using Karnel_Travel.Data
 @{
+    // Shortcuts to model parts and page title
     var item = Model.Item;
     var inp = Model.Input;
     ViewData["Title"] = "Reserve " + item.Name;
 
+    // Flags for item type
     var isStay = item.Type is BookingType.Hotel or BookingType.Resort;
     var isRestaurant = item.Type == BookingType.Restaurant;
     var today = DateTime.Today.ToString("yyyy-MM-dd");
 
+    // Type-specific labels
     var dateLabel = item.Type switch
     {
         BookingType.Hotel or BookingType.Resort => "Check-in date",
@@ -24,6 +27,10 @@
         _ => "Guests"
     };
     var unitLabel = item.Type == BookingType.Resort ? "Units" : "Rooms";
+    // Price wali Hotel/Resort/Transport/Package par booking ke baad payment page aata hai
+    // Whether a payment step follows
+    var hasPayment = item.UnitPrice > 0 && (item.Type is BookingType.Hotel or BookingType.Resort or BookingType.Transport or BookingType.Package);
+    // Price unit text per type
     var priceUnit = item.Type switch
     {
         BookingType.Hotel or BookingType.Resort => "/ night",
@@ -34,13 +41,15 @@
     };
 }
 
+@* Load page styles *@
 @section Styles { <partial name="_Styles" /> }
 
+<!-- Page header -->
 <div class="vip-page py-4">
     <div class="vip-head">
         <span class="vip-eyebrow">@(isRestaurant ? "Table reservation" : "Reserve your experience")</span>
         <h1 class="vip-title">Book <span>@BookingUi.TypeLabel(item.Type)</span></h1>
-        <p class="vip-sub">Choose your dates, see the price instantly and send your request. No advance payment needed.</p>
+        <p class="vip-sub">Choose your dates, see the price instantly and @(hasPayment ? "continue to a secure payment step. You can also choose to pay on arrival." : "send your request. No advance payment needed.")</p>
     </div>
 
     <div class="row g-4 justify-content-center">
@@ -48,6 +57,7 @@
         <!-- ================= Left: item showcase ================= -->
         <div class="col-lg-5">
             <div class="vip-card position-sticky" style="top: 100px">
+                <!-- Item image with badge and name -->
                 <div class="vip-item-img">
                     <img src="@Url.Content(item.ImageUrl)" alt="@item.Name" />
                     <span class="vip-item-badge"><i class="fa @BookingUi.TypeIcon(item.Type) me-1"></i> @BookingUi.TypeLabel(item.Type)</span>
@@ -61,6 +71,7 @@
                     </div>
                 </div>
 
+                <!-- Price tag with discount -->
                 <div class="vip-price-tag">
                     @if (item.UnitPrice > 0)
                     {
@@ -77,6 +88,7 @@
                     }
                 </div>
 
+                <!-- Item perks list -->
                 <ul class="vip-perks">
                     @if (!string.IsNullOrWhiteSpace(item.Description))
                     {
@@ -91,7 +103,7 @@
                         <li><i class="fa fa-hourglass-half"></i> Offer valid till @item.ValidTill.Value.ToString("dd MMM yyyy")</li>
                     }
                     <li><i class="fa fa-shield-alt"></i> Free cancellation before the start date</li>
-                    <li><i class="fa fa-hand-holding-usd"></i> Pay on arrival, no advance payment</li>
+                    <li><i class="fa fa-hand-holding-usd"></i> @(hasPayment ? "Pay online securely or on arrival" : "Pay on arrival, no advance payment")</li>
                     <li><i class="fa fa-headset"></i> Confirmation by our team</li>
                 </ul>
             </div>
@@ -102,6 +114,7 @@
             <div class="vip-card">
                 <div class="vip-card-body">
 
+                    <!-- Unavailable item warning -->
                     @if (!item.IsAvailable)
                     {
                         <div class="vip-alert error">
@@ -110,6 +123,7 @@
                         </div>
                     }
 
+                    <!-- Validation error summary -->
                     @if (!ViewData.ModelState.IsValid)
                     {
                         <div class="vip-alert error">
@@ -118,6 +132,7 @@
                         </div>
                     }
 
+                    <!-- Booking form -->
                     <form asp-action="Create" method="post" id="bookingForm"
                           data-quote-url="@Url.Action("Quote", "Booking")"
                           data-type="@item.Type" data-id="@item.Id"
@@ -128,6 +143,7 @@
 
                         <h4 class="vip-card-title"><i class="fa fa-calendar-check"></i> Your reservation</h4>
 
+                        <!-- Dates, units and guests fields -->
                         <div class="row g-3 mb-4">
                             <div class="@(isStay ? "col-md-6" : "col-12")">
                                 <label class="vip-label" for="Input_StartDate">@dateLabel</label>
@@ -135,6 +151,7 @@
                                 <span asp-validation-for="Input.StartDate" class="vip-field-error"></span>
                             </div>
 
+                            <!-- Stay-only fields: check-out and units -->
                             @if (isStay)
                             {
                                 <div class="col-md-6">
@@ -167,6 +184,7 @@
                                 <span asp-validation-for="Input.Guests" class="vip-field-error"></span>
                             </div>
 
+                            <!-- Restaurant time slot picker -->
                             @if (isRestaurant)
                             {
                                 <div class="col-12">
@@ -190,6 +208,7 @@
                             }
                         </div>
 
+                        <!-- Guest contact details -->
                         <h4 class="vip-card-title"><i class="fa fa-user"></i> Guest details</h4>
 
                         <div class="row g-3 mb-4">
@@ -215,6 +234,7 @@
                             </div>
                         </div>
 
+                        <!-- Live price summary -->
                         <h4 class="vip-card-title"><i class="fa fa-receipt"></i> Summary</h4>
 
                         <div class="vip-summary mb-3" id="summaryBox">
@@ -223,11 +243,12 @@
                             <div class="vip-sum-msg" id="sumMsg"></div>
                         </div>
 
+                        <!-- Submit button and note -->
                         <button type="submit" class="vip-btn vip-btn-gold vip-btn-block" id="submitBtn" @(item.IsAvailable ? null : "disabled")>
-                             Request booking
+                             @(hasPayment ? "Continue to payment" : "Request booking")
                         </button>
                         <p class="vip-muted small text-center mt-3 mb-0">
-                            <i class="fa fa-lock me-1"></i> Your request is reviewed by our team. You pay on arrival.
+                            <i class="fa fa-lock me-1"></i> @(hasPayment ? "Your booking is saved first. Next step: secure payment (demo), or pay on arrival." : "Your request is reviewed by our team. You pay on arrival.")
                         </p>
                     </form>
                 </div>
@@ -236,12 +257,15 @@
     </div>
 </div>
 
+@* Page scripts *@
 @section Scripts {
     <script>
+        // Live quote logic
         (function () {
             var form = document.getElementById('bookingForm');
             if (!form) return;
 
+            // Cache form elements and flags
             var isStay = form.dataset.stay === '1';
             var isRestaurant = form.dataset.restaurant === '1';
             var quoteUrl = form.dataset.quoteUrl;
@@ -256,6 +280,7 @@
             var unitsEl = document.getElementById('Input_Units');
             var timer = null, seq = 0;
 
+            // Add days to an ISO date
             function addDays(iso, n) {
                 var d = new Date(iso + 'T00:00:00');
                 d.setDate(d.getDate() + n);
@@ -264,6 +289,7 @@
                 return d.getFullYear() + '-' + m + '-' + day;
             }
 
+            // Build one summary row
             function row(label, value) {
                 var r = document.createElement('div');
                 r.className = 'vip-sum-row';
@@ -273,16 +299,19 @@
                 return r;
             }
 
+            // Get selected time slot
             function slotValue() {
                 var c = form.querySelector('input[name="Input.TimeSlot"]:checked');
                 return c ? c.value : '';
             }
 
+            // Show status message under total
             function showMessage(kind, text) {
                 msg.className = 'vip-sum-msg' + (kind ? ' ' + kind : '');
                 msg.textContent = text || '';
             }
 
+            // Render quote result in summary
             function render(d) {
                 rows.innerHTML = '';
                 if (d.ok) {
@@ -313,6 +342,7 @@
                 }
             }
 
+            // Fetch price quote from server
             function requestQuote() {
                 if (!startEl.value) { render({ ok: false }); return; }
                 var params = new URLSearchParams({
@@ -333,9 +363,11 @@
                     .finally(function () { if (mine === seq) box.classList.remove('vip-loading'); });
             }
 
+            // Debounce quote requests
             function schedule() { clearTimeout(timer); timer = setTimeout(requestQuote, 250); }
 
             // Check-out hamesha check-in ke baad
+            // Keep check-out after check-in
             startEl.addEventListener('change', function () {
                 if (endEl && startEl.value) {
                     endEl.min = addDays(startEl.value, 1);
@@ -345,6 +377,7 @@
             });
             if (endEl) endEl.addEventListener('change', schedule);
 
+            // Stepper buttons update fields
             // +/- buttons
             form.querySelectorAll('.vip-stepper').forEach(function (st) {
                 var input = document.getElementById(st.dataset.target);
@@ -361,13 +394,16 @@
                 input.addEventListener('input', schedule);
             });
 
+            // Recalculate when time slot changes
             form.querySelectorAll('input[name="Input.TimeSlot"]').forEach(function (r) { r.addEventListener('change', schedule); });
 
+            // Disable button on submit
             form.addEventListener('submit', function () {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sending request...';
+                submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving your booking...';
             });
 
+            // Initial setup and first quote
             if (endEl && startEl.value) endEl.min = addDays(startEl.value, 1);
             if (startEl.value) requestQuote();
         })();

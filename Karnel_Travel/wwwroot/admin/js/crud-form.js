@@ -8,12 +8,14 @@
 
     // ---- Image preview ----
     document.querySelectorAll('input[type=file][data-preview]').forEach(function (input) {
+        // Preview elements linked through data attributes
         var img = document.getElementById(input.dataset.preview);
         var nameEl = document.getElementById(input.dataset.name);
         var placeholder = document.getElementById(input.dataset.placeholder);
         var error = document.getElementById(input.dataset.error);
         var box = input.closest('.upload-box');
 
+        // Validate and preview the chosen file
         input.addEventListener('change', function () {
             var file = input.files[0];
             if (error) error.textContent = '';
@@ -31,6 +33,7 @@
                 return;
             }
 
+            // Read the file and show it as a preview
             var reader = new FileReader();
             reader.onload = function (e) {
                 img.src = e.target.result;
@@ -54,9 +57,12 @@
 
     // ---- Character counter ----
     document.querySelectorAll('textarea[data-counter]').forEach(function (ta) {
+        // Counter element and the textarea max length
         var out = document.getElementById(ta.dataset.counter);
         var max = ta.getAttribute('maxlength');
+        // Write current length / max into the counter
         function update() { if (out) out.textContent = ta.value.length + ' / ' + max; }
+        // Update while typing and once on load
         ta.addEventListener('input', update);
         update();
     });

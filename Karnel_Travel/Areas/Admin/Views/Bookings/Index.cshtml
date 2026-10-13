@@ -1,16 +1,21 @@
+@* Model bound to this view. *@
 @model Karnel_Travel.Models.AdminBookingsViewModel
 @using Karnel_Travel.Data
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Bookings";
 
+    // True when any filter is active.
     bool filtered = !string.IsNullOrWhiteSpace(Model.Q) || !string.IsNullOrWhiteSpace(Model.Status) || !string.IsNullOrWhiteSpace(Model.Type) || Model.From.HasValue || Model.To.HasValue;
 }
 
+@* Booking page styles. *@
 <link rel="stylesheet" href="~/admin/css/admin-bookings.css" asp-append-version="true" />
 
 <div class="bk-gold">
 
+    @* Page header: title and action buttons. *@
     <div class="page-header">
         <div>
             <h1 class="page-title">Bookings</h1>
@@ -18,7 +23,9 @@
         </div>
     </div>
 
+    @* Success flash message. *@
     @if (TempData["Success"] is string ok) { <div class="bk-flash ok"><i class="bi bi-check-circle me-2"></i>@ok</div> }
+    @* Error flash message. *@
     @if (TempData["Error"] is string err) { <div class="bk-flash err"><i class="bi bi-exclamation-circle me-2"></i>@err</div> }
 
     <!-- Stat cards -->
@@ -29,6 +36,7 @@
         <div class="bk-stat vip"><i class="bi bi-gem"></i><div class="bk-stat-label">Revenue (confirmed + completed)</div><div class="bk-stat-value">@BookingUi.Money(Model.Revenue)</div></div>
     </div>
 
+    @* List card: toolbar and data table. *@
     <div class="table-card-custom">
 
         <!-- Filters -->
@@ -41,6 +49,7 @@
                 <label for="status">Status</label>
                 <select id="status" name="status" class="form-select">
                     <option value="">All</option>
+                    @* Status options. *@
                     @foreach (var s in Enum.GetValues<BookingStatus>())
                     {
                         <option value="@s" selected="@(string.Equals(Model.Status, s.ToString(), StringComparison.OrdinalIgnoreCase))">@BookingUi.StatusLabel(s)</option>
@@ -51,6 +60,7 @@
                 <label for="type">Type</label>
                 <select id="type" name="type" class="form-select">
                     <option value="">All</option>
+                    @* Type options. *@
                     @foreach (var t in Enum.GetValues<BookingType>())
                     {
                         <option value="@t" selected="@(string.Equals(Model.Type, t.ToString(), StringComparison.OrdinalIgnoreCase))">@BookingUi.TypeLabel(t)</option>
@@ -67,6 +77,7 @@
             </div>
             <div class="bk-filter-actions">
                 <button type="submit" class="btn-crud btn-crud-dark"><i class="bi bi-funnel"></i> Filter</button>
+                @* Show a clear-filters button while filtering. *@
                 @if (filtered)
                 {
                     <a asp-action="Index" class="btn-crud btn-crud-light" title="Clear filters"><i class="bi bi-x-lg"></i></a>
@@ -74,6 +85,7 @@
             </div>
         </form>
 
+        @* Empty state when there are no records. *@
         @if (!Model.Bookings.Any())
         {
             <div class="crud-empty">
@@ -84,8 +96,10 @@
         }
         else
         {
+            @* Data table. *@
             <div class="table-responsive">
                 <table class="table-custom">
+                    @* Table header. *@
                     <thead>
                         <tr>
                             <th>Booking</th>
@@ -97,9 +111,12 @@
                             <th class="text-end">Actions</th>
                         </tr>
                     </thead>
+                    @* Table body. *@
                     <tbody>
+                        @* One row per booking; pending rows are highlighted. *@
                         @foreach (var b in Model.Bookings)
                         {
+                            @* Table row. *@
                             <tr class="@(b.Status == BookingStatus.Pending ? "bk-row-pending" : "")">
                                 <td>
                                     <div class="bk-code">@b.BookingCode</div>
@@ -119,11 +136,21 @@
                                     </div>
                                 </td>
                                 <td>@BookingUi.When(b)</td>
-                                <td><strong>@(b.TotalPrice > 0 ? BookingUi.Money(b.TotalPrice) : "On request")</strong></td>
+                                <td>
+                                    <strong>@(b.TotalPrice > 0 ? BookingUi.Money(b.TotalPrice) : "On request")</strong>
+                                    @* Show the payment status for payable bookings. *@
+                                    @if (b.NeedsPayment)
+                                    {
+                                        <div><span class="badge @(b.PaymentStatus == PaymentStatus.Paid ? "bg-success" : b.PaymentStatus == PaymentStatus.Refunded ? "bg-info text-dark" : "bg-warning text-dark")">@BookingUi.PaymentLabel(b.PaymentStatus)</span></div>
+                                    }
+                                </td>
                                 <td><span class="bk-status @BookingUi.StatusClass(b.Status)">@BookingUi.StatusLabel(b.Status)</span></td>
+                                @* Row actions. *@
                                 <td class="text-end">
+                                    @* Quick row actions. *@
                                     <div class="bk-quick">
                                         <a asp-action="Details" asp-route-id="@b.Id" class="icon-btn" title="View"><i class="bi bi-eye"></i></a>
+                                        @* Quick confirm (only when the transition is allowed). *@
                                         @if (BookingService.CanMove(b.Status, BookingStatus.Confirmed))
                                         {
                                             <form asp-action="SetStatus" method="post">
@@ -133,6 +160,7 @@
                                                 <button type="submit" class="icon-btn ok" title="Confirm"><i class="bi bi-check-lg"></i></button>
                                             </form>
                                         }
+                                        @* Quick reject with a confirmation prompt. *@
                                         @if (BookingService.CanMove(b.Status, BookingStatus.Rejected))
                                         {
                                             <form asp-action="SetStatus" method="post" onsubmit="return confirm('Reject this booking?');">
@@ -150,14 +178,17 @@
                 </table>
             </div>
 
+            @* Pagination footer: range info and page links. *@
             <div class="bk-pager">
                 <span>Showing @((Model.Page - 1) * Model.PageSize + 1)&ndash;@((Model.Page - 1) * Model.PageSize + Model.Bookings.Count) of @Model.TotalItems</span>
+                @* Page links only when there is more than one page. *@
                 @if (Model.TotalPages > 1)
                 {
                     <div class="pages">
                         @if (Model.Page > 1) { <a asp-action="Index" asp-all-route-data="@(new Dictionary<string, string?> { ["q"] = Model.Q, ["status"] = Model.Status, ["type"] = Model.Type, ["from"] = Model.From?.ToString("yyyy-MM-dd"), ["to"] = Model.To?.ToString("yyyy-MM-dd"), ["page"] = (Model.Page - 1).ToString() })">&lsaquo;</a> }
                         else { <span class="disabled">&lsaquo;</span> }
 
+                        @* Numbered links with ellipses for distant pages. *@
                         @for (int i = 1; i <= Model.TotalPages; i++)
                         {
                             if (i == Model.Page) { <span class="current">@i</span> }

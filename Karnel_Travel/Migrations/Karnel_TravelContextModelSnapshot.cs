@@ -161,6 +161,24 @@ namespace Karnel_Travel.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<DateTime?>("PaidOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentLast4")
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("PaymentReference")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<int>("PaymentStatus")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
@@ -251,6 +269,9 @@ namespace Karnel_Travel.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("BookingId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
@@ -258,6 +279,13 @@ namespace Karnel_Travel.Migrations
                         .IsRequired()
                         .HasMaxLength(254)
                         .HasColumnType("nvarchar(254)");
+
+                    b.Property<string>("ItemName")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<int?>("ItemType")
+                        .HasColumnType("int");
 
                     b.Property<string>("Message")
                         .IsRequired()
@@ -269,7 +297,20 @@ namespace Karnel_Travel.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("BookingId")
+                        .IsUnique()
+                        .HasFilter("[BookingId] IS NOT NULL");
+
+                    b.HasIndex("CreatedOn");
 
                     b.ToTable("Feedbacks");
                 });

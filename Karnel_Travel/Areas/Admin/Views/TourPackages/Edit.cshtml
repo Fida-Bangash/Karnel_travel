@@ -1,5 +1,7 @@
+@* Model bound to this view. *@
 @model Karnel_Travel.Models.TourPackage
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Edit Package";
     var m = Model ?? new Karnel_Travel.Models.TourPackage();
@@ -15,41 +17,53 @@
     <a asp-action="Index" class="btn-crud btn-crud-light"><i class="bi bi-arrow-left"></i> Back to List</a>
 </div>
 
+@* Form posted to the server (supports file upload). *@
 <form asp-action="Edit" enctype="multipart/form-data" novalidate>
+    @* Keeps the record id on submit. *@
     <input type="hidden" asp-for="Id" />
+    @* Keeps the current image when no new file is chosen. *@
     <input type="hidden" asp-for="ImagePath" />
+    @* Two-column page layout. *@
     <div class="row g-4">
 
         <!-- Left: details -->
         <div class="col-lg-8">
+            @* Card: Package Details. *@
             <div class="crud-card">
                 <div class="crud-card-title"><i class="bi bi-tag"></i> Package Details</div>
 
+                @* Model-level validation errors. *@
                 <div asp-validation-summary="ModelOnly" class="crud-summary"></div>
 
+                @* Form fields grid. *@
                 <div class="row g-3">
+                    @* Field: Title. *@
                     <div class="col-md-12">
                         <label asp-for="Title" class="crud-label">Package Title <span class="req">*</span></label>
                         <input asp-for="Title" class="crud-input" placeholder="e.g. Northern Areas Summer Tour" maxlength="100" />
                         <span asp-validation-for="Title" class="crud-error"></span>
                     </div>
+                    @* Field: Details. *@
                     <div class="col-md-12">
                         <label asp-for="Details" class="crud-label">Details</label>
                         <textarea asp-for="Details" class="crud-textarea" rows="6" maxlength="1000" placeholder="What is included? Days, hotels, transport..." data-counter="DetailsCount"></textarea>
                         <div class="crud-counter" id="DetailsCount">0 / 1000</div>
                         <span asp-validation-for="Details" class="crud-error"></span>
                     </div>
+                    @* Field: Price. *@
                     <div class="col-md-6">
                         <label asp-for="Price" class="crud-label">Price per person <span class="req">*</span></label>
                         <div class="input-affix"><span class="affix">Rs</span><input asp-for="Price" type="number" step="0.01" min="0" class="crud-input" placeholder="0.00" /></div>
                         <div class="crud-help">Booking total = price x persons, minus the discount.</div>
                         <span asp-validation-for="Price" class="crud-error"></span>
                     </div>
+                    @* Field: DiscountPercent. *@
                     <div class="col-md-6">
                         <label asp-for="DiscountPercent" class="crud-label">Discount <span class="req">*</span></label>
                         <div class="input-affix"><input asp-for="DiscountPercent" type="number" step="1" min="0" max="100" class="crud-input has-right" placeholder="0" /><span class="affix affix-right">%</span></div>
                         <span asp-validation-for="DiscountPercent" class="crud-error"></span>
                     </div>
+                    @* Field: ValidTill. *@
                     <div class="col-md-6">
                         <label asp-for="ValidTill" class="crud-label">Valid Till</label>
                         <input asp-for="ValidTill" type="date" class="crud-input" />
@@ -64,9 +78,11 @@
         <!-- Right: image + buttons -->
         <div class="col-lg-4">
 
+            @* Card: Package Image. *@
             <div class="crud-card">
                 <div class="crud-card-title"><i class="bi bi-image"></i> Package Image</div>
 
+                @* Image picker with live preview. *@
                 <div class="upload-box">
                     <img id="imgPreview" class="upload-preview @(hasImage ? "show" : "")"
                          src="@(hasImage ? Model.ImagePath : "")" alt="Current image" />
@@ -79,11 +95,14 @@
                            data-preview="imgPreview" data-name="imgName"
                            data-placeholder="imgPlaceholder" data-error="imgError" />
                 </div>
+                @* Upload rules. *@
                 <div class="upload-hint mt-2">Leave empty to keep the current image. JPG, PNG or WEBP, max 2 MB.</div>
                 <span id="imgError" class="crud-error"></span>
+                @* Server-side image error. *@
                 @Html.ValidationMessage("imageFile", new { @class = "crud-error" })
             </div>
 
+            @* Submit and cancel buttons. *@
             <div class="d-grid gap-2">
                 <button type="submit" class="btn-crud btn-crud-primary justify-content-center">
                     <i class="bi bi-check-lg"></i> Save Changes
@@ -94,6 +113,7 @@
     </div>
 </form>
 
+@* Page-specific scripts. *@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script src="~/admin/js/crud-form.js"></script>

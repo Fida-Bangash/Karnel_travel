@@ -1,5 +1,7 @@
+@* Model bound to this view. *@
 @model Karnel_Travel.Models.Resort
 
+@* Page setup: title and helper variables. *@
 @{
     ViewData["Title"] = "Resort Details";
 }
@@ -10,6 +12,7 @@
         <h1 class="page-title">@Model.Name</h1>
         <p class="page-subtitle"><i class="bi bi-geo-alt-fill"></i> @Model.Location</p>
     </div>
+    @* Header action buttons. *@
     <div class="d-flex gap-2 flex-wrap">
         <a asp-action="Index" class="btn-crud btn-crud-light"><i class="bi bi-arrow-left"></i> Back to List</a>
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-crud btn-crud-primary"><i class="bi bi-pencil-square"></i> Edit</a>
@@ -17,10 +20,13 @@
     </div>
 </div>
 
+@* Two-column page layout. *@
 <div class="row g-4">
     <!-- Image -->
     <div class="col-lg-5">
+        @* Content card. *@
         <div class="crud-card">
+            @* Show the image, or a placeholder if none. *@
             @if (!string.IsNullOrEmpty(Model.ImagePath))
             {
                 <img src="@Model.ImagePath" class="detail-hero" alt="@Model.Name" />
@@ -33,33 +39,41 @@
     </div>
     <!-- Information -->
     <div class="col-lg-7">
+        @* Card: Information. *@
         <div class="crud-card">
             <div class="crud-card-title"><i class="bi bi-info-circle"></i> Information</div>
 
+            @* Detail: Name. *@
             <div class="detail-row">
                 <div class="k">Name</div>
                 <div class="v">@Model.Name</div>
             </div>
+            @* Detail: Location. *@
             <div class="detail-row">
                 <div class="k">Location</div>
                 <div class="v">@Model.Location</div>
             </div>
+            @* Detail: Price. *@
             <div class="detail-row">
                 <div class="k">Price</div>
                 <div class="v">Rs @Model.Price.ToString("0.##") <span class="text-muted fw-normal">per stay</span></div>
             </div>
+            @* Detail: Rating. *@
             <div class="detail-row">
                 <div class="k">Rating</div>
                 <div class="v"><span class="stars">@for (var i = 1; i <= 5; i++) { <i class="bi @(i <= Model.Rating ? "bi-star-fill" : "bi-star")"></i> }</span> <span class="ms-1">@Model.Rating / 5</span></div>
             </div>
+            @* Detail: Available rooms / units. *@
             <div class="detail-row">
                 <div class="k">Available rooms / units</div>
                 <div class="v">@Model.Quantity</div>
             </div>
+            @* Detail: Status. *@
             <div class="detail-row">
                 <div class="k">Status</div>
                 <div class="v">@if (Model.IsAvailable && Model.Quantity > 0) { <span class="badge-table success">Available</span> } else { <span class="badge-table failed">Unavailable</span> }</div>
             </div>
+            @* Detail: Description. *@
             <div class="detail-row">
                 <div class="k">Description</div>
                 <div class="v">@(string.IsNullOrWhiteSpace(Model.Description) ? "No description added." : Model.Description)</div>

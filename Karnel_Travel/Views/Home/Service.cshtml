@@ -1,13 +1,17 @@
 @{
+    // Set the browser page title
     ViewData["Title"] = "Services";
 }
 
+@* Hero banner section *@
 @section Hero {
+<!-- Hero header container -->
 <div class="container-fluid bg-primary py-5 mb-5 hero-header">
             <div class="container py-5">
                 <div class="row justify-content-center py-5">
                     <div class="col-lg-10 pt-lg-5 mt-lg-5 text-center">
                         <h1 class="display-3 text-white animated slideInDown">Services</h1>
+                        <!-- Breadcrumb navigation -->
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb justify-content-center">
                                 <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
@@ -23,11 +27,14 @@
     <!-- Service Start -->
     <div class="container-fluid py-5">
         <div class="container">
+            <!-- Section heading -->
             <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
                 <h6 class="section-title bg-white text-center text-primary px-3">Services</h6>
                 <h1 class="mb-5">Our Services</h1>
             </div>
+            <!-- Service cards grid -->
             <div class="row g-4">
+                <!-- Service card: tourist spots -->
                 <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">
     <div class="service-item rounded pt-3">
         <div class="p-4">
@@ -37,6 +44,7 @@
         </div>
     </div>
 </div>
+<!-- Service card: travel information -->
 <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.3s">
     <div class="service-item rounded pt-3">
         <div class="p-4">
@@ -46,6 +54,7 @@
         </div>
     </div>
 </div>
+<!-- Service card: hotels -->
 <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.5s">
     <div class="service-item rounded pt-3">
         <div class="p-4">
@@ -55,6 +64,7 @@
         </div>
     </div>
 </div>
+<!-- Service card: restaurants -->
 <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.7s">
     <div class="service-item rounded pt-3">
         <div class="p-4">
@@ -64,6 +74,7 @@
         </div>
     </div>
 </div>
+<!-- Service card: resorts -->
 <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">
     <div class="service-item rounded pt-3">
         <div class="p-4">
@@ -73,6 +84,7 @@
         </div>
     </div>
 </div>
+<!-- Service card: tour packages -->
 <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.3s">
     <div class="service-item rounded pt-3">
         <div class="p-4">
@@ -82,6 +94,7 @@
         </div>
     </div>
 </div>
+<!-- Service card: search -->
 <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.5s">
     <div class="service-item rounded pt-3">
         <div class="p-4">
@@ -91,6 +104,7 @@
         </div>
     </div>
 </div>
+<!-- Service card: customer support -->
 <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.7s">
     <div class="service-item rounded pt-3">
         <div class="p-4">

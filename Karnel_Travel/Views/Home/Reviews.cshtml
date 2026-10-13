@@ -1,0 +1,33 @@
+@model List<Karnel_Travel.Models.Feedback>
+@{
+    // Set the browser page title
+    ViewData["Title"] = "Traveller Reviews";
+}
+
+<div class="container-fluid py-5">
+    <div class="container">
+        <!-- Page heading -->
+        <div class="text-center mb-5">
+            <h6 class="section-title bg-white text-center text-primary px-3">Reviews</h6>
+            <h1 class="mb-3">What Our Travellers Say</h1>
+            <p class="text-muted">Real reviews from customers after their completed bookings.</p>
+        </div>
+
+        @* Show message when no reviews exist *@
+        @if (!Model.Any())
+        {
+            <p class="text-center text-muted">No reviews yet. Complete a booking and be the first to share your experience.</p>
+        }
+        @* Otherwise list all reviews *@
+        else
+        {
+            <div class="row g-4">
+                @* Render one card per review *@
+                @foreach (var r in Model)
+                {
+                    <div class="col-lg-4 col-md-6"><partial name="_ReviewCard" model="r" /></div>
+                }
+            </div>
+        }
+    </div>
+</div>

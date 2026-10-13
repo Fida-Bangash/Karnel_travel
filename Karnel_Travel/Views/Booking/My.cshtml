@@ -1,11 +1,14 @@
 @model Karnel_Travel.Models.MyBookingsViewModel
 @{
+    // Page title and tab helper
     ViewData["Title"] = "My Bookings";
     string Tab(string? key) => (Model.Status ?? "") == (key ?? "") ? "active" : "";
 }
 
+@* Load page styles *@
 @section Styles { <partial name="_Styles" /> }
 
+<!-- Page header -->
 <div class="vip-page py-4">
     <div class="vip-head">
         <span class="vip-eyebrow">Your journeys</span>
@@ -13,6 +16,7 @@
         <p class="vip-sub">Track every reservation, see its status and manage it in one place.</p>
     </div>
 
+    <!-- Flash messages -->
     @if (TempData["Success"] is string ok)
     {
         <div class="vip-alert success"><i class="fa fa-check-circle mt-1"></i><div>@ok</div></div>
@@ -22,6 +26,7 @@
         <div class="vip-alert error"><i class="fa fa-exclamation-circle mt-1"></i><div>@err</div></div>
     }
 
+    <!-- Status filter tabs -->
     <div class="vip-tabs">
         <a class="vip-tab @Tab(null)" asp-action="My">All <em>@Model.All</em></a>
         <a class="vip-tab @Tab("pending")" asp-action="My" asp-route-status="pending">Pending <em>@Model.Pending</em></a>
@@ -32,6 +37,7 @@
 
     <div class="row justify-content-center">
         <div class="col-lg-10">
+            <!-- Empty state -->
             @if (!Model.Bookings.Any())
             {
                 <div class="vip-card vip-empty">
@@ -43,6 +49,7 @@
             }
             else
             {
+                <!-- Booking cards list -->
                 foreach (var b in Model.Bookings)
                 {
                     <div class="vip-card vip-bk">
@@ -56,10 +63,30 @@
                                 <span><i class="fa fa-users"></i>@BookingUi.UnitsLabel(b)</span>
                             </div>
                         </div>
+                        <!-- Status, price and actions -->
                         <div class="vip-bk-side">
                             <span class="vip-status @BookingUi.StatusClass(b.Status)">@BookingUi.StatusLabel(b.Status)</span>
                             <div class="vip-bk-price">@(b.TotalPrice > 0 ? BookingUi.Money(b.TotalPrice) : "Price on confirmation")</div>
-                            <a asp-action="Details" asp-route-id="@b.Id" class="vip-btn vip-btn-ghost vip-btn-sm">View details</a>
+                            @if (b.NeedsPayment && (b.PaymentStatus != PaymentStatus.Unpaid || b.HoldsInventory))
+                            {
+                                <span class="vip-pay @BookingUi.PaymentClass(b.PaymentStatus)">@BookingUi.PaymentLabel(b.PaymentStatus)</span>
+                            }
+                            <!-- Action buttons -->
+                            <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                @if (b.CanPayNow)
+                                {
+                                    <a asp-action="Payment" asp-route-id="@b.Id" class="vip-btn vip-btn-gold vip-btn-sm"><i class="fa fa-credit-card"></i> Pay now</a>
+                                }
+                                @if (Model.ReviewedIds.Contains(b.Id))
+                                {
+                                    <span class="vip-pay pay-paid"><i class="fa fa-check"></i> Reviewed</span>
+                                }
+                                else if (b.CanReviewNow)
+                                {
+                                    <a asp-action="Review" asp-route-id="@b.Id" class="vip-btn vip-btn-gold vip-btn-sm"><i class="fa fa-star"></i> Write a review</a>
+                                }
+                                <a asp-action="Details" asp-route-id="@b.Id" class="vip-btn vip-btn-ghost vip-btn-sm">View details</a>
+                            </div>
                         </div>
                     </div>
                 }
